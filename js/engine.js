@@ -289,9 +289,9 @@
   function heatLine(res) {
     if (res.dh == null) return null;
     const T = Math.abs(res.dT).toFixed(1);
-    if (res.dh < -1) return 'Temperature rises (exothermic, ΔH = ' + res.dh + ' kJ per mole of reaction as written). Illustrative rise for 0.05 mol in 100 mL: about ' + T + ' °C.';
+    if (res.dh < -1) return 'Temperature rises (exothermic, ΔH = −' + Math.abs(res.dh) + ' kJ per mole of reaction as written). Illustrative rise for 0.05 mol in 100 mL: about ' + T + ' °C.';
     if (res.dh > 1) return 'Temperature falls (endothermic, ΔH = +' + res.dh + ' kJ). The reaction absorbs heat from its surroundings: about ' + T + ' °C drop for 0.05 mol in 100 mL.';
-    return 'Almost no temperature change (ΔH = ' + res.dh + ' kJ).';
+    return 'Almost no temperature change (ΔH = ' + String(res.dh).replace('-', '−') + ' kJ).';
   }
 
   // Turn species lists into a complete result object.
