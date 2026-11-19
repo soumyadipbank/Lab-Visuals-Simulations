@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab Visuals · Chemical Reaction Simulator</title>
+  <meta name="description" content="Pick any chemicals and watch them react: colour changes, precipitates, gases, heat released or absorbed, balanced equations and particle-level animations. For Class 11, 12 and undergraduate chemistry.">
+  <meta name="theme-color" content="#0f766e">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f766e'/%3E%3Cpath d='M26 10h12v4h-3v14l12 20c2 4-1 8-5 8H22c-4 0-7-4-5-8l12-20V14h-3z' fill='%23fff'/%3E%3Cpath d='M23 42h22l4 7c1 2-.5 4-2.5 4h-25c-2 0-3.500-2-2.500-4z' fill='%23f59e0b'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip" href="#stage">Skip to the simulation</a>
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="currentColor"/><path d="M26 10h12v4h-3v14l12 20c2 4-1 8-5 8H22c-4 0-7-4-5-8l12-20V14h-3z" fill="#fff"/><path d="M23 42h22l4 7c1 2-.5 4-2.5 4h-25c-2 0-3.500-2-2.500-4z" fill="#f59e0b"/></svg>
+      <div>
+        <h1>Lab Visuals</h1>
+        <p>Choose chemicals. Watch them react.</p>
+      </div>
+    </div>
+    <div class="top-controls">
+      <div class="seg" role="group" aria-label="Level of detail">
+        <button type="button" data-level="school" aria-pressed="true">Class 11–12</button>
+        <button type="button" data-level="uni" aria-pressed="false">Bachelors</button>
+      </div>
+      <button type="button" class="icon-btn" id="themeBtn" aria-label="Switch between light and dark theme" title="Light / dark">🌓</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- ========================= 1. choose -->
+    <section class="panel picker" aria-labelledby="pickH">
+      <h2 id="pickH"><span class="step">1</span> Choose chemicals <small id="selCount">0 of 4</small></h2>
+      <div class="tray" id="tray" aria-live="polite"></div>
+
+      <details class="quick" open>
+        <summary>Quick experiments</summary>
+        <div class="presets" id="presets"></div>
+        <button type="button" class="ghost" id="surpriseBtn">🎲 Surprise me</button>
+      </details>
+
+      <label class="search"><span class="sr">Search chemicals</span>
+        <input type="search" id="search" placeholder="Search by name or formula (e.g. Cu, NaOH, silver)" autocomplete="off">
+      </label>
+      <div class="chips" id="groupChips" role="group" aria-label="Filter by type"></div>
+      <div class="chem-grid" id="chemGrid"></div>
+      <p class="fine">Salts, acids and bases are used as about 0.1&nbsp;M solutions unless marked as solid or concentrated. Pick up to four.</p>
+    </section>
+
+    <!-- ========================= 2. stage + results -->
+    <div class="main-col">
+      <section class="panel stage" id="stage" aria-labelledby="stageH">
+        <div class="stage-head">
+          <h2 id="stageH"><span class="step">2</span> Watch it happen</h2>
+          <div class="seg" role="group" aria-label="Choose view">
+            <button type="button" data-view="beaker" aria-pressed="true">🧪 Beaker</button>
+            <button type="button" data-view="micro" aria-pressed="false">⚛ Particles</button>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="beaker" role="img" aria-label="Animated chemistry lab bench showing the reaction"></canvas>
+          <div class="stage-msg" id="stageMsg"></div>
+        </div>
+        <div class="controls">
+          <button type="button" class="primary" id="mixBtn">▶ Mix</button>
+          <button type="button" id="resetBtn">↺ Reset</button>
+          <label class="range"><span>Speed</span><input type="range" id="speed" min="0.25" max="3" step="0.25" value="1"><output id="speedOut">1×</output></label>
+          <label class="range grow"><span>Timeline</span><input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Scrub through the reaction"></label>
+        </div>
+        <div class="readouts" aria-live="off">
+          <div class="rd"><span>Temperature</span><b id="rdTemp">25.0 °C</b></div>
+          <div class="rd"><span>Heat</span><b id="rdHeat">–</b></div>
+          <div class="rd"><span>ΔH</span><b id="rdDH">–</b></div>
+          <div class="rd"><span>Progress</span><b id="rdProg">0%</b></div>
+        </div>
+        <div class="charts">
+          <figure><figcaption>Temperature over time</figcaption><div class="cv"><canvas id="temp" role="img" aria-label="Graph of temperature against time"></canvas></div></figure>
+          <figure><figcaption>Energy profile</figcaption><div class="cv"><canvas id="energy" role="img" aria-label="Energy profile diagram of the reaction"></canvas></div></figure>
+        </div>
+        <label class="toggle"><input type="checkbox" id="predictMode"> <span><b>Predict first</b>: hide the answer until after you mix, and check your prediction.</span></label>
+      </section>
+
+      <section class="panel results" id="results" aria-live="polite" aria-labelledby="resH">
+        <h2 id="resH" class="sr">Results</h2>
+        <div id="resBody"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <p><b>Lab Visuals</b> is a teaching model, not a substitute for a real lab. Enthalpies come from standard thermodynamic data (ΔfH° at 298&nbsp;K, Hess's law); temperature changes assume 0.05&nbsp;mol in 100&nbsp;mL of water, so they are illustrative. Never repeat dangerous experiments (alkali metals, thermite, conc. acids, lead and chromium salts) without a teacher, a fume cupboard and eye protection.</p>
+    <p><a href="https://github.com/soumyadipbank/Lab-Visuals-Simulations">Source on GitHub</a> · MIT licence · Found a mistake in the chemistry? Please open an issue.</p>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/curated.js"></script>
+  <script src="js/sim.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
