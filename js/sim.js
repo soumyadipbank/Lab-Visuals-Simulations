@@ -427,14 +427,14 @@
     drawBackground(ctx) {
       const d = this.dark;
       const g = ctx.createLinearGradient(0, 0, 0, BENCH);
-      g.addColorStop(0, d ? '#1a2230' : '#eef3f8'); g.addColorStop(1, d ? '#202a3a' : '#dfe8f1');
+      g.addColorStop(0, d ? '#170a2b' : '#eef3f8'); g.addColorStop(1, d ? '#2b1450' : '#dfe8f1');
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
       if (this.view === 'micro') { return; }
       // bench
       const b = ctx.createLinearGradient(0, BENCH, 0, H);
-      b.addColorStop(0, d ? '#3a3f48' : '#b7a58b'); b.addColorStop(1, d ? '#2b2f37' : '#9c8a70');
+      b.addColorStop(0, d ? '#3b2360' : '#b7a58b'); b.addColorStop(1, d ? '#24123f' : '#9c8a70');
       ctx.fillStyle = b; ctx.fillRect(0, BENCH, W, H - BENCH);
-      ctx.fillStyle = d ? '#4a505b' : '#cdbb9f'; ctx.fillRect(0, BENCH, W, 5);
+      ctx.fillStyle = d ? '#c07cf0' : '#cdbb9f'; ctx.globalAlpha = d ? 0.55 : 1; ctx.fillRect(0, BENCH, W, 2); ctx.globalAlpha = 1; if (d) { const gl = ctx.createLinearGradient(0, BENCH - 40, 0, BENCH); gl.addColorStop(0, 'rgba(206,114,245,0)'); gl.addColorStop(1, 'rgba(206,114,245,.16)'); ctx.fillStyle = gl; ctx.fillRect(0, BENCH - 40, W, 40); }
     }
 
     // ---------------------------------------------------------- beaker view
@@ -714,7 +714,7 @@
       ctx.beginPath(); ctx.arc(x, bot + 8, 11, 0, 6.3); ctx.fill();
       const mh = (bot - top - 16) * f + 6;
       ctx.fillRect(x - 3, bot - mh, 6, mh);
-      ctx.fillStyle = d ? '#c9d3e0' : '#44505f'; ctx.font = '10px system-ui, sans-serif'; ctx.textAlign = 'right';
+      ctx.fillStyle = d ? '#d8c8f0' : '#44505f'; ctx.font = '10px system-ui, sans-serif'; ctx.textAlign = 'right';
       const steps = 5;
       for (let i = 0; i <= steps; i++) {
         const v = this.tLo + ((this.tHi - this.tLo) * i) / steps;
@@ -724,7 +724,7 @@
       }
       // read-out
       ctx.textAlign = 'center'; ctx.font = '600 15px system-ui, sans-serif';
-      ctx.fillStyle = hot ? '#e0453a' : cold ? '#3b8be0' : (d ? '#e6edf5' : '#2a3441');
+      ctx.fillStyle = hot ? '#e0453a' : cold ? '#3b8be0' : (d ? '#f6e8ff' : '#2a3441');
       const arrow = T > this.T0 + 0.6 ? '▲ ' : T < this.T0 - 0.6 ? '▼ ' : '';
       ctx.fillText(arrow + T.toFixed(1) + ' °C', x, top - 16);
     }
@@ -813,7 +813,7 @@
       ctx.restore();
       // name under bottle when on shelf
       if (ps.stage !== 'active' || ps.u < 0.1 || ps.u > 0.9) {
-        ctx.fillStyle = d ? '#d6e0ee' : '#3c4756'; ctx.font = '10.5px system-ui, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillStyle = d ? '#e6d6fa' : '#3c4756'; ctx.font = '10.5px system-ui, sans-serif'; ctx.textAlign = 'center';
         const lines = nameLines(it.chem.name.replace(/ \(.*\)/, ''), 12);
         lines.forEach((ln, k) => ctx.fillText(ln, sx, BENCH + 15 + k * 12));
       }
@@ -883,7 +883,7 @@
         ctx.fillText('⏩ Time-lapse (real: days)', 26, 30);
       }
       if (this.phase === 'pour' && this.t > 0) {
-        ctx.fillStyle = this.dark ? '#cfe0f4' : '#3b4a5c'; ctx.font = '600 12px system-ui, sans-serif'; ctx.textAlign = 'left';
+        ctx.fillStyle = this.dark ? '#e6d6fa' : '#3b4a5c'; ctx.font = '600 12px system-ui, sans-serif'; ctx.textAlign = 'left';
         ctx.fillText('Adding reagents…', 14, 484);
       }
     }
@@ -891,10 +891,10 @@
     // ---------------------------------------------------------- particle view
     drawMicro(ctx) {
       const [x0, y0, x1, y1] = this.mbox, d = this.dark, p = this.p;
-      ctx.fillStyle = d ? '#101826' : '#fbfdff';
-      ctx.strokeStyle = d ? '#3a4a60' : '#b5c4d6'; ctx.lineWidth = 2;
+      ctx.fillStyle = d ? '#12081f' : '#fbfdff';
+      ctx.strokeStyle = d ? '#5a3a85' : '#b5c4d6'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.roundRect(x0, y0, x1 - x0, y1 - y0, 14); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = d ? '#9fb2c8' : '#5a6b7e'; ctx.font = '600 13px system-ui, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillStyle = d ? '#bba8d6' : '#5a6b7e'; ctx.font = '600 13px system-ui, sans-serif'; ctx.textAlign = 'left';
       ctx.fillText('Particle view (a tiny region of the mixture, greatly magnified)', x0, y0 - 14);
       // solvent tint
       const col = this.liquidColorNow();
@@ -932,24 +932,24 @@
       // legend
       let ly = y0 + 6;
       ctx.textAlign = 'left';
-      ctx.fillStyle = d ? '#cfe0f4' : '#33414f'; ctx.font = '700 13px system-ui, sans-serif';
+      ctx.fillStyle = d ? '#e6d6fa' : '#33414f'; ctx.font = '700 13px system-ui, sans-serif';
       ctx.fillText('Key', 584, ly + 10); ly += 26;
       this.legend.forEach((e) => {
         if (ly > y1 - 6) return;
         if (e.ph === 's') { ctx.fillStyle = e.color; ctx.fillRect(586, ly - 8, 14, 14); ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.strokeRect(586, ly - 8, 14, 14); }
         else { ctx.fillStyle = e.color; ctx.beginPath(); ctx.arc(593, ly - 1, 7, 0, 6.3); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.stroke(); }
-        ctx.fillStyle = d ? '#e4ecf6' : '#26323f'; ctx.font = '600 12px system-ui, sans-serif'; ctx.fillText(uni(e.label), 608, ly + 3);
-        ctx.fillStyle = d ? '#8fa2b8' : '#6b7b8d'; ctx.font = '11px system-ui, sans-serif';
+        ctx.fillStyle = d ? '#f6e8ff' : '#26323f'; ctx.font = '600 12px system-ui, sans-serif'; ctx.fillText(uni(e.label), 608, ly + 3);
+        ctx.fillStyle = d ? '#9a86b8' : '#6b7b8d'; ctx.font = '11px system-ui, sans-serif';
         const tag = e.role + (e.ph === 's' ? ' (solid)' : e.ph === 'g' ? ' (gas)' : '');
         ctx.fillText(tag, 608, ly + 16);
         ly += 36;
       });
       if (ly < y1 - 40) {
-        ctx.fillStyle = d ? '#8fa2b8' : '#6b7b8d'; ctx.font = '11px system-ui, sans-serif';
+        ctx.fillStyle = d ? '#9a86b8' : '#6b7b8d'; ctx.font = '11px system-ui, sans-serif';
         wrapText(ctx, 'Spectator ions do not take part in the reaction: they are there before and after.', 584, ly + 8, 196, 14);
       }
       // progress ring text
-      ctx.fillStyle = d ? '#9fb2c8' : '#5a6b7e'; ctx.font = '12px system-ui, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillStyle = d ? '#bba8d6' : '#5a6b7e'; ctx.font = '12px system-ui, sans-serif'; ctx.textAlign = 'left';
       ctx.fillText(this.res.reacts === false ? 'No new substance forms' : 'Reaction progress: ' + Math.round(p * 100) + '%', x0, y1 + 24);
     }
 
@@ -965,7 +965,7 @@
       ctx.setTransform(cv._s, 0, 0, cv._s, 0, 0);
       ctx.clearRect(0, 0, 400, 220);
       const L = 44, R = 388, T = 20, B = 184;
-      ctx.fillStyle = d ? '#9fb2c8' : '#5a6b7e'; ctx.font = '11px system-ui, sans-serif';
+      ctx.fillStyle = d ? '#bba8d6' : '#5a6b7e'; ctx.font = '11px system-ui, sans-serif';
       const lo = this.tLo, hi = this.tHi;
       ctx.strokeStyle = d ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.08)'; ctx.lineWidth = 1; ctx.textAlign = 'right';
       for (let i = 0; i <= 4; i++) { const y = B - ((B - T) * i) / 4; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke(); ctx.fillText(Math.round(lo + ((hi - lo) * i) / 4) + '', L - 6, y + 4); }
@@ -980,7 +980,7 @@
       ctx.setLineDash([4, 4]); ctx.strokeStyle = d ? 'rgba(255,255,255,.35)' : 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.moveTo(L, yOf(25)); ctx.lineTo(R, yOf(25)); ctx.stroke(); ctx.setLineDash([]);
       // mixing zone shading
       ctx.fillStyle = d ? 'rgba(120,170,230,.12)' : 'rgba(90,150,220,.1)'; ctx.fillRect(L, T, xOf(this.tPour) - L, B - T);
-      ctx.fillStyle = d ? '#9fb2c8' : '#6b7b8d'; ctx.textAlign = 'left'; ctx.font = '10px system-ui, sans-serif'; ctx.fillText('adding', L + 3, T + 11);
+      ctx.fillStyle = d ? '#bba8d6' : '#6b7b8d'; ctx.textAlign = 'left'; ctx.font = '10px system-ui, sans-serif'; ctx.fillText('adding', L + 3, T + 11);
       // trace
       if (this.graph.length > 1) {
         const exo = this.T1 >= this.T0;
@@ -991,7 +991,7 @@
         const last = this.graph[this.graph.length - 1];
         ctx.fillStyle = exo ? '#e5533d' : '#2f86e0'; ctx.beginPath(); ctx.arc(xOf(last[0]), yOf(clamp(last[1], lo, hi)), 4.5, 0, 6.3); ctx.fill();
       } else {
-        ctx.fillStyle = d ? '#7f90a5' : '#8696a8'; ctx.textAlign = 'center'; ctx.font = '12px system-ui, sans-serif'; ctx.fillText('Press Mix to start recording', (L + R) / 2, (T + B) / 2);
+        ctx.fillStyle = d ? '#9a86b8' : '#8696a8'; ctx.textAlign = 'center'; ctx.font = '12px system-ui, sans-serif'; ctx.fillText('Press Mix to start recording', (L + R) / 2, (T + B) / 2);
       }
     }
 
@@ -1012,7 +1012,7 @@
         return yR + (yP - yR) * s - (yR + (yP - yR) * s - yTS) * hump * (res.reacts === false ? 0 : 1);
       };
       const X = (x) => L + x * (R - L - 30) + 6;
-      ctx.fillStyle = d ? '#9fb2c8' : '#5a6b7e'; ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillStyle = d ? '#bba8d6' : '#5a6b7e'; ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'left';
       ctx.save(); ctx.translate(11, 108); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.fillText('Enthalpy, H', 0, 0); ctx.restore();
       ctx.strokeStyle = d ? 'rgba(255,255,255,.3)' : 'rgba(0,0,0,.3)'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.moveTo(L - 2, 18); ctx.lineTo(L - 2, 196); ctx.lineTo(R, 196); ctx.stroke();
@@ -1028,13 +1028,13 @@
         ctx.fillStyle = '#2faa8d'; ctx.textAlign = 'left'; ctx.fillText('with catalyst (lower Eₐ)', X(0.55), yTS + 20 + 12);
       }
       const exo = res.heat === 'exo';
-      const col = res.dh == null ? (d ? '#9fb2c8' : '#6b7b8d') : exo ? '#e5533d' : res.heat === 'endo' ? '#2f86e0' : '#8a8f98';
+      const col = res.dh == null ? (d ? '#bba8d6' : '#6b7b8d') : exo ? '#e5533d' : res.heat === 'endo' ? '#2f86e0' : '#8a8f98';
       ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.lineJoin = 'round';
       ctx.beginPath();
       for (let i = 0; i <= 80; i++) { const x = i / 80; const y = f(x); if (i === 0) ctx.moveTo(X(x), y); else ctx.lineTo(X(x), y); }
       ctx.stroke();
       // labels
-      ctx.fillStyle = d ? '#e6edf5' : '#2a3441'; ctx.font = '600 11.5px system-ui, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillStyle = d ? '#f6e8ff' : '#2a3441'; ctx.font = '600 11.5px system-ui, sans-serif'; ctx.textAlign = 'left';
       ctx.fillText('Reactants', X(0.0), yR + 18);
       ctx.textAlign = 'right'; ctx.fillText('Products', X(1.0) + 20, yP + 20);
       // delta H arrow
@@ -1047,14 +1047,14 @@
         ctx.textAlign = 'right'; ctx.font = '700 11.5px system-ui, sans-serif';
         ctx.fillText('ΔH = ' + (res.dh > 0 ? '+' : '−') .replace('−', res.dh < 0 ? '−' : '') + Math.abs(res.dh) + ' kJ', ax - 6, Math.min(yR, yP) - 8);
       } else if (res.dh == null) {
-        ctx.textAlign = 'right'; ctx.font = '11px system-ui, sans-serif'; ctx.fillStyle = d ? '#9fb2c8' : '#6b7b8d';
+        ctx.textAlign = 'right'; ctx.font = '11px system-ui, sans-serif'; ctx.fillStyle = d ? '#bba8d6' : '#6b7b8d';
         ctx.fillText('ΔH: not tabulated here (qualitative)', X(1) + 20, 210);
       }
       // Ea
       if (res.reacts !== false) {
-        ctx.strokeStyle = d ? '#c9d3e0' : '#44505f'; ctx.lineWidth = 1.2; ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = d ? '#d8c8f0' : '#44505f'; ctx.lineWidth = 1.2; ctx.setLineDash([3, 3]);
         ctx.beginPath(); ctx.moveTo(X(0.5), yR); ctx.lineTo(X(0.5), yTS); ctx.stroke(); ctx.setLineDash([]);
-        ctx.fillStyle = d ? '#c9d3e0' : '#44505f'; ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'left';
+        ctx.fillStyle = d ? '#d8c8f0' : '#44505f'; ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'left';
         ctx.fillText('Eₐ (not to scale)', X(0.5) + 5, yTS + 14);
       }
       // marker
@@ -1062,7 +1062,7 @@
       const mx = X(p), my = f(p);
       ctx.fillStyle = '#ffffff'; ctx.strokeStyle = col; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(mx, my, 6, 0, 6.3); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = d ? '#9fb2c8' : '#6b7b8d'; ctx.font = '10.5px system-ui, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillStyle = d ? '#bba8d6' : '#6b7b8d'; ctx.font = '10.5px system-ui, sans-serif'; ctx.textAlign = 'center';
       ctx.fillText('Reaction progress →', (L + R) / 2, 212);
     }
   }

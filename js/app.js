@@ -35,22 +35,8 @@
     ['Blue vitriol, heated', ['cuso4h', 'heat']], ['Chromate ⇌ dichromate', ['k2cr2o7', 'naoh']], ['Al in NaOH', ['al', 'naoh']],
   ];
 
-  const state = { sel: [], group: 'all', q: '', level: 'school', predict: false, pred: {}, revealed: true, res: null, doneHandled: false, phIdx: null };
+  const state = { sel: [], group: 'all', q: '', predict: false, pred: {}, revealed: true, res: null, doneHandled: false, phIdx: null };
   let sim = null;
-
-  // ------------------------------------------------------------ theme and level
-  function applyTheme(t) {
-    if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme');
-    const dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-    if (sim) { sim.dark = dark; sim.needsDraw = true; }
-    $('meta[name="theme-color"]').setAttribute('content', dark ? '#0d141c' : '#0f766e');
-  }
-  function applyLevel(l) {
-    state.level = l;
-    document.body.setAttribute('data-level', l);
-    $$('[data-level]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.level === l)));
-    store.set('lv-level', l);
-  }
 
   // ------------------------------------------------------------ chemical picker
   const hazLabel = ['Low', 'Caution', 'Hazard', 'Danger'];
@@ -74,7 +60,7 @@
       const sq = c.phase === 's' || c.metal ? ' sq' : '';
       const tag = c.id === 'heat' ? 'heat source' : c.phase === 's' ? 'solid' : c.phase === 'g' ? 'gas' : c.conc ? 'conc. liquid' : c.phase === 'l' ? 'liquid' : c.group === 'indicator' ? 'indicator' : 'solution';
       return '<button type="button" class="chem" data-id="' + c.id + '" aria-pressed="' + on + '"' + (!on && full ? ' disabled' : '') + ' title="' + esc(c.name + ': ' + c.look) + '">' +
-        '<i class="dot' + sq + '" style="background:' + dotColor(c) + '"></i><b>' + fmt(c.f) + '</b><span>' + esc(c.name.replace(/ \(.*\)/, '')) + (c.conc ? ' (conc.)' : '') + '</span><span>' + tag + '</span>' + ord + '</button>';
+        '<i class="dot' + sq + '" style="background:' + dotColor(c) + ';color:' + dotColor(c) + '"></i><b>' + fmt(c.f) + '</b><span>' + esc(c.name.replace(/ \(.*\)/, '')) + (c.conc ? ' (conc.)' : '') + '</span><span>' + tag + '</span>' + ord + '</button>';
     }).join('') : '<div class="chem-empty">No chemical matches “' + esc(state.q) + '”.</div>';
   }
   function renderTray() {
@@ -311,14 +297,13 @@
       h += '<div class="card hint-card"><h4>Want to see a reaction?</h4><p>These chemicals do not react by themselves, but a reaction does happen if you add:</p>' +
         res.hints.map((x) => '<button type="button" data-add="' + x.add + '">+ ' + esc(CH[x.add].name.replace(/ \(.*\)/, '')) + '</button>').join('') + '</div>';
     }
-    // bachelors detail
+    // deeper explanation
     const deepBits = [];
     if (res.hess) deepBits.push(hessTable(res));
     if (res.dh != null && res.dhSource) deepBits.push('<p class="eq-note">ΔH source: ' + esc(res.dhSource) + (res.dhNote ? '; ' + esc(res.dhNote) : '') + '.</p>');
     else if (res.dhNote) deepBits.push('<p class="eq-note">' + esc(res.dhNote) + '</p>');
     (res.deep || []).forEach((t) => deepBits.push('<p>' + esc(t) + '</p>'));
-    if (deepBits.length) h += '<div class="card uni-only"><h4>Going deeper (Bachelors level)</h4>' + deepBits.join('') + '</div>';
-    if (state.level === 'school' && deepBits.length) h += '<p class="fine" style="margin-top:10px">Switch to <b>Bachelors</b> at the top for the Hess’s-law calculation, Ksp / E° values and the deeper explanation.</p>';
+    if (deepBits.length) h += '<details class="card deep"><summary>Go deeper: the numbers behind it</summary>' + deepBits.join('') + '</details>';
     h += safetyHTML(res);
     box.innerHTML = h;
     updateObs();
@@ -372,16 +357,22 @@
     $('#presets').addEventListener('click', (e) => {
       const b = e.target.closest('[data-p]'); if (!b) return;
       setSelection(PRESETS[+b.dataset.p][1]);
-      $('#stage').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      $('#stage').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
     $('#surpriseBtn').addEventListener('click', () => {
       const p = PRESETS[Math.floor(Math.random() * PRESETS.length)];
       setSelection(p[1]);
-      $('#stage').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      $('#stage').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
     $('#groupChips').addEventListener('click', (e) => {
       const b = e.target.closest('[data-g]'); if (!b) return;
       state.group = b.dataset.g; renderGroups(); renderGrid();
+    });
+    const rb = $('#heroRandom');
+    if (rb) rb.addEventListener('click', () => {
+      const p = PRESETS[Math.floor(Math.random() * PRESETS.length)];
+      setSelection(p[1]);
+      $('#lab').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     $('#search').addEventListener('input', (e) => { state.q = e.target.value; renderGrid(); });
     $('#mixBtn').addEventListener('click', () => {
@@ -396,13 +387,6 @@
       sim.view = b.dataset.view; sim.needsDraw = true;
       $$('[data-view]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
     }));
-    $$('.top [data-level]').forEach((b) => b.addEventListener('click', () => { applyLevel(b.dataset.level); renderResults(); }));
-    $('#themeBtn').addEventListener('click', () => {
-      const cur = document.documentElement.getAttribute('data-theme');
-      const dark = cur ? cur === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-      const next = dark ? 'light' : 'dark';
-      store.set('lv-theme', next); applyTheme(next);
-    });
     $('#predictMode').addEventListener('change', (e) => {
       state.predict = e.target.checked; state.revealed = !state.predict; state.doneHandled = false;
       renderResults();
@@ -430,10 +414,7 @@
   function init() {
     sim = new C.Sim({ beaker: $('#beaker'), temp: $('#temp'), energy: $('#energy') });
     sim.onFrame = onFrame;
-    applyLevel(store.get('lv-level', 'school'));
-    const th = store.get('lv-theme', '');
-    applyTheme(th || null);
-    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (!store.get('lv-theme', '')) applyTheme(null); });
+    sim.dark = true;
     renderGroups(); renderPresets(); renderGrid(); renderTray();
     bind();
     let start = ['agno3', 'nacl'];
