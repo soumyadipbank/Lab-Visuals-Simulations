@@ -59,6 +59,15 @@
       this.view = 'beaker'; this.userSpeed = 1; this.dark = false;
       this.running = false; this.t = 0; this.last = 0; this.ids = []; this.res = null;
       this.onFrame = null;
+      this.clock = 0; this.ripples = []; this.shocks = []; this.stir = 0; this.lastRip = 0;
+      this.ptr = { x: -999, y: -999, in: false }; this.hoverGraph = null;
+      const toLogical = (e) => { const r = this.cv.getBoundingClientRect(); return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H }; };
+      this.cv.style.touchAction = 'manipulation';
+      this.cv.addEventListener('pointermove', (e) => { const q = toLogical(e); this.ptr.x = q.x; this.ptr.y = q.y; this.ptr.in = true; this.onPointerMove(q); });
+      this.cv.addEventListener('pointerleave', () => { this.ptr.in = false; this.ptr.x = -999; this.cv.style.cursor = 'default'; });
+      this.cv.addEventListener('pointerdown', (e) => { this.onPointerDown(toLogical(e)); });
+      this.tcv.addEventListener('pointermove', (e) => { const r = this.tcv.getBoundingClientRect(); this.hoverGraph = ((e.clientX - r.left) / r.width) * 400; });
+      this.tcv.addEventListener('pointerleave', () => { this.hoverGraph = null; });
       this.resize();
       new ResizeObserver(() => { this.resize(); }).observe(this.cv.parentElement);
       new ResizeObserver(() => { this.resize(); }).observe(this.tcv.parentElement);
@@ -261,6 +270,10 @@
     loop(now) {
       const dt = Math.min(0.05, (now - (this.last || now)) / 1000);
       this.last = now;
+      this.clock += dt;
+      this.ripples = this.ripples.filter((r) => this.clock - r.t0 < 2.4);
+      this.shocks = this.shocks.filter((r) => this.clock - r.t0 < 0.9);
+      this.stir = Math.max(0, this.stir - dt * 0.55);
       if (this.running && this.res) {
         this.t += dt * this.userSpeed;
         if (this.t >= this.tTotal) { this.t = this.tTotal; this.running = false; this.done = true; }
@@ -316,7 +329,7 @@
       // update bubbles
       for (let i = this.bubbles.length - 1; i >= 0; i--) {
         const b = this.bubbles[i];
-        b.y -= b.vy * dt; b.x += Math.sin(this.t * 3 + b.ph) * 12 * dt;
+        b.y -= b.vy * dt * (1 + this.stir * 0.8); b.x += Math.sin(this.t * 3 + b.ph) * 12 * dt + (Math.random() - 0.5) * this.stir * 60 * dt;
         if (b.y < surf) {
           if (Math.random() < 0.35) this.mist.push({ x: b.x, y: surf, vx: rnd(-20, 20), vy: rnd(-40, -20), life: 0.35, c: b.c });
           this.bubbles.splice(i, 1);
@@ -329,6 +342,7 @@
       if (fx.ppt && !idle) {
         const bottom = BBOT - 3 - this.sedHeight();
         this.pptP.forEach((q) => {
+          if (this.stir > 0.02 && q.started) { q.x = clamp(q.x + (Math.random() - 0.5) * this.stir * 70 * dt, BX + 8, BX + BW - 8); if (!q.settled) q.y -= this.stir * 18 * dt; }
           if (p < q.thr) { q.started = false; q.settled = false; return; }
           if (!q.started) { q.started = true; q.y = surf + (BBOT - surf) * rnd(0, 0.55); q.settled = false; }
           if (fx.ppt.noSettle) { q.x += Math.sin(this.t * 1.3 + q.ox) * 6 * dt; q.y += Math.cos(this.t * 1.1 + q.ox) * 5 * dt; q.y = clamp(q.y, surf + 4, BBOT - 6); }
@@ -391,7 +405,13 @@
         }
         const g = q.role === 'p' && q.ph === 'g';
         q.vx += rnd(-90, 90) * dt; q.vy += rnd(-90, 90) * dt + (g ? -60 * dt : 0);
-        const sp = Math.hypot(q.vx, q.vy), cap = g ? 90 : 55;
+        let cap = g ? 90 : 55;
+        if (this.view === 'micro' && this.ptr.in) {
+          const dx = q.x - this.ptr.x, dy = q.y - this.ptr.y, dd = Math.hypot(dx, dy);
+          if (dd < 95 && dd > 0.1) { const f = (1 - dd / 95) * 900 * dt; q.vx += (dx / dd) * f; q.vy += (dy / dd) * f; cap = 170; }
+        }
+        if (q.boost > 0) { q.boost -= dt; cap = 320; }
+        const sp = Math.hypot(q.vx, q.vy);
         if (sp > cap) { q.vx *= cap / sp; q.vy *= cap / sp; }
         q.x += q.vx * dt; q.y += q.vy * dt;
         if (q.x < x0 + q.r) { q.x = x0 + q.r; q.vx = Math.abs(q.vx); }
@@ -469,6 +489,7 @@
       if (fx.consumeLiquid) tgt *= 1 - 0.7 * p;
       this.level = clamp(tgt, 0, 0.82);
 
+      this.drawAmbient(ctx);
       this.drawStand(ctx);
       this.drawBurner(ctx);
       if (this.dry) this.drawCrucible(ctx); else this.drawBeaker(ctx);
@@ -519,6 +540,89 @@
       ctx.lineTo(BX + BW - 16, BBOT); ctx.quadraticCurveTo(BX + BW, BBOT, BX + BW, BBOT - 16); ctx.lineTo(BX + BW, BTOP);
     }
 
+    waveAt(x, surf) {
+      let y = surf + Math.sin(x * 0.045 + this.clock * 2.1) * 1.3 + Math.sin(x * 0.11 - this.clock * 3.2) * 0.8;
+      for (let i = 0; i < this.ripples.length; i++) {
+        const r = this.ripples[i], a = this.clock - r.t0, dx = Math.abs(x - r.x);
+        y += r.amp * 7 * Math.exp(-a * 1.6) * Math.sin(dx * 0.13 - a * 11) * Math.exp(-dx * 0.011);
+      }
+      return y;
+    }
+
+    liquidPath(ctx, surf) {
+      ctx.beginPath(); ctx.moveTo(BX, BBOT); ctx.lineTo(BX, this.waveAt(BX, surf));
+      for (let x = BX + 4; x <= BX + BW; x += 4) ctx.lineTo(x, this.waveAt(x, surf));
+      ctx.lineTo(BX + BW, BBOT); ctx.closePath();
+    }
+
+    overBeaker(q) { return q.x > BX && q.x < BX + BW && q.y > BTOP - 10 && q.y < BBOT; }
+
+    onPointerMove(q) {
+      if (this.view === 'micro') { this.cv.style.cursor = 'crosshair'; return; }
+      const over = this.overBeaker(q) && !this.dry;
+      this.cv.style.cursor = over ? 'pointer' : 'default';
+      if (over && this.level > 0.05 && q.y > this.surfaceY() - 10 && this.clock - this.lastRip > 0.14) {
+        this.lastRip = this.clock; this.ripples.push({ x: q.x, t0: this.clock, amp: 0.35 });
+      }
+    }
+
+    onPointerDown(q) {
+      if (!this.res) return;
+      if (this.view === 'micro') {
+        this.shocks.push({ x: q.x, y: q.y, t0: this.clock });
+        this.mp.forEach((m) => {
+          if (!m.vis || m.fixed || (m.role === 'p' && m.ph === 's')) return;
+          const dx = m.x - q.x, dy = m.y - q.y, dd = Math.hypot(dx, dy);
+          if (dd < 200 && dd > 0.1) { const f = (1 - dd / 200) * 330; m.vx += (dx / dd) * f; m.vy += (dy / dd) * f; m.boost = 0.7; }
+        });
+        return;
+      }
+      if (!this.overBeaker(q) || this.dry) return;
+      const surf = this.surfaceY();
+      this.ripples.push({ x: clamp(q.x, BX + 10, BX + BW - 10), t0: this.clock, amp: 1.7 });
+      this.stir = 1;
+      if (this.level > 0.05) {
+        for (let i = 0; i < 12; i++) this.bubbles.push({ x: q.x + rnd(-12, 12), y: Math.max(surf + 6, Math.min(BBOT - 6, q.y)) + rnd(0, 12), vy: rnd(60, 120), r: rnd(1.8, 4), ph: rnd(0, 6), c: null });
+        // stirring lifts settled precipitate back into the liquid
+        this.pptP.forEach((m) => { if (m.settled && Math.random() < 0.6) { m.settled = false; m.y = BBOT - rnd(10, 60); } });
+      }
+    }
+
+    drawAmbient(ctx) {
+      const T = this.T == null ? 25 : this.T, heat = clamp((T - 25) / 35, -1, 1), cy = this.dry ? 372 : BBOT - 80;
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      if (this.level > 0.05 && !this.dry) {
+        const col = this.liquidColorNow();
+        const g = ctx.createRadialGradient(400, cy + 10, 10, 400, cy + 10, 260);
+        g.addColorStop(0, rgba(col, 0.3 * Math.min(1, this.level * 1.7))); g.addColorStop(1, rgba(col, 0));
+        ctx.fillStyle = g; ctx.fillRect(100, 60, 600, 420);
+      }
+      if (heat > 0.04) {
+        const g = ctx.createRadialGradient(400, cy, 10, 400, cy, 300);
+        g.addColorStop(0, rgba('#ff8f6e', 0.34 * heat)); g.addColorStop(1, rgba('#ff8f6e', 0));
+        ctx.fillStyle = g; ctx.fillRect(60, 40, 680, 440);
+        ctx.strokeStyle = rgba('#ffc8a0', 0.16 * heat); ctx.lineWidth = 3; ctx.lineCap = 'round';
+        for (let i = 0; i < 6; i++) {
+          const bx = 330 + i * 28, off = (this.clock * 40 + i * 37) % 120;
+          ctx.beginPath();
+          for (let k = 0; k <= 8; k++) { const y = BTOP - 6 - off - k * 9, x = bx + Math.sin(k * 0.9 + this.clock * 3 + i) * 5; if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+          ctx.stroke();
+        }
+      } else if (heat < -0.04) {
+        const g = ctx.createRadialGradient(400, cy, 10, 400, cy, 300);
+        g.addColorStop(0, rgba('#7ab8ff', 0.3 * -heat)); g.addColorStop(1, rgba('#7ab8ff', 0));
+        ctx.fillStyle = g; ctx.fillRect(60, 40, 680, 440);
+        ctx.strokeStyle = rgba('#dff0ff', 0.8 * -heat); ctx.lineWidth = 1.4;
+        for (let i = 0; i < 16; i++) {
+          const x = BX - 24 + ((i * 41) % (BW + 48)), y = BTOP + ((i * 59) % 250), a = 0.35 + 0.65 * Math.abs(Math.sin(this.clock * 2.2 + i)), r = 2 + (i % 3) * 1.6;
+          ctx.globalAlpha = a * -heat;
+          ctx.beginPath(); ctx.moveTo(x - r, y); ctx.lineTo(x + r, y); ctx.moveTo(x, y - r); ctx.lineTo(x, y + r); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      }
+      ctx.restore();
+    }
+
     liquidColorNow() {
       const p = this.p;
       let c = this.c0;
@@ -539,18 +643,19 @@
         const col = this.liquidColorNow();
         const g = ctx.createLinearGradient(0, surf, 0, BBOT);
         g.addColorStop(0, rgba(col, 0.72)); g.addColorStop(1, rgba(col, 0.9));
-        ctx.fillStyle = g; ctx.fillRect(BX, surf, BW, BBOT - surf);
+        ctx.fillStyle = g; this.liquidPath(ctx, surf); ctx.fill();
         // milky cloud for suspended precipitate
         if (fx.ppt) {
           let cloud;
           if (fx.ppt.noSettle) cloud = clamp(fx.ppt.amount, 0, 1) * 0.55 * smooth(p * 2);
           else { const n = this.pptP.length || 1; const susp = this.pptP.filter((q) => q.started && !q.settled).length / n; cloud = susp * 0.7 * clamp(fx.ppt.amount + 0.2, 0, 1); }
           if (fx.ppt.redissolve) cloud *= 1 - smooth((p - 0.55) / 0.3);
-          if (cloud > 0.01) { ctx.fillStyle = rgba(fx.ppt.color, cloud); ctx.fillRect(BX, surf, BW, BBOT - surf); }
+          if (cloud > 0.01) { ctx.fillStyle = rgba(fx.ppt.color, cloud); this.liquidPath(ctx, surf); ctx.fill(); }
         }
         // surface shine
-        ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(BX, surf, BW, 2);
-        ctx.fillStyle = rgba(col, 0.9); ctx.beginPath(); ctx.ellipse(BX + BW / 2, surf, BW / 2, 4, 0, 0, 6.3); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 2; ctx.beginPath();
+        for (let x = BX; x <= BX + BW; x += 4) { const y = this.waveAt(x, surf); if (x === BX) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+        ctx.stroke();
       }
       // sediment
       const sh = this.sedHeight();
@@ -928,7 +1033,20 @@
         ctx.strokeStyle = rgba('#ffd54a', 1 - k); ctx.lineWidth = 2.5 * (1 - k);
         ctx.beginPath(); ctx.arc(r.x, r.y, 10 + k * (r.big ? 34 : 22), 0, 6.3); ctx.stroke();
       });
+      // cursor halo and shockwaves
+      if (this.ptr.in && this.ptr.x > x0 && this.ptr.x < x1 && this.ptr.y > y0 && this.ptr.y < y1) {
+        const hg = ctx.createRadialGradient(this.ptr.x, this.ptr.y, 4, this.ptr.x, this.ptr.y, 95);
+        hg.addColorStop(0, 'rgba(254,166,208,.22)'); hg.addColorStop(1, 'rgba(254,166,208,0)');
+        ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(this.ptr.x, this.ptr.y, 95, 0, 6.3); ctx.fill();
+      }
+      this.shocks.forEach((sw) => {
+        const k = (this.clock - sw.t0) / 0.9;
+        ctx.strokeStyle = 'rgba(254,166,208,' + (0.8 * (1 - k)) + ')'; ctx.lineWidth = 3 * (1 - k) + 0.5;
+        ctx.beginPath(); ctx.arc(sw.x, sw.y, 12 + k * 220, 0, 6.3); ctx.stroke();
+      });
       ctx.restore();
+      ctx.fillStyle = 'rgba(246,232,255,.55)'; ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('Move the cursor to push particles. Click for a shockwave.', x0 + 10, y1 - 10);
       // legend
       let ly = y0 + 6;
       ctx.textAlign = 'left';
@@ -992,6 +1110,22 @@
         ctx.fillStyle = exo ? '#e5533d' : '#2f86e0'; ctx.beginPath(); ctx.arc(xOf(last[0]), yOf(clamp(last[1], lo, hi)), 4.5, 0, 6.3); ctx.fill();
       } else {
         ctx.fillStyle = d ? '#9a86b8' : '#8696a8'; ctx.textAlign = 'center'; ctx.font = '12px system-ui, sans-serif'; ctx.fillText('Press Mix to start recording', (L + R) / 2, (T + B) / 2);
+      }
+      // hover read-out
+      const hx = this.hoverGraph;
+      if (hx != null && hx >= L && hx <= R) {
+        const t = ((hx - L) / (R - L)) * tt;
+        ctx.strokeStyle = 'rgba(246,232,255,.45)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.moveTo(hx, T); ctx.lineTo(hx, B); ctx.stroke(); ctx.setLineDash([]);
+        const known = t <= this.t;
+        const v = this.temperatureAt(t);
+        if (known) { ctx.fillStyle = '#fea6d0'; ctx.beginPath(); ctx.arc(hx, yOf(clamp(v, lo, hi)), 4, 0, 6.3); ctx.fill(); }
+        const label = known ? t.toFixed(1) + ' s · ' + v.toFixed(1) + ' °C' : t.toFixed(1) + ' s · not reached yet';
+        ctx.font = '600 11px system-ui, sans-serif';
+        const tw = ctx.measureText(label).width + 14, bx = Math.min(R - tw, Math.max(L, hx - tw / 2));
+        ctx.fillStyle = 'rgba(14,6,24,.9)'; ctx.strokeStyle = 'rgba(206,114,245,.6)';
+        ctx.beginPath(); ctx.roundRect(bx, T - 2, tw, 20, 8); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#f6e8ff'; ctx.textAlign = 'left'; ctx.fillText(label, bx + 7, T + 12);
       }
     }
 

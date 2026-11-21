@@ -35,6 +35,7 @@
   const rings = [0, 1, 2, 3].map((i) => ({ rx: 0.9 + i * 0.42, ry: 0.34 + i * 0.13, tilt: -0.5 + i * 0.35, speed: (i % 2 ? -1 : 1) * (0.16 + i * 0.05), dots: 5 + i * 3 }));
   rings.forEach((r) => { r.items = Array.from({ length: r.dots }, (_, k) => ({ a: (k / r.dots) * 6.283 + rnd(0, 0.4), c: PAL[Math.floor(rnd(0, PAL.length))], s: rnd(2.2, 5.2) })); });
   const bubbles = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: rnd(2, 9), v: rnd(0.012, 0.04), ph: rnd(0, 6.3), c: PAL[Math.floor(rnd(0, PAL.length))] }));
+  const sparks = []; let pulse = 0; const pt = { x: -999, y: -999, in: false };
   const tags = LABELS.map((t) => ({ t, x: Math.random(), y: Math.random(), v: rnd(0.004, 0.012), ph: rnd(0, 6.3), s: rnd(15, 28) }));
 
   function resize() {
@@ -59,7 +60,8 @@
     ctx.globalCompositeOperation = 'source-over';
     const narrow = W < 800;
     const cx = (narrow ? W * 0.5 : W * 0.7) + mouse.x * 26, cy = (narrow ? H * 0.8 : H * 0.48) + mouse.y * 16;
-    const R = Math.min(W, H) * (narrow ? 0.13 : 0.2);
+    pulse *= 0.94;
+    const R = Math.min(W, H) * (narrow ? 0.13 : 0.2) * (1 + 0.16 * pulse);
 
     ctx.globalCompositeOperation = 'lighter';
     // drifting colour fields
@@ -103,10 +105,25 @@
     ctx.globalCompositeOperation = 'source-over';
     bubbles.forEach((b) => {
       b.y -= b.v * 0.016; if (b.y < -0.05) { b.y = 1.05; b.x = Math.random(); }
-      const x = b.x * W + Math.sin(t * 0.8 + b.ph) * 14, y = b.y * H;
+      let x = b.x * W + Math.sin(t * 0.8 + b.ph) * 14, y = b.y * H;
+      if (pt.in) {
+        const dx = pt.x - x, dy = pt.y - y, dd = Math.hypot(dx, dy), k = dd < 200 ? 0.45 * (1 - dd / 200) : 0;
+        b.ox = (b.ox || 0) + (dx * k - (b.ox || 0)) * 0.1; b.oy = (b.oy || 0) + (dy * k - (b.oy || 0)) * 0.1;
+      } else { b.ox = (b.ox || 0) * 0.92; b.oy = (b.oy || 0) * 0.92; }
+      x += b.ox || 0; y += b.oy || 0;
       ctx.strokeStyle = hexA(b.c, 0.5); ctx.fillStyle = hexA(b.c, 0.08); ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(x, y, b.r, 0, 6.283); ctx.fill(); ctx.stroke();
     });
+    // sparks from the cursor
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i];
+      s.x += s.vx; s.y += s.vy; s.vx *= 0.96; s.vy *= 0.96; s.vy += 0.012; s.life -= 0.016;
+      if (s.life <= 0) { sparks.splice(i, 1); continue; }
+      glow(s.x, s.y, s.r * 6, s.c, 0.55 * s.life);
+      ctx.fillStyle = hexA(s.c, s.life); ctx.beginPath(); ctx.arc(s.x, s.y, s.r * s.life + 0.5, 0, 6.283); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
     // floating formulas
     ctx.font = 'italic 400 22px "Instrument Serif", Georgia, serif'; ctx.textAlign = 'center';
     tags.forEach((g) => {
@@ -121,7 +138,24 @@
   function start() { running = true; requestAnimationFrame(frame); }
   resize();
   new ResizeObserver(() => { resize(); if (reduce) frame(1000); }).observe(cv.parentElement);
-  window.addEventListener('mousemove', (e) => { mouse.tx = e.clientX / window.innerWidth - 0.5; mouse.ty = e.clientY / window.innerHeight - 0.5; }, { passive: true });
+  function addSparks(n, burst) {
+    for (let i = 0; i < n; i++) {
+      const a = rnd(0, 6.283), sp = burst ? rnd(1.5, 6) : rnd(0.2, 1.2);
+      sparks.push({ x: pt.x, y: pt.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - (burst ? 0 : 0.3), r: rnd(1.4, 3.6), life: rnd(0.7, 1.2), c: PAL[Math.floor(rnd(0, PAL.length))] });
+    }
+  }
+  window.addEventListener('mousemove', (e) => {
+    mouse.tx = e.clientX / window.innerWidth - 0.5; mouse.ty = e.clientY / window.innerHeight - 0.5;
+    const r = cv.getBoundingClientRect();
+    pt.x = e.clientX - r.left; pt.y = e.clientY - r.top; pt.in = pt.y >= 0 && pt.y <= r.height;
+    if (pt.in && !reduce && Math.random() < 0.7) addSparks(1, false);
+  }, { passive: true });
+  cv.parentElement.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('a, button')) return;
+    const r = cv.getBoundingClientRect();
+    pt.x = e.clientX - r.left; pt.y = e.clientY - r.top;
+    addSparks(34, true); pulse = 1;
+  });
   if ('IntersectionObserver' in window) {
     new IntersectionObserver((es) => {
       const v = es[0].isIntersecting;

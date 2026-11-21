@@ -59,7 +59,7 @@
       const ord = on ? '<i class="ord">' + (state.sel.indexOf(c.id) + 1) + '</i>' : '';
       const sq = c.phase === 's' || c.metal ? ' sq' : '';
       const tag = c.id === 'heat' ? 'heat source' : c.phase === 's' ? 'solid' : c.phase === 'g' ? 'gas' : c.conc ? 'conc. liquid' : c.phase === 'l' ? 'liquid' : c.group === 'indicator' ? 'indicator' : 'solution';
-      return '<button type="button" class="chem" data-id="' + c.id + '" aria-pressed="' + on + '"' + (!on && full ? ' disabled' : '') + ' title="' + esc(c.name + ': ' + c.look) + '">' +
+      return '<button type="button" class="chem" draggable="true" data-id="' + c.id + '" aria-pressed="' + on + '"' + (!on && full ? ' disabled' : '') + ' title="' + esc(c.name + ': ' + c.look) + '">' +
         '<i class="dot' + sq + '" style="background:' + dotColor(c) + ';color:' + dotColor(c) + '"></i><b>' + fmt(c.f) + '</b><span>' + esc(c.name.replace(/ \(.*\)/, '')) + (c.conc ? ' (conc.)' : '') + '</span><span>' + tag + '</span>' + ord + '</button>';
     }).join('') : '<div class="chem-empty">No chemical matches “' + esc(state.q) + '”.</div>';
   }
@@ -110,6 +110,8 @@
   }
   function setMsg() {
     const m = $('#stageMsg');
+    m.classList.remove('clickable');
+    if (state.sel.length && state.res && state.res.reacts !== false && sim.phase === 'done' && sim.t > sim.tEnd + 1) { m.textContent = 'Reaction complete. Tap here for the explanation ↓'; m.classList.add('show', 'clickable'); return; }
     if (!state.sel.length) { m.textContent = 'Choose chemicals on the left to set up your experiment.'; m.classList.add('show'); }
     else if (sim.t < 0.01 && !sim.running) { m.textContent = state.sel.length === 1 ? 'Press Pour to add it to the beaker, or pick another chemical.' : 'Everything is on the bench. Press Mix to begin.'; m.classList.add('show'); }
     else m.classList.remove('show');
@@ -383,10 +385,37 @@
     $('#resetBtn').addEventListener('click', () => { sim.restart(); state.doneHandled = false; if (state.predict) { state.revealed = false; renderResults(); } lastSig = ''; onFrame(sim); });
     $('#speed').addEventListener('input', (e) => { sim.userSpeed = +e.target.value; $('#speedOut').textContent = e.target.value + '×'; });
     $('#scrub').addEventListener('input', (e) => { sim.pause(); sim.seek((+e.target.value / 1000) * sim.tTotal); lastSig = ''; onFrame(sim); });
-    $$('[data-view]').forEach((b) => b.addEventListener('click', () => {
-      sim.view = b.dataset.view; sim.needsDraw = true;
-      $$('[data-view]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-    }));
+    const setView = (v) => {
+      sim.view = v; sim.needsDraw = true;
+      $$('[data-view]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.view === v)));
+    };
+    $$('[data-view]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
+    // drag a chemical onto the beaker
+    $('#chemGrid').addEventListener('dragstart', (e) => {
+      const b = e.target.closest('.chem'); if (!b) return;
+      e.dataTransfer.setData('text/plain', b.dataset.id); e.dataTransfer.effectAllowed = 'copy';
+    });
+    const zone = $('.canvas-wrap');
+    ['dragenter', 'dragover'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('drop'); }));
+    zone.addEventListener('dragleave', () => zone.classList.remove('drop'));
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault(); zone.classList.remove('drop');
+      const id = e.dataTransfer.getData('text/plain');
+      if (!CH[id] || state.sel.includes(id)) return;
+      if (state.sel.length >= MAX) { const m = $('#stageMsg'); m.textContent = 'The bench holds four chemicals. Remove one first.'; m.classList.add('show'); return; }
+      setSelection(state.sel.concat(id));
+    });
+    $('#stageMsg').addEventListener('click', () => { if ($('#stageMsg').classList.contains('clickable')) $('#results').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    // keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return;
+      const k = e.key.toLowerCase();
+      if (k === ' ') { if (tag === 'button') return; e.preventDefault(); $('#mixBtn').click(); }
+      else if (k === 'r') $('#resetBtn').click();
+      else if (k === 'p') setView(sim.view === 'micro' ? 'beaker' : 'micro');
+    });
     $('#predictMode').addEventListener('change', (e) => {
       state.predict = e.target.checked; state.revealed = !state.predict; state.doneHandled = false;
       renderResults();
