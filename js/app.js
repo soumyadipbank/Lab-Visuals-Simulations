@@ -98,6 +98,8 @@
     renderResults();
     updateURL();
     setMsg();
+    renderLegend();
+    updateBar();
     $('#mixBtn').disabled = !ids.length;
     if (opts && opts.autoplay) sim.play();
   }
@@ -115,6 +117,16 @@
     if (!state.sel.length) { m.textContent = 'Choose chemicals on the left to set up your experiment.'; m.classList.add('show'); }
     else if (sim.t < 0.01 && !sim.running) { m.textContent = state.sel.length === 1 ? 'Press Pour to add it to the beaker, or pick another chemical.' : 'Everything is on the bench. Press Mix to begin.'; m.classList.add('show'); }
     else m.classList.remove('show');
+  }
+
+  // key for the particle view, shown as HTML on phones (the canvas legend is too small to read there)
+  function renderLegend() {
+    const box = $('#mLegend');
+    if (!box) return;
+    if (sim.view !== 'micro' || !sim.legend || !sim.legend.length) { box.innerHTML = ''; box.classList.remove('on'); return; }
+    box.classList.add('on');
+    box.innerHTML = '<b>Key</b>' + sim.legend.map((e) => '<span><i style="background:' + e.color + ';border-radius:' + (e.ph === 's' ? '3px' : '50%') + '"></i>' + esc(C.uni(e.label)) + ' <em>' + e.role + (e.ph === 's' ? ', solid' : e.ph === 'g' ? ', gas' : '') + '</em></span>').join('') +
+      '<small>Spectator ions are there before and after: they do not take part in the reaction.</small>';
   }
 
   // ------------------------------------------------------------ results rendering
@@ -317,6 +329,18 @@
     items.forEach((li) => li.classList.toggle('seen', done || sim.t >= sim.tPour && p >= +li.dataset.th * 0.85 || (!state.res.reacts && sim.t > 0.5)));
   }
 
+  // sticky bar on small screens so you do not have to scroll back up to the stage
+  function updateBar() {
+    const bar = $('#mobileBar'); if (!bar) return;
+    const n = state.sel.length;
+    bar.classList.toggle('show', n > 0 && !stageInView());
+    $('#mobileBarText').textContent = n + (n === 1 ? ' chemical' : ' chemicals') + ' ready';
+  }
+  function stageInView() {
+    const r = $('#stage').getBoundingClientRect();
+    return r.top < innerHeight * 0.55 && r.bottom > innerHeight * 0.3;
+  }
+
   // ------------------------------------------------------------ per-frame updates
   let lastSig = '';
   function onFrame(s) {
@@ -336,6 +360,8 @@
     const sc = $('#scrub');
     if (document.activeElement !== sc) sc.value = Math.round((s.t / s.tTotal) * 1000);
     const mb = $('#mixBtn');
+    const mbar = $('#mobileBarBtn');
+    if (mbar) mbar.textContent = s.running ? '⏸ Pause' : s.t >= s.tTotal - 0.01 ? '↻ Replay' : s.t > 0.01 ? '▶ Resume' : '▶ Mix';
     mb.textContent = s.running ? '⏸ Pause' : s.t >= s.tTotal - 0.01 ? '↻ Replay' : s.t > 0.01 ? '▶ Resume' : (state.res && state.res.single ? '▶ Pour' : '▶ Mix');
     updateObs();
     setMsg();
@@ -386,8 +412,9 @@
     $('#speed').addEventListener('input', (e) => { sim.userSpeed = +e.target.value; $('#speedOut').textContent = e.target.value + '×'; });
     $('#scrub').addEventListener('input', (e) => { sim.pause(); sim.seek((+e.target.value / 1000) * sim.tTotal); lastSig = ''; onFrame(sim); });
     const setView = (v) => {
-      sim.view = v; sim.needsDraw = true;
+      sim.setView(v);
       $$('[data-view]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.view === v)));
+      renderLegend();
     };
     $$('[data-view]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
     // drag a chemical onto the beaker
@@ -404,6 +431,14 @@
       if (!CH[id] || state.sel.includes(id)) return;
       if (state.sel.length >= MAX) { const m = $('#stageMsg'); m.textContent = 'The bench holds four chemicals. Remove one first.'; m.classList.add('show'); return; }
       setSelection(state.sel.concat(id));
+    });
+    let barTick = false;
+    addEventListener('scroll', () => { if (!barTick) { barTick = true; requestAnimationFrame(() => { barTick = false; updateBar(); }); } }, { passive: true });
+    $('#mobileBarBtn').addEventListener('click', () => {
+      if (!stageInView()) {
+        $('#stage').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (!sim.running) setTimeout(() => $('#mixBtn').click(), 650);
+      } else $('#mixBtn').click();
     });
     $('#stageMsg').addEventListener('click', () => { if ($('#stageMsg').classList.contains('clickable')) $('#results').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     // keyboard shortcuts
