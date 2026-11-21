@@ -139,7 +139,11 @@
     const fx = res.fx || {};
     const eq = res.equation ? eqSide(res) : { left: [], right: [] };
     f.c0 = sim.c0; f.c1 = sim.c1;
-    f.colourChange = dist(sim.c0, sim.c1) > 38 || !!(fx.solidFrom && fx.solidEnd && dist(fx.solidFrom, fx.solidEnd) > 40);
+    f.liqChanged = C.colourChanged(sim.c0, sim.c1);
+    const solidChem = (res.ids || []).map((i) => CH[i]).find((c) => c && (c.metal || (c.phase === 's' && c.color)));
+    f.s0 = fx.solidFrom || (solidChem && solidChem.color) || null; f.s1 = fx.solidEnd || null;
+    f.solidChanged = !!(f.s0 && f.s1 && C.colourChanged(f.s0, f.s1));
+    f.colourChange = f.liqChanged || f.solidChanged;
     f.solids = eq.right.filter((t) => t.ph === 's').map((t) => t.f);
     f.ppt = !!fx.ppt;
     f.gases = eq.right.filter((t) => t.ph === 'g' && t.f !== 'H2O').map((t) => t.f);
@@ -177,10 +181,16 @@
   function factsHTML(res) {
     const f = getFacts(res);
     const parts = [];
-    // colour
+    // colour: only claim a change when the two colours are really different
+    const nm = (hex) => cap(C.colourName(hex));
     let col;
-    if (f.colourChange) col = '<div class="v">' + swatch(f.c0) + '<span class="sw-arrow">→</span>' + swatch(f.c1) + ' Colour changes</div><div class="s">' + esc(cap(C.colorWord(f.c0 === '#cfe6f5' ? null : f.c0)) + ' → ' + C.colorWord(f.c1 === '#cfe6f5' ? null : f.c1)) + '</div>';
-    else col = '<div class="v">' + swatch(f.c1) + ' No colour change</div><div class="s">' + esc(cap(C.colorWord(f.c1 === '#cfe6f5' ? null : f.c1))) + ' solution</div>';
+    if (f.liqChanged) {
+      col = '<div class="v">' + swatch(f.c0) + '<span class="sw-arrow">→</span>' + swatch(f.c1) + ' Colour changes</div><div class="s">' + esc(nm(f.c0) + ' → ' + C.colourName(f.c1) + (C.colourName(f.c1) === 'colourless' ? '' : ' solution')) + (f.solidChanged ? '. The solid also changes colour (' + esc(C.colourName(f.s0) + ' → ' + C.colourName(f.s1)) + ').' : '') + '</div>';
+    } else if (f.solidChanged) {
+      col = '<div class="v">' + swatch(f.s0) + '<span class="sw-arrow">→</span>' + swatch(f.s1) + ' The solid changes colour</div><div class="s">' + esc(nm(f.s0) + ' → ' + C.colourName(f.s1)) + '. The solution colour stays the same.</div>';
+    } else {
+      col = '<div class="v">' + swatch(f.c1) + ' No colour change</div><div class="s">' + esc(nm(f.c1)) + (C.colourName(f.c1) === 'colourless' ? '' : ' solution') + ' before and after.</div>';
+    }
     parts.push(['Colour', col]);
     // precipitate
     if (f.ppt) {

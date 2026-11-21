@@ -257,7 +257,7 @@
   chem('ui', 'Universal indicator', 'UI', 'indicator', { color: '#5fb957', look: 'Green solution (a few drops)', haz: [1, 'Contains alcohol; flammable.'] });
   // Others
   chem('h2o', 'Water', 'H2O', 'other', { phase: 'l', color: null, look: 'Colourless liquid (distilled)' });
-  chem('i2', 'Iodine solution', 'I2', 'other', { color: '#b5651d', haz: [2, 'Harmful; stains skin and surfaces. Dissolved in KI solution.'], look: 'Yellow-brown solution' });
+  chem('i2', 'Iodine solution', 'I2', 'other', { color: '#c58a2a', haz: [2, 'Harmful; stains skin and surfaces. Dissolved in KI solution.'], look: 'Yellow-brown solution' });
   chem('heat', 'Heat (Bunsen flame)', 'Δ', 'other', { phase: 'h', haz: [2, 'Burn hazard. Tie back hair, wear eye protection, keep flammables away.'], look: 'A flame heats the mixture from below' });
 
   C.ION = ION; C.PPT = PPT; C.MOL = MOL; C.METAL = METAL; C.CATION_E = CATION_E; C.DSOL = DSOL;
