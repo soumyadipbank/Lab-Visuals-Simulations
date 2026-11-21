@@ -249,10 +249,13 @@
 
   const colorWord = (hex) => {
     if (!hex) return 'colourless';
-    const [r, g, b] = C.hex2rgb(hex).map((v) => v / 255);
+    const rgb = C.hex2rgb(hex);
+    const W = [207, 230, 245];   // the tint used for clear water
+    if (Math.hypot(rgb[0] - W[0], rgb[1] - W[1], rgb[2] - W[2]) < 24) return 'colourless';
+    const [r, g, b] = rgb.map((v) => v / 255);
     const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
     if (l > 0.9 && d < 0.1) return 'white';
-    if (l < 0.2) return 'black';
+    if (l < 0.2) return (b > r * 1.5 && b > g * 1.5) ? 'blue-black' : 'black';
     let h = 0;
     if (d > 0.02) {
       if (mx === r) h = ((g - b) / d) % 6; else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4;
@@ -261,26 +264,30 @@
     const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
     if (s < 0.13) return l > 0.75 ? 'white' : l > 0.4 ? 'grey' : 'dark grey';
     let n;
-    if (h < 15 || h >= 340) n = l < 0.45 ? 'reddish-brown' : 'red';
-    else if (h < 42) n = l < 0.5 ? 'brown' : 'orange';
+    if (h >= 340 || h < 8) n = 'red';
+    else if (h < 15) n = l < 0.45 ? 'reddish-brown' : 'red';
+    else if (h < 34) n = l < 0.5 ? 'brown' : 'orange';
+    else if (h < 42) n = 'yellow-brown';
     else if (h < 68) n = 'yellow';
     else if (h < 165) n = 'green';
     else if (h < 200) n = 'turquoise';
     else if (h < 260) n = 'blue';
     else if (h < 295) n = 'purple';
     else n = 'pink';
-    if (l > 0.8 && !/brown/.test(n)) n = 'pale ' + n;
-    else if (l < 0.3) n = 'dark ' + n;
+    if (/brown/.test(n) && n !== 'yellow-brown') return n;
+    if (l > 0.84) return 'very pale ' + n;
+    if (l > 0.72) return 'pale ' + n;
+    if (l > 0.62) return 'light ' + n;
+    if (l < 0.3) return 'dark ' + n;
+    if (l < 0.46 && s > 0.45) return 'deep ' + n;
     return n;
-  }
+  };
   C.colorWord = colorWord;
 
   function solColor(ionKeys) {
     const keys = [...new Set(ionKeys)];
     const cols = [];
-    if (keys.includes('Cu') && keys.includes('Cl')) cols.push('#3aa0a0');
-    else if (keys.includes('Cu')) cols.push(ION.Cu.col);
-    keys.forEach((k) => { if (k !== 'Cu' && ION[k].col) cols.push(ION[k].col); });
+    keys.forEach((k) => { if (ION[k].col) cols.push(ION[k].col); });
     if (!cols.length) return null;
     return cols.reduce((a, c, i) => (i === 0 ? c : C.mix(a, c, 0.5)));
   }
@@ -415,7 +422,7 @@
     res.dhNote = dh == null ? 'The heat of solution of this salt is small; no value in our table.' : null;
     if (x === 'cuso4h') res.fx.liq1 = ION.Cu.col;
     finishFx(res);
-    res.fx.liq1 = c.color || null;
+    res.fx.liq1 = x === 'sugar' ? null : (c.color || null);   // dissolved sugar is colourless
     if (x === 'kmno4') res.fx.liq1 = '#9b1fa8';
     if (res.dh == null) { res.dT = 0; }
     return res;
@@ -790,7 +797,7 @@
       fx: { ppt: { color, amount }, liq1: solColor(aqIons(prod)), speed: 1.1 } };
     const names = ppts.map((p) => p.ppt.name);
     o.obs.push('The two clear solutions mix and a ' + (ppts.length === 1 ? colorWord(color) + ' precipitate of ' + names[0] : 'precipitate of ' + names.join(' and ')) + ' appears at once as the solution turns cloudy; on standing it settles.');
-    const before = [x, y].map((i) => CH[i].color).filter(Boolean);
+    const before = [x, y].filter((i) => CH[i].phase !== 's').map((i) => CH[i].color).filter(Boolean);   // coloured SOLUTIONS only (white solids do not count)
     if (before.length && !o.fx.liq1) o.obs.push('The colour of the solution fades because the coloured ion is removed in the precipitate.');
     o.fx.liq1 = o.fx.liq1 || null;
     ppts.forEach((p) => { if (p.ppt.note) o.obs.push(p.ppt.note); });

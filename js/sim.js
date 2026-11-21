@@ -126,30 +126,8 @@
     setPH(ph) { this.ph1 = ph; this.computeColors(); this.needsDraw = true; }
 
     computeColors() {
-      const items = this.items, res = this.res, fx = this.fx;
-      let r = 0, g = 0, b = 0, wsum = 0;
-      items.forEach((it) => {
-        const v = VOL[it.kind] ? (it.id === 'h2o' ? 1.4 : 1) * VOL[it.kind] : 0;
-        if (v > 0 && it.kind === 'liquid') {
-          const col = C.hex2rgb(it.chem.color || WATER);
-          r += col[0] * v; g += col[1] * v; b += col[2] * v; wsum += v;
-        }
-      });
-      let c0 = wsum ? C.rgb2hex([r / wsum, g / wsum, b / wsum]) : WATER;
-      // concentrated colourful solids dissolving give colour via liq1 only
-      const ind = items.filter((i) => i.kind === 'drop');
-      let c1;
-      if (fx.liq1 === undefined) c1 = c0; else c1 = fx.liq1 || WATER;
-      if (ind.length) {
-        const id0 = C.indColor(ind[0].id, this.ph0 == null ? 7 : this.ph0);
-        const id1 = C.indColor(ind[0].id, this.ph1 == null ? 7 : this.ph1);
-        c0 = id0 ? (wsum && c0 !== WATER ? C.mix(c0, id0, 0.55) : id0) : c0;
-        c1 = id1 ? (c1 !== WATER ? C.mix(c1, id1, 0.55) : id1) : (fx.liq1 === undefined ? WATER : c1);
-        if (!id1 && fx.liq1 === undefined) c1 = WATER;
-        this.indActive = true;
-        this.indColor1 = id1;
-      } else { this.indActive = false; }
-      this.c0 = c0; this.c1 = c1;
+      const col = C.liquidColours(this.ids, this.res, this.ph0, this.ph1);
+      this.c0 = col.c0; this.c1 = col.c1; this.indActive = col.indActive; this.indColor1 = col.indColor1;
     }
 
     buildTemperature() {
@@ -653,7 +631,7 @@
       if (this.level > 0.005) {
         const col = this.liquidColorNow();
         const g = ctx.createLinearGradient(0, surf, 0, BBOT);
-        g.addColorStop(0, rgba(col, 0.72)); g.addColorStop(1, rgba(col, 0.9));
+        g.addColorStop(0, rgba(col, 0.82)); g.addColorStop(1, rgba(col, 0.95));
         ctx.fillStyle = g; this.liquidPath(ctx, surf); ctx.fill();
         // milky cloud for suspended precipitate
         if (fx.ppt) {

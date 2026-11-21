@@ -6,6 +6,7 @@ const path = require('path');
 require(path.join(__dirname, '../js/data.js'));
 require(path.join(__dirname, '../js/engine.js'));
 require(path.join(__dirname, '../js/curated.js'));
+require(path.join(__dirname, '../js/colour.js'));
 const C = globalThis.Chem;
 
 let problems = 0;
@@ -73,6 +74,32 @@ Object.values(C.CH).forEach((c) => {
     try { C.parseFormula(c.f); } catch (e) { bad('formula ' + c.id + ' ' + c.f); }
   }
 });
+
+// 4. colour claims must match what is shown
+{
+  const colours = (ids, phIdx) => {
+    const r = C.resolve(ids);
+    const ph1 = r.phChoices ? r.phChoices[phIdx == null ? 1 : phIdx].ph : r.ph1;
+    const c = C.liquidColours(ids, r, r.ph0, ph1);
+    return { from: C.colourName(c.c0), to: C.colourName(c.c1), changed: C.colourChanged(c.c0, c.c1) };
+  };
+  const expectNo = (ids, why) => { const c = colours(ids); if (c.changed) bad('colour: ' + ids.join('+') + ' reported as a change (' + c.from + ' -> ' + c.to + ') but ' + why); };
+  const expect = (ids, from, to, phIdx) => { const c = colours(ids, phIdx); if (!c.changed || c.from !== from || c.to !== to) bad('colour: ' + ids.join('+') + ' expected ' + from + ' -> ' + to + ' but got ' + c.from + ' -> ' + c.to + ' (changed=' + c.changed + ')'); };
+  expectNo(['agno3', 'cuso4h'], 'blue stays blue');
+  expectNo(['bacl2', 'cuso4h'], 'blue stays blue');
+  expectNo(['cacl2', 'feso4'], 'pale green stays pale green');
+  expectNo(['pbno32', 'fecl3'], 'yellow-brown stays');
+  expectNo(['hcl', 'naoh', 'phph'], 'phenolphthalein is colourless at the equivalence point');
+  expectNo(['cuso4h', 'phph'], 'colourless phenolphthalein must not erase the blue');
+  expectNo(['sugar', 'h2o'], 'a sugar solution is colourless');
+  expect(['cuso4h', 'nh3'], 'pale blue', 'deep blue');
+  expect(['fecl3', 'kscn'], 'pale yellow', 'deep red');
+  expect(['starch', 'i2'], 'yellow-brown', 'blue-black');
+  expect(['zn', 'cuso4h'], 'blue', 'colourless');
+  expect(['kmno4', 'feso4', 'h2so4'], 'purple', 'light yellow');
+  expect(['hcl', 'naoh', 'phph'], 'colourless', 'pink', 2);
+  expect(['hcl', 'naoh', 'mo'], 'red', 'yellow');
+}
 
 if (process.argv[2] === '-v') {
   const show = (ids) => { const r = C.resolve(ids); console.log('\n==', ids.join(' + '), '\n', JSON.stringify({ eq: r.equation, net: r.equation && r.equation.net, dh: r.dh, dT: r.dT, types: r.types, obs: r.obs, reason: r.reason }, null, 1)); };
