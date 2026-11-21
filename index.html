@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <div id="progress" aria-hidden="true"></div>
+  <div id="cursorGlow" aria-hidden="true"></div>
   <div id="loader" aria-hidden="true">
     <div class="ld-rays"></div>
     <div class="ld-core"></div>
@@ -45,10 +47,10 @@
           <button type="button" class="btn-ghost" id="heroRandom">Try a classic reaction</button>
         </div>
         <ul class="stats reveal" aria-label="What is inside">
-          <li><b>59</b><span>chemicals</span></li>
-          <li><b>340+</b><span>reacting pairs</span></li>
+          <li><b data-count="59">59</b><span>chemicals</span></li>
+          <li><b data-count="340" data-suffix="+">340+</b><span>reacting pairs</span></li>
           <li><b>ΔH</b><span>real enthalpy data</span></li>
-          <li><b>4</b><span>live views</span></li>
+          <li><b data-count="4">4</b><span>live views</span></li>
         </ul>
       </div>
       <a class="scroll-cue" href="#lab" aria-label="Scroll to the lab"><span></span></a>
@@ -100,6 +102,7 @@
               <label class="range"><span>Speed</span><input type="range" id="speed" min="0.25" max="3" step="0.25" value="1"><output id="speedOut">1×</output></label>
               <label class="range grow"><span>Timeline</span><input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Scrub through the reaction"></label>
             </div>
+            <p class="hint"><span>Drag a chemical onto the beaker</span><span>Click the liquid to stir</span><span><kbd>Space</kbd> mix</span><span><kbd>R</kbd> reset</span><span><kbd>P</kbd> particles</span></p>
             <div class="readouts">
               <div class="rd"><span>Temperature</span><b id="rdTemp">25.0 °C</b></div>
               <div class="rd"><span>Heat</span><b id="rdHeat">–</b></div>
@@ -137,6 +140,7 @@
 
   <footer class="foot">
     <p><b>Lab Visuals</b> is a teaching model, not a substitute for a real laboratory. Temperature changes assume 0.05&nbsp;mol in 100&nbsp;mL, so they are illustrative. Never repeat hazardous experiments (alkali metals, thermite, concentrated acids, lead and chromium salts) without a teacher, a fume cupboard and eye protection.</p>
+    <p class="credit"><small>Crafted with curiosity</small>Made by <strong>Soumyadip</strong></p>
     <p><a href="https://github.com/soumyadipbank/Lab-Visuals-Simulations">Source on GitHub</a> · MIT licence · Spotted a chemistry error? Please open an issue.</p>
   </footer>
 
@@ -146,5 +150,6 @@
   <script src="js/sim.js"></script>
   <script src="js/app.js"></script>
   <script src="js/hero.js"></script>
+  <script src="js/fx.js"></script>
 </body>
 </html>
