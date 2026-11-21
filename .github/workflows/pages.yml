@@ -29,5 +29,7 @@ jobs:
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with: { path: . }
+      - name: Give GitHub a moment to register the uploaded artifact
+        run: sleep 20
       - id: deployment
         uses: actions/deploy-pages@v4
