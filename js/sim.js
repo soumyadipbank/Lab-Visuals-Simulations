@@ -61,7 +61,7 @@
       this.onFrame = null;
       this.clock = 0; this.ripples = []; this.shocks = []; this.stir = 0; this.lastRip = 0;
       this.ptr = { x: -999, y: -999, in: false }; this.hoverGraph = null;
-      const toLogical = (e) => { const r = this.cv.getBoundingClientRect(); return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H }; };
+      const toLogical = (e) => { const r = this.cv.getBoundingClientRect(), c = this.crop || { x: 0, y: 0, w: W, h: H }; return { x: c.x + ((e.clientX - r.left) / r.width) * c.w, y: c.y + ((e.clientY - r.top) / r.height) * c.h }; };
       this.cv.style.touchAction = 'manipulation';
       this.cv.addEventListener('pointermove', (e) => { const q = toLogical(e); this.ptr.x = q.x; this.ptr.y = q.y; this.ptr.in = true; this.onPointerMove(q); });
       this.cv.addEventListener('pointerleave', () => { this.ptr.in = false; this.ptr.x = -999; this.cv.style.cursor = 'default'; });
@@ -75,14 +75,25 @@
       requestAnimationFrame(this.loop);
     }
 
+    // on narrow screens the scene is cropped to the interesting part so it can be drawn larger
+    getCrop() {
+      if (!this.narrow) return { x: 0, y: 0, w: W, h: H };
+      return this.view === 'micro' ? { x: 30, y: 34, w: 540, h: 446 } : { x: 20, y: 80, w: 620, h: 420 };
+    }
+
+    setView(v) { this.view = v; this.resize(); this.needsDraw = true; }
+
     resize() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
-      [[this.cv, W, H], [this.tcv, 400, 220], [this.ecv, 400, 220]].forEach(([c, lw, lh]) => {
+      this.narrow = this.cv.getBoundingClientRect().width < 640;
+      this.crop = this.getCrop();
+      [[this.cv, this.crop.w, this.crop.h], [this.tcv, 400, 220], [this.ecv, 400, 220]].forEach(([c, lw, lh]) => {
         const r = c.getBoundingClientRect();
         const w = Math.max(10, r.width);
         c.width = Math.round(w * dpr); c.height = Math.round(w * (lh / lw) * dpr);
         c.style.height = (w * (lh / lw)) + 'px';
         c._s = (w * dpr) / lw;
+        c._ox = c === this.cv ? this.crop.x : 0; c._oy = c === this.cv ? this.crop.y : 0;
       });
       this.needsDraw = true;
     }
@@ -433,7 +444,7 @@
       this.drawEnergy();
     }
 
-    scaleCtx(ctx, cv, lw) { ctx.setTransform(cv._s, 0, 0, cv._s, 0, 0); }
+    scaleCtx(ctx, cv) { ctx.setTransform(cv._s, 0, 0, cv._s, -(cv._ox || 0) * cv._s, -(cv._oy || 0) * cv._s); }
 
     drawMain() {
       const ctx = this.ctx;
@@ -1000,7 +1011,7 @@
       ctx.strokeStyle = d ? '#5a3a85' : '#b5c4d6'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.roundRect(x0, y0, x1 - x0, y1 - y0, 14); ctx.fill(); ctx.stroke();
       ctx.fillStyle = d ? '#bba8d6' : '#5a6b7e'; ctx.font = '600 13px system-ui, sans-serif'; ctx.textAlign = 'left';
-      ctx.fillText('Particle view (a tiny region of the mixture, greatly magnified)', x0, y0 - 14);
+      ctx.fillText(this.narrow ? 'Particle view (greatly magnified)' : 'Particle view (a tiny region of the mixture, greatly magnified)', x0, y0 - 12);
       // solvent tint
       const col = this.liquidColorNow();
       ctx.save(); ctx.beginPath(); ctx.roundRect(x0, y0, x1 - x0, y1 - y0, 14); ctx.clip();
@@ -1012,6 +1023,8 @@
       this.mp.forEach((q) => {
         if (!q.vis) return;
         ctx.globalAlpha = q.role === 's' ? 0.75 : 1;
+        ctx.save();
+        if (this.narrow) { ctx.translate(q.x, q.y); ctx.scale(1.45, 1.45); ctx.translate(-q.x, -q.y); }
         if (q.ph === 's' && q.role !== 's') {
           ctx.fillStyle = q.color; ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1;
           ctx.beginPath(); ctx.rect(q.x - 10, q.y - 10, 20, 20); ctx.fill(); ctx.stroke();
@@ -1026,6 +1039,7 @@
           ctx.fillStyle = this.labelColor(q.color); ctx.font = '700 ' + (lbl.length > 3 ? 8 : 9.5) + 'px system-ui, sans-serif'; ctx.textAlign = 'center';
           ctx.fillText(lbl.length > 6 ? lbl.slice(0, 5) + '…' : lbl, q.x, q.y + 3.2);
         }
+        ctx.restore();
         ctx.globalAlpha = 1;
       });
       this.rings.forEach((r) => {
@@ -1046,8 +1060,9 @@
       });
       ctx.restore();
       ctx.fillStyle = 'rgba(246,232,255,.55)'; ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'left';
-      ctx.fillText('Move the cursor to push particles. Click for a shockwave.', x0 + 10, y1 - 10);
+      ctx.fillText(this.narrow ? 'Tap to send a shockwave.' : 'Move the cursor to push particles. Click for a shockwave.', x0 + 10, this.narrow ? y0 + 18 : y1 - 10);
       // legend
+      if (!this.narrow) {
       let ly = y0 + 6;
       ctx.textAlign = 'left';
       ctx.fillStyle = d ? '#e6d6fa' : '#33414f'; ctx.font = '700 13px system-ui, sans-serif';
@@ -1065,6 +1080,7 @@
       if (ly < y1 - 40) {
         ctx.fillStyle = d ? '#9a86b8' : '#6b7b8d'; ctx.font = '11px system-ui, sans-serif';
         wrapText(ctx, 'Spectator ions do not take part in the reaction: they are there before and after.', 584, ly + 8, 196, 14);
+      }
       }
       // progress ring text
       ctx.fillStyle = d ? '#bba8d6' : '#5a6b7e'; ctx.font = '12px system-ui, sans-serif'; ctx.textAlign = 'left';

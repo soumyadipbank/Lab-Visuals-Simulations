@@ -32,14 +32,15 @@
   const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
   const rnd = (a, b) => a + Math.random() * (b - a);
 
-  const rings = [0, 1, 2, 3].map((i) => ({ rx: 0.9 + i * 0.42, ry: 0.34 + i * 0.13, tilt: -0.5 + i * 0.35, speed: (i % 2 ? -1 : 1) * (0.16 + i * 0.05), dots: 5 + i * 3 }));
+  const LITE = Math.min(innerWidth, innerHeight) < 700 || (navigator.hardwareConcurrency || 8) <= 4;
+  const rings = [0, 1, 2, 3].slice(0, LITE ? 3 : 4).map((i) => ({ rx: 0.9 + i * 0.42, ry: 0.34 + i * 0.13, tilt: -0.5 + i * 0.35, speed: (i % 2 ? -1 : 1) * (0.16 + i * 0.05), dots: 5 + i * 3 }));
   rings.forEach((r) => { r.items = Array.from({ length: r.dots }, (_, k) => ({ a: (k / r.dots) * 6.283 + rnd(0, 0.4), c: PAL[Math.floor(rnd(0, PAL.length))], s: rnd(2.2, 5.2) })); });
-  const bubbles = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: rnd(2, 9), v: rnd(0.012, 0.04), ph: rnd(0, 6.3), c: PAL[Math.floor(rnd(0, PAL.length))] }));
+  const bubbles = Array.from({ length: LITE ? 22 : 46 }, () => ({ x: Math.random(), y: Math.random(), r: rnd(2, 9), v: rnd(0.012, 0.04), ph: rnd(0, 6.3), c: PAL[Math.floor(rnd(0, PAL.length))] }));
   const sparks = []; let pulse = 0; const pt = { x: -999, y: -999, in: false };
-  const tags = LABELS.map((t) => ({ t, x: Math.random(), y: Math.random(), v: rnd(0.004, 0.012), ph: rnd(0, 6.3), s: rnd(15, 28) }));
+  const tags = LABELS.slice(0, LITE ? 6 : LABELS.length).map((t) => ({ t, x: Math.random(), y: Math.random(), v: rnd(0.004, 0.012), ph: rnd(0, 6.3), s: rnd(15, 28) }));
 
   function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio || 1, LITE ? 1.5 : 2);
     const r = cv.getBoundingClientRect();
     W = r.width; H = r.height;
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
@@ -71,8 +72,9 @@
     glow(W * 0.45 + Math.sin(t * 0.2) * 60, H * 1.0, Math.max(W, H) * 0.35, '#fea6d0', 0.10);
 
     // light rays
-    for (let i = 0; i < 16; i++) {
-      const a = (i / 16) * 6.283 + t * 0.04, len = R * (3.2 + 1.2 * Math.sin(t * 0.7 + i * 1.7));
+    const NR = LITE ? 9 : 16;
+    for (let i = 0; i < NR; i++) {
+      const a = (i / NR) * 6.283 + t * 0.04, len = R * (3.2 + 1.2 * Math.sin(t * 0.7 + i * 1.7));
       const g = ctx.createLinearGradient(cx, cy, cx + Math.cos(a) * len, cy + Math.sin(a) * len);
       g.addColorStop(0, 'rgba(246,232,255,.22)'); g.addColorStop(1, 'rgba(206,114,245,0)');
       ctx.strokeStyle = g; ctx.lineWidth = 1 + (i % 3);

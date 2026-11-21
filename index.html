@@ -95,6 +95,7 @@
               <canvas id="beaker" role="img" aria-label="Animated chemistry bench showing the reaction"></canvas>
               <div class="stage-msg" id="stageMsg"></div>
             </div>
+            <div class="mlegend" id="mLegend" aria-live="polite"></div>
             <div class="controls">
               <button type="button" class="primary" id="mixBtn">▶ Mix</button>
               <button type="button" id="resetBtn">↺ Reset</button>
@@ -136,6 +137,11 @@
       </div>
     </section>
   </main>
+
+  <div class="mobile-bar" id="mobileBar" role="region" aria-label="Quick controls">
+    <span id="mobileBarText">0 chemicals ready</span>
+    <button type="button" id="mobileBarBtn">▶ Mix</button>
+  </div>
 
   <footer class="foot">
     <p><b>Lab Visuals</b> is a teaching model, not a substitute for a real laboratory. Temperature changes assume 0.05&nbsp;mol in 100&nbsp;mL, so they are illustrative. Never repeat hazardous experiments (alkali metals, thermite, concentrated acids, lead and chromium salts) without a teacher, a fume cupboard and eye protection.</p>
