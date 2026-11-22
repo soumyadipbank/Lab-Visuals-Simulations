@@ -48,4 +48,4 @@ The Bachelors experiment list was collected from published undergraduate chemist
 Solution colours combine by absorbance (Beer-Lambert), not by averaging RGB: absorbances of dyes add, so blue + yellow gives green, and a colour fading during a reaction follows the concentration of the coloured species. Indicator colours follow the fraction of the indicator in its coloured form (phenolphthalein pKa 9.4, methyl orange pKa 3.46).
 
 ## Accuracy note
-This is a teaching model. Temperature changes assume 0.05 mol in 100 mL and are illustrative. Please report chemistry errors as issues.
+This is a teaching model. Solutions in the Reaction Lab are 1 M (KMnO₄ and K₂Cr₂O₇ 0.02 M); temperature changes are for 0.05 mol reacting in 100 mL (50 mL of each 1 M solution), the same conditions as the calorimetry lab. Please report chemistry errors as issues.

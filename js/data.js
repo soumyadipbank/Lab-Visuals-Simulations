@@ -203,26 +203,26 @@
   chem('nh3', 'Ammonia solution', 'NH3', 'base', { weak: true, ph: 11.1, haz: [2, 'Corrosive, with a choking vapour. Use in a well-ventilated space.'], look: 'Colourless solution with a sharp smell (1 M)' });
   // Salts
   function salt(id, name, ions, o) { chem(id, name, null, 'salt', Object.assign({ ions }, o)); }
-  salt('nacl', 'Sodium chloride', ['Na', 'Cl'], { look: 'White crystals / colourless solution (0.1 M)' });
-  salt('kbr', 'Potassium bromide', ['K', 'Br'], { look: 'White crystals / colourless solution (0.1 M)' });
-  salt('ki', 'Potassium iodide', ['K', 'I'], { look: 'White crystals / colourless solution (0.1 M)' });
-  salt('kscn', 'Potassium thiocyanate', ['K', 'SCN'], { haz: H.irr, look: 'Colourless solution (0.1 M)' });
-  salt('agno3', 'Silver nitrate', ['Ag', 'NO3'], { haz: [2, 'Oxidiser, corrosive; stains skin and clothes black.'], look: 'Colourless solution (0.1 M)' });
-  salt('bacl2', 'Barium chloride', ['Ba', 'Cl'], { haz: H.tox, look: 'Colourless solution (0.1 M)' });
-  salt('cacl2', 'Calcium chloride', ['Ca', 'Cl'], { look: 'White granules / colourless solution (0.1 M)' });
-  salt('cuso4h', 'Copper(II) sulfate (blue vitriol)', ['Cu', 'SO4'], { f: 'CuSO4·5H2O', ph: 4, color: '#2f7fd8', haz: [2, 'Harmful if swallowed; irritant; toxic to aquatic life.'], look: 'Bright blue crystals / blue solution (0.1 M)' });
-  salt('fecl3', 'Iron(III) chloride', ['Fe3', 'Cl'], { ph: 2, color: '#d9a13a', haz: H.corr, look: 'Yellow-brown solution (0.1 M)' });
-  salt('feso4', 'Iron(II) sulfate', ['Fe2', 'SO4'], { ph: 5, color: '#b9dbb0', haz: H.irr, look: 'Pale green solution (0.1 M)' });
-  salt('znso4', 'Zinc sulfate', ['Zn', 'SO4'], { ph: 5.5, haz: H.irr, look: 'Colourless solution (0.1 M)' });
-  salt('mgso4', 'Magnesium sulfate', ['Mg', 'SO4'], { look: 'Colourless solution (0.1 M), Epsom salt' });
-  salt('al2so43', 'Aluminium sulfate', ['Al', 'SO4'], { ph: 3.5, haz: H.irr, look: 'Colourless solution (0.1 M)' });
-  salt('pbno32', 'Lead(II) nitrate', ['Pb', 'NO3'], { haz: [3, 'Toxic and a reproductive hazard. For demonstration use only; collect all waste.'], look: 'Colourless solution (0.1 M)' });
-  salt('na2co3', 'Sodium carbonate', ['Na', 'CO3'], { ph: 11.6, haz: H.irr, look: 'Colourless solution (0.1 M), washing soda' });
+  salt('nacl', 'Sodium chloride', ['Na', 'Cl'], { look: 'White crystals / colourless solution (1 M)' });
+  salt('kbr', 'Potassium bromide', ['K', 'Br'], { look: 'White crystals / colourless solution (1 M)' });
+  salt('ki', 'Potassium iodide', ['K', 'I'], { look: 'White crystals / colourless solution (1 M)' });
+  salt('kscn', 'Potassium thiocyanate', ['K', 'SCN'], { haz: H.irr, look: 'Colourless solution (1 M)' });
+  salt('agno3', 'Silver nitrate', ['Ag', 'NO3'], { haz: [2, 'Oxidiser, corrosive; stains skin and clothes black.'], look: 'Colourless solution (1 M)' });
+  salt('bacl2', 'Barium chloride', ['Ba', 'Cl'], { haz: H.tox, look: 'Colourless solution (1 M)' });
+  salt('cacl2', 'Calcium chloride', ['Ca', 'Cl'], { look: 'White granules / colourless solution (1 M)' });
+  salt('cuso4h', 'Copper(II) sulfate (blue vitriol)', ['Cu', 'SO4'], { f: 'CuSO4·5H2O', ph: 4, color: '#2f7fd8', haz: [2, 'Harmful if swallowed; irritant; toxic to aquatic life.'], look: 'Bright blue crystals / blue solution (1 M)' });
+  salt('fecl3', 'Iron(III) chloride', ['Fe3', 'Cl'], { ph: 2, color: '#d9a13a', haz: H.corr, look: 'Yellow-brown solution (1 M)' });
+  salt('feso4', 'Iron(II) sulfate', ['Fe2', 'SO4'], { ph: 5, color: '#b9dbb0', haz: H.irr, look: 'Pale green solution (1 M)' });
+  salt('znso4', 'Zinc sulfate', ['Zn', 'SO4'], { ph: 5.5, haz: H.irr, look: 'Colourless solution (1 M)' });
+  salt('mgso4', 'Magnesium sulfate', ['Mg', 'SO4'], { look: 'Colourless solution (1 M), Epsom salt' });
+  salt('al2so43', 'Aluminium sulfate', ['Al', 'SO4'], { ph: 3.5, haz: H.irr, look: 'Colourless solution (1 M)' });
+  salt('pbno32', 'Lead(II) nitrate', ['Pb', 'NO3'], { haz: [3, 'Toxic and a reproductive hazard. For demonstration use only; collect all waste.'], look: 'Colourless solution (1 M)' });
+  salt('na2co3', 'Sodium carbonate', ['Na', 'CO3'], { ph: 11.6, haz: H.irr, look: 'Colourless solution (1 M), washing soda' });
   salt('nahco3', 'Sodium hydrogencarbonate', ['Na', 'HCO3'], { ph: 8.3, look: 'White powder / colourless solution, baking soda' });
-  salt('na2so4', 'Sodium sulfate', ['Na', 'SO4'], { look: 'Colourless solution (0.1 M)' });
-  salt('na2s', 'Sodium sulfide', ['Na', 'S'], { ph: 12.5, haz: [2, 'Corrosive; releases toxic H2S gas with acids.'], look: 'Colourless solution (0.1 M), smells slightly of H2S' });
-  salt('na2s2o3', 'Sodium thiosulfate', ['Na', 'S2O3'], { look: 'Colourless solution (0.1 M), photographic "hypo"' });
-  salt('nh4cl', 'Ammonium chloride', ['NH4', 'Cl'], { ph: 5.3, haz: H.irr, look: 'White crystals / colourless solution (0.1 M)' });
+  salt('na2so4', 'Sodium sulfate', ['Na', 'SO4'], { look: 'Colourless solution (1 M)' });
+  salt('na2s', 'Sodium sulfide', ['Na', 'S'], { ph: 12.5, haz: [2, 'Corrosive; releases toxic H2S gas with acids.'], look: 'Colourless solution (1 M), smells slightly of H2S' });
+  salt('na2s2o3', 'Sodium thiosulfate', ['Na', 'S2O3'], { look: 'Colourless solution (1 M), photographic "hypo"' });
+  salt('nh4cl', 'Ammonium chloride', ['NH4', 'Cl'], { ph: 5.3, haz: H.irr, look: 'White crystals / colourless solution (1 M)' });
   salt('nh4no3', 'Ammonium nitrate', ['NH4', 'NO3'], { ph: 5.3, haz: [2, 'Oxidiser. Harmful in contact with combustibles.'], look: 'White prills / colourless solution' });
   // Oxidising agents
   salt('kmno4', 'Potassium permanganate', ['K', 'MnO4'], { group: 'oxidiser', color: '#9b1fa8', haz: H.ox, look: 'Dark purple crystals / deep purple solution (0.02 M)' });

@@ -8,9 +8,9 @@
   const WATER = '#cfe6f5';
   C.WATER = WATER;
 
-  // how strongly each colour tints water (extinction): permanganate and complexes are intense,
-  // 0.1 M copper(II) or iron(II) are only pale
-  const K = { '#2f7fd8': 0.6, '#d9a13a': 0.7, '#b9dbb0': 0.7, '#9b1fa8': 1.8, '#f28c28': 1.5, '#c58a2a': 1.4, '#ece9dc': 0.35 };
+  // how strongly each colour tints water (extinction), for the 1 M solutions of the Reaction Lab:
+  // permanganate and complexes are intense; 1 M copper(II) is clearly blue, iron(III) yellow-brown, iron(II) pale green
+  const K = { '#2f7fd8': 1.1, '#d9a13a': 1.3, '#b9dbb0': 0.9, '#9b1fa8': 1.8, '#f28c28': 1.5, '#c58a2a': 1.4, '#ece9dc': 0.35 };
   const kOf = (hex) => K[(hex || '').toLowerCase()] || 1;
   const ionHex = new Set(Object.values(ION).map((i) => i.col).filter(Boolean).map((h) => h.toLowerCase()));
   const chroma = (hex) => { const [r, g, b] = C.hex2rgb(hex); return (Math.max(r, g, b) - Math.min(r, g, b)) / 255 + 0.05; };

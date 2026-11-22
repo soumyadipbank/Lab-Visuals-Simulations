@@ -296,8 +296,8 @@
   function heatLine(res) {
     if (res.dh == null) return null;
     const T = Math.abs(res.dT).toFixed(1);
-    if (res.dh < -1) return 'Temperature rises (exothermic, ΔH = −' + Math.abs(res.dh) + ' kJ per mole of reaction as written). Illustrative rise for 0.05 mol in 100 mL: about ' + T + ' °C.';
-    if (res.dh > 1) return 'Temperature falls (endothermic, ΔH = +' + res.dh + ' kJ). The reaction absorbs heat from its surroundings: about ' + T + ' °C drop for 0.05 mol in 100 mL.';
+    if (res.dh < -1) return 'Temperature rises (exothermic, ΔH = −' + Math.abs(res.dh) + ' kJ per mole of reaction as written). Rise for 0.05 mol reacting in 100 mL (50 mL of each 1 M solution): about ' + T + ' °C.';
+    if (res.dh > 1) return 'Temperature falls (endothermic, ΔH = +' + res.dh + ' kJ). The reaction absorbs heat from its surroundings: about ' + T + ' °C drop for 0.05 mol reacting in 100 mL (50 mL of each 1 M solution).';
     return 'Almost no temperature change (ΔH = ' + String(res.dh).replace('-', '−') + ' kJ).';
   }
 
@@ -805,8 +805,8 @@
     o.why.push('Two soluble ionic compounds swap partners. When the new combination is insoluble in water, those ions find each other and clump together as a solid (' + net + '), while the other ions stay dissolved as spectators. Memorise the solubility rules: nitrates and Group 1 salts are always soluble; most chlorides are soluble except Ag⁺, Pb²⁺; most sulfates except Ba²⁺, Pb²⁺, (Ca²⁺); most hydroxides, carbonates and sulfides are insoluble except for Group 1 (and NH₄⁺).');
     ppts.forEach((p) => {
       if (p.ppt.ksp) {
-        const Q = Math.pow(0.05, (compound(p.c, p.a).nc + compound(p.c, p.a).na));
-        o.deep.push('Ksp(' + p.f + ') ≈ ' + sci(p.ppt.ksp) + ' at 25 °C. Mixing equal volumes of 0.1 M solutions gives roughly 0.05 M of each ion, so the ionic product Q ≈ ' + sci(Q) + ', which is ' + (Q > p.ppt.ksp ? sci(Q / p.ppt.ksp) + ' times Ksp: Q > Ksp, so the solid precipitates until Q falls back to Ksp.' : 'below Ksp: no precipitate at this concentration.'));
+        const Q = Math.pow(0.5, (compound(p.c, p.a).nc + compound(p.c, p.a).na));
+        o.deep.push('Ksp(' + p.f + ') ≈ ' + sci(p.ppt.ksp) + ' at 25 °C. Mixing equal volumes of 1 M solutions gives roughly 0.5 M of each ion (ignoring activity effects), so the ionic product Q ≈ ' + sci(Q) + ', which is ' + (Q > p.ppt.ksp ? sci(Q / p.ppt.ksp) + ' times Ksp: Q > Ksp, so the solid precipitates until Q falls back to Ksp.' : 'below Ksp: no precipitate at this concentration.'));
       }
     });
     if (c1 === 'H' || c2 === 'H') o.types.push('Acid + salt');
