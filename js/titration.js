@@ -160,7 +160,7 @@
       g.strokeStyle = 'rgba(206,114,245,.7)'; g.beginPath(); g.moveTo(mx + 14, my + mh); g.lineTo(fcx + fw * 0.14, top + 8); g.lineTo(fcx + fw * 0.14, fy - 10); g.stroke();
     }
     g.fillStyle = 'rgba(235,225,250,.8)'; g.textAlign = 'left'; g.font = Math.max(10, w * 0.016) + 'px Hanken Grotesk, sans-serif';
-    g.fillText('Burette: ' + P().titrant, 12, 20); g.fillText('Flask: ' + P().flask, 12, 38);
+    const capTxt = 'Burette: ' + P().titrant + ' · Flask: ' + P().flask, cap = $('benchCap'); if (cap && cap.textContent !== capTxt) cap.textContent = capTxt;
     requestAnimationFrame(draw);
   }
 

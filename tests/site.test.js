@@ -22,5 +22,13 @@ for (const p of fs.readdirSync(root).filter((x) => x.endsWith('.html')).concat(f
   const t = src(p);
   ok(p + ' mentions a university by name', !/Calcutta|Burdwan|West Bengal|WBSU|'CU'|'BU'|caluniv|wbsu/.test(t));
 }
+// guard against code accidentally hidden behind a // comment on the same line (this caused two real bugs)
+for (const p of fs.readdirSync(path.join(root, 'js')).map((x) => 'js/' + x)) {
+  src(p).split('\n').forEach((line, i) => {
+    if (/https?:\/\//.test(line)) return;
+    const m = line.match(/;\s*\/\/(.*)$/); if (!m) return;
+    ok(p + ':' + (i + 1) + ' has code after a // comment', !/;\s*(g|ctx|return|S|st|const|let|if)\b|\)\s*;\s*\w+\s*\(/.test(m[1]));
+  });
+}
 console.log(problems ? problems + ' problem(s)' : 'Site link tests passed.');
 process.exit(problems ? 1 : 0);

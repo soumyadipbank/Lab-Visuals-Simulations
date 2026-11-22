@@ -1,4 +1,4 @@
-/* Lab Visuals: the Class 11 / 12 hub page. Each card opens the Reaction Lab with the chemicals pre-selected,
+/* Lab Visuals: the Grade 11 / 12 hub page. Each card opens the Reaction Lab with the chemicals pre-selected,
    or one of the simulators. The lists follow typical school practicals, not one specific board's syllabus. */
 (function () {
   'use strict';
@@ -7,7 +7,7 @@
 
   const DATA = {
     school: {
-      title: 'Class <em>11 / 12</em> lab',
+      title: 'Grade <em>11 / 12</em> lab',
       lead: 'From what chemicals actually do (neutralise, precipitate, fizz, displace, heat up) to redox, complex ions, rates and real titrations. Pick a card to set up the experiment, then press Mix, or open a simulator.',
       next: { label: 'Heading to university? The Bachelors (BSc / BS) lab has the full practical course.', href: 'bsc.html?level=bsc' },
       sections: [
@@ -78,7 +78,7 @@
     const d = DATA[lv];
     if (!d) return;
     const root = document.getElementById('levelRoot');
-    let h = '<div class="wrap"><section class="page-head"><p class="crumbs"><a href="index.html">Home</a> / Class 11 / 12</p><h1>' + d.title + '</h1><p class="lead">' + d.lead + '</p>' +
+    let h = '<div class="wrap"><section class="page-head"><p class="crumbs"><a href="index.html">Home</a> / Grade 11 / 12</p><h1>' + d.title + '</h1><p class="lead">' + d.lead + '</p>' +
       '<div class="btn-row" style="margin-top:18px"><a class="btn-glow" href="' + lab(lv, []).replace('&mix=', '') + '">Open the free-play Reaction Lab</a>' +
       '<a class="btn-ghost" href="index.html" style="text-decoration:none;display:inline-block">Change level</a></div></section>';
     d.sections.forEach((s) => {

@@ -355,9 +355,9 @@
     ethanol: { name: 'ethanol', f: 'C₂H₆O', C: 2, H: 6, nmr: [[1.22, 't', 3, 'CH₃ next to CH₂ (n + 1 = 3)'], [3.69, 'q', 2, 'CH₂ on oxygen: deshielded; next to CH₃ (quartet)'], [2.6, 'br s', 1, 'O–H: broad, position varies, exchanges with D₂O']], ir: [[3350, 0.9, 120, 'broad O–H stretch (hydrogen bonded)'], [2970, 0.6, 30, 'sp³ C–H stretch'], [1050, 0.8, 25, 'C–O stretch']] },
     ethylacetate: { name: 'ethyl acetate', f: 'C₄H₈O₂', C: 4, H: 8, nmr: [[1.26, 't', 3, 'CH₃ of the ethyl group'], [2.05, 's', 3, 'CH₃ on C=O: no neighbours, singlet'], [4.12, 'q', 2, 'OCH₂: strongly deshielded by the ester oxygen']], ir: [[2985, 0.5, 30, 'sp³ C–H'], [1742, 1, 18, 'ester C=O stretch (higher than ketones)'], [1240, 0.9, 30, 'C–O stretch of the ester']] },
     acetone: { name: 'acetone', f: 'C₃H₆O', C: 3, H: 6, nmr: [[2.17, 's', 6, 'two equivalent CH₃ next to C=O: one singlet']], ir: [[3000, 0.4, 30, 'C–H'], [1715, 1, 18, 'ketone C=O stretch'], [1220, 0.6, 25, 'C–C(=O)–C stretch']] },
-    toluene: { name: 'toluene', f: 'C₇H₈', C: 7, H: 8, nmr: [[2.35, 's', 3, 'Ar–CH₃ (benzylic)'], [7.2, 'm', 5, 'five aromatic H (ring current deshields them)']], ir: [[3030, 0.5, 25, 'aromatic C–H (above 3000)'], [2920, 0.5, 25, 'sp³ C–H'], [1605, 0.6, 12, 'aromatic C=C'], [1495, 0.7, 12, 'aromatic C=C'], [730, 0.9, 15, 'C–H bend, monosubstituted ring']] },
-    acetophenone: { name: 'acetophenone', f: 'C₈H₈O', C: 8, H: 8, nmr: [[2.6, 's', 3, 'CH₃ on C=O'], [7.45, 'm', 2, 'meta H'], [7.56, 'm', 1, 'para H'], [7.96, 'd', 2, 'ortho H: deshielded by the C=O']], ir: [[3060, 0.4, 25, 'aromatic C–H'], [1685, 1, 18, 'conjugated ketone C=O (lower than 1715)'], [1600, 0.6, 12, 'aromatic C=C'], [1265, 0.8, 25, 'C–C(=O)']] },
-    benzaldehyde: { name: 'benzaldehyde', f: 'C₇H₆O', C: 7, H: 6, nmr: [[10.0, 's', 1, 'CHO: aldehyde H, very deshielded'], [7.52, 'm', 2, 'meta H'], [7.62, 'm', 1, 'para H'], [7.87, 'd', 2, 'ortho H']], ir: [[3060, 0.4, 25, 'aromatic C–H'], [2820, 0.5, 15, 'aldehyde C–H (Fermi doublet)'], [2730, 0.5, 15, 'aldehyde C–H (Fermi doublet)'], [1700, 1, 18, 'conjugated aldehyde C=O']] },
+    toluene: { name: 'toluene', f: 'C₇H₈', C: 7, H: 8, nmr: [[2.35, 's', 3, 'Ar–CH₃ (benzylic)'], [7.2, 'm', 5, 'five aromatic H (ring current deshields them)']], ir: [[3030, 0.3, 25, 'aromatic C–H (above 3000)'], [2920, 0.5, 25, 'sp³ C–H'], [1605, 0.6, 12, 'aromatic C=C'], [1495, 0.7, 12, 'aromatic C=C'], [730, 0.9, 15, 'C–H bend, monosubstituted ring']] },
+    acetophenone: { name: 'acetophenone', f: 'C₈H₈O', C: 8, H: 8, nmr: [[2.6, 's', 3, 'CH₃ on C=O'], [7.45, 'm', 2, 'meta H'], [7.56, 'm', 1, 'para H'], [7.96, 'd', 2, 'ortho H: deshielded by the C=O']], ir: [[3060, 0.25, 25, 'aromatic C–H (weak)'], [2925, 0.2, 25, 'C–H of CH₃'], [1685, 1, 18, 'conjugated ketone C=O (lower than 1715)'], [1600, 0.6, 12, 'aromatic C=C'], [1265, 0.8, 25, 'C–C(=O)']] },
+    benzaldehyde: { name: 'benzaldehyde', f: 'C₇H₆O', C: 7, H: 6, nmr: [[10.0, 's', 1, 'CHO: aldehyde H, very deshielded'], [7.52, 'm', 2, 'meta H'], [7.62, 'm', 1, 'para H'], [7.87, 'd', 2, 'ortho H']], ir: [[3060, 0.25, 25, 'aromatic C–H (weak)'], [2820, 0.5, 15, 'aldehyde C–H (Fermi doublet)'], [2730, 0.5, 15, 'aldehyde C–H (Fermi doublet)'], [1700, 1, 18, 'conjugated aldehyde C=O']] },
     propanoic: { name: 'propanoic acid', f: 'C₃H₆O₂', C: 3, H: 6, nmr: [[1.16, 't', 3, 'CH₃'], [2.38, 'q', 2, 'CH₂ next to C=O'], [11.7, 'br s', 1, 'COOH: very deshielded, broad']], ir: [[3000, 0.9, 380, 'very broad O–H of a hydrogen-bonded acid dimer (2500–3300)'], [1715, 1, 20, 'acid C=O'], [1240, 0.7, 30, 'C–O']] },
     ipa: { name: '2-propanol', f: 'C₃H₈O', C: 3, H: 8, nmr: [[1.2, 'd', 6, 'two CH₃ split by one CH (doublet)'], [4.02, 'sept', 1, 'CH–O: six neighbours → septet'], [2.2, 'br s', 1, 'O–H']], ir: [[3350, 0.9, 120, 'broad O–H'], [2970, 0.6, 30, 'C–H'], [1130, 0.8, 25, 'C–O (secondary alcohol)']] },
     butanone: { name: 'butanone', f: 'C₄H₈O', C: 4, H: 8, nmr: [[1.06, 't', 3, 'CH₃ of the ethyl group'], [2.14, 's', 3, 'CH₃ on C=O'], [2.44, 'q', 2, 'CH₂ on C=O']], ir: [[2980, 0.5, 30, 'C–H'], [1715, 1, 18, 'ketone C=O'], [1170, 0.6, 25, 'C–C(=O)']] },
@@ -372,7 +372,9 @@
       const render = () => {
         const d = SPEC[st.id];
         api.$('actions').innerHTML = btn('new', 'New unknown', true);
-        api.readouts([['Molecular formula', d.f], ['DBE', String(d.C - d.H / 2 + 1)]]);
+        api.readouts([['Molecular formula', d.f], ['IR bands to check', '3600–2500 · 1750–1680 · 1300–1000 cm⁻¹']]);
+        const MN = { s: 'singlet', d: 'doublet', t: 'triplet', q: 'quartet', sept: 'septet', m: 'multiplet', 'br s': 'broad singlet' };
+        api.table('¹H NMR peak list (read from the expanded spectrum)', [{ label: 'δ / ppm', f: (p) => p[0].toFixed(2) }, { label: 'multiplicity', f: (p) => MN[p[1]] }, { label: 'integration', f: (p) => p[2] + 'H' }], d.nmr.slice().sort((a, b) => b[0] - a[0]));
         api.custom('<h4 class="lbl-sum" style="padding-top:14px">Your answer</h4><div class="answer-form">' + sel('nmA', 'The compound is', [['', 'choose…']].concat(Object.keys(SPEC).map((k) => [k, SPEC[k].name])), '') + '<button type="button" class="btn-sm primary" id="nmC">Check</button></div><div id="nmV"></div>');
         api.$('nmC').onclick = () => {
           const v = api.$('nmA').value; if (!v) return; const ok = v === st.id;
@@ -390,16 +392,32 @@
       g.strokeStyle = 'rgba(255,255,255,.25)'; g.beginPath(); g.moveTo(L1, B1); g.lineTo(R1, B1); g.stroke();
       g.textAlign = 'center'; g.font = '10px Hanken Grotesk, sans-serif'; for (let p = 0; p <= 12; p++) { g.fillText(String(p), X(p), B1 + 12); }
       g.fillText('δ / ppm', (L1 + R1) / 2, B1 + 24);
-      const lines = []; d.nmr.forEach((p) => { const pat = MULT[p[1]], tot = pat.reduce((a, b) => a + b, 0), J = 7 / 400, wdt = p[1].startsWith('br') ? 0.06 : 0.004; pat.forEach((r, i) => lines.push([p[0] + (i - (pat.length - 1) / 2) * J, (p[2] * r) / tot, wdt])); });
-      const yAt = (ppm) => lines.reduce((a, l) => a + l[1] / (1 + ((ppm - l[0]) / l[2]) ** 2), 0), maxY = Math.max(...d.nmr.map((p) => yAt(p[0]))) * 1.08;
-      g.strokeStyle = '#ce72f5'; g.lineWidth = 1.2; g.beginPath(); for (let x = L1; x <= R1; x++) { const ppm = ((R1 - x) / (R1 - L1)) * 12.8 - 0.3, y = B1 - (yAt(ppm) / maxY) * (B1 - T1 - 14); x === L1 ? g.moveTo(x, y) : g.lineTo(x, y); } g.stroke(); g.lineWidth = 1;
-      g.fillStyle = '#7cf0b4'; g.font = '11px Hanken Grotesk, sans-serif'; d.nmr.forEach((p) => g.fillText(p[2] + 'H', X(p[0]), T1 + 8));
+      // lines narrower than a pixel would be drawn at random heights, so every line is at least ~1 px wide;
+      // heights then follow the number of protons (broad O–H / COOH signals are lower and wider, as in real spectra)
+      const ppx = 12.8 / (R1 - L1), lines = [];
+      d.nmr.forEach((p) => { const pat = MULT[p[1]], tot = pat.reduce((a, b) => a + b, 0), J = 7 / 400, wdt = Math.max(p[1].startsWith('br') ? 0.06 : 0.004, ppx * 0.9); pat.forEach((r, i) => lines.push([p[0] + (i - (pat.length - 1) / 2) * J, (p[2] * r) / tot, wdt])); });
+      const yAt = (ppm) => lines.reduce((a, l) => a + (l[1] * (ppx * 0.9 / l[2])) / (1 + ((ppm - l[0]) / l[2]) ** 2), 0);
+      const pk = (p) => { let m = 0; for (let k = -6; k <= 6; k++) m = Math.max(m, yAt(p[0] + k * 0.002)); return m; };
+      const maxY = Math.max(...d.nmr.map(pk)) * 1.05, H = B1 - T1 - 40, Y = (v) => B1 - (v / maxY) * H;
+      g.strokeStyle = '#ce72f5'; g.lineWidth = 1.2; g.beginPath();
+      for (let x = L1; x <= R1; x++) { let v = 0; for (let k = 0; k < 4; k++) v = Math.max(v, yAt(((R1 - x - k / 4) / (R1 - L1)) * 12.8 - 0.3)); x === L1 ? g.moveTo(x, Y(v)) : g.lineTo(x, Y(v)); }
+      g.stroke(); g.lineWidth = 1;
+      // integral trace (steps proportional to the number of H), as printed on a real spectrum
+      const totH = d.nmr.reduce((a, p) => a + p[2], 0), IH = H * 0.45, ib = B1 - 6;
+      g.strokeStyle = 'rgba(124,240,180,.75)'; g.beginPath();
+      for (let x = L1; x <= R1; x++) { const ppm = ((R1 - x) / (R1 - L1)) * 12.8 - 0.3; let cum = 0; d.nmr.forEach((p) => { const wd = p[1].startsWith('br') ? 0.08 : 0.03 + 0.012 * MULT[p[1]].length; cum += p[2] * (0.5 + Math.atan((p[0] - ppm) / wd) / Math.PI); }); const y = ib - (cum / totH) * IH; x === L1 ? g.moveTo(x, y) : g.lineTo(x, y); }
+      g.stroke();
+      // labels: above each peak top; crowded labels are stacked and joined to their peak by a thin leader line
+      g.font = '11px Hanken Grotesk, sans-serif'; g.textAlign = 'center';
+      const lab = d.nmr.map((p) => ({ x: X(p[0]), top: Y(pk(p)), t: p[2] + 'H' })).sort((a, b) => a.x - b.x), placed = [];
+      lab.forEach((l) => { let y = Math.max(T1 + 12, l.top - 6); const wl = g.measureText(l.t).width + 6; while (placed.some((q) => Math.abs(q.x - l.x) < (wl + q.w) / 2 && Math.abs(q.y - y) < 13)) y -= 13; placed.push({ x: l.x, y, w: wl }); l.y = Math.max(T1 + 2, y); });
+      lab.forEach((l) => { if (l.top - l.y > 10) { g.strokeStyle = 'rgba(124,240,180,.45)'; g.beginPath(); g.moveTo(l.x, l.y + 2); g.lineTo(l.x, l.top - 2); g.stroke(); } g.fillStyle = '#0d0618'; const tw = g.measureText(l.t).width; g.fillRect(l.x - tw / 2 - 2, l.y - 10, tw + 4, 12); g.fillStyle = '#7cf0b4'; g.fillText(l.t, l.x, l.y); });
       // IR: 4000 -> 500 cm-1, % transmittance
-      const T2 = h * 0.58, B2 = h - 26, X2 = (nu) => R1 - ((nu - 500) / 3500) * (R1 - L1);
+      const T2 = Math.max(h * 0.58, B1 + 46), B2 = h - 26, X2 = (nu) => R1 - ((nu - 500) / 3500) * (R1 - L1);
       g.fillStyle = 'rgba(235,225,250,.85)'; g.font = '12px Hanken Grotesk, sans-serif'; g.textAlign = 'left'; g.fillText('IR (liquid film)', L1, T2 - 8);
       g.strokeStyle = 'rgba(255,255,255,.25)'; g.strokeRect(L1, T2, R1 - L1, B2 - T2);
       g.textAlign = 'center'; g.font = '10px Hanken Grotesk, sans-serif'; for (let nu = 4000; nu >= 500; nu -= 500) g.fillText(String(nu), X2(nu), B2 + 12); g.fillText('wavenumber / cm⁻¹', (L1 + R1) / 2, B2 + 24);
-      const tr = (nu) => { let a = 0.04 + 0.006 * Math.sin(nu / 37) + 0.005 * Math.sin(nu / 11.3 + 1) + 0.004 * Math.sin(nu / 5.7); d.ir.forEach((b) => (a += b[1] / (1 + ((nu - b[0]) / b[2]) ** 2))); for (let k = 0; k < 6; k++) a += 0.25 / (1 + ((nu - (1450 - k * 90)) / 12) ** 2) * (nu < 1500 ? 1 : 0); return Math.pow(10, -Math.min(2, a)); };
+      const tr = (nu) => { let a = 0.04 + 0.006 * Math.sin(nu / 37) + 0.005 * Math.sin(nu / 11.3 + 1) + 0.004 * Math.sin(nu / 5.7); d.ir.forEach((b) => (a += b[1] / (1 + ((nu - b[0]) / b[2]) ** 2))); (d.fp || (d.fp = (() => { const r = L.rng([...st.id].reduce((x, ch) => x * 31 + ch.charCodeAt(0), 7)); const out = [[1460, 0.3, 12]].concat(d.nmr.some((p) => p[2] % 3 === 0 && p[0] < 2.7) ? [[1375, 0.22, 10]] : []); /* CH₃ umbrella bend only when there is a CH₃ */ for (let k = 0; k < 5; k++) out.push([620 + r() * 780, 0.1 + r() * 0.25, 6 + r() * 10]); return out; })())).forEach((b) => (a += b[1] / (1 + ((nu - b[0]) / b[2]) ** 2))); return Math.pow(10, -Math.min(2, a)); };   // C–H bends near 1460/1375 plus compound-specific fingerprint bands
       g.strokeStyle = '#7cb8f0'; g.beginPath(); for (let x = L1; x <= R1; x++) { const nu = 500 + ((R1 - x) / (R1 - L1)) * 3500, y = T2 + 4 + (1 - tr(nu)) * (B2 - T2 - 8); x === L1 ? g.moveTo(x, y) : g.lineTo(x, y); } g.stroke();
     },
   });

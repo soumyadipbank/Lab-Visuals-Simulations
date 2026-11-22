@@ -31,10 +31,10 @@
       K.beaker(g, w * 0.4, h * 0.9, w * 0.2, h * 0.55, '#d9ecf5', 0.62); K.cell(g, w * 0.5, h * 0.18, h * 0.88);
       K.display(g, w, S.anim ? '…' : (S.last ? S.last.k.toFixed(1) : '0.0') + ' µS/cm', w - Math.min(w * 0.32, 210) - 12, 12);
       g.strokeStyle = 'rgba(206,114,245,.7)'; g.beginPath(); g.moveTo(w * 0.5, h * 0.18); g.lineTo(w - 120, 58); g.stroke();
-      K.label(g, w, conc ? conc + ' M acetic acid' : 'distilled water', 12, h - 12);
+      K.caption(conc ? conc + ' M acetic acid' : 'distilled water');
       // ions drawn more sparsely at high dilution but a larger fraction dissociated
       const a = conc ? (-s.Ka + Math.sqrt(s.Ka * s.Ka + 4 * s.Ka * conc)) / (2 * conc) : 0;
-      K.label(g, w, conc ? 'α ≈ ' + (a * 100).toFixed(1) + ' % ionised' : '', 12, h - 30);
+      K.caption(conc ? 'α ≈ ' + (a * 100).toFixed(1) + ' % ionised' : '');
     },
   });
 
@@ -65,7 +65,7 @@
       const wl = +c.lam, beam = wl === 444 ? '#5b7cff' : wl === 515 ? '#3fdc6a' : '#ff8a3a';
       g.fillStyle = K.rgba(beam, 0.8); g.fillRect(w * 0.15, h * 0.62, w * 0.3, 4); g.fillStyle = K.rgba(beam, 0.35); g.fillRect(w * 0.55, h * 0.62, w * 0.25, 4);
       K.display(g, w, 'A ' + (S.last ? S.last.A.toFixed(3) : '—'), w - Math.min(w * 0.32, 210) - 12, 12);
-      K.label(g, w, (c.sol === 'acid' ? 'all HIn (yellow)' : c.sol === 'base' ? 'all In⁻ (blue)' : 'buffer pH ' + c.sol) + ' · ' + wl + ' nm', 12, h - 12);
+      K.caption((c.sol === 'acid' ? 'all HIn (yellow)' : c.sol === 'base' ? 'all In⁻ (blue)' : 'buffer pH ' + c.sol) + ' · ' + wl + ' nm');
     },
   });
 
@@ -127,7 +127,7 @@
       g.fillRect(x - 2, Math.max(lvl, h * 0.42), 4, h * 0.7 - Math.max(lvl, h * 0.42)); g.fillRect(x + w * 0.16 - 3, h * 0.55, 6, h * 0.3);
       K.thermo(g, w * 0.78, h * 0.15, h * 0.75, c.T, 10, 50); K.label(g, w, c.T + ' °C', w * 0.78, h * 0.12, null, 'center');
       K.display(g, w, (S.anim && S.anim.kind === 'flow' ? (S.last.t * a).toFixed(1) : S.last ? S.last.t.toFixed(1) : '0.0') + ' s', 12, 12, Math.min(w * 0.28, 170));
-      K.label(g, w, LIQ[c.liq].name, 12, h - 12);
+      K.caption(LIQ[c.liq].name);
     },
   });
 
@@ -160,7 +160,7 @@
       if (an) { const ph = (an.t * 6) % 1, r = 3 + ph * 5; g.beginPath(); g.ellipse(x, h * 0.68 + r, r * 0.9, r, 0, 0, 6.283); g.fill(); if (ph > 0.6) { g.beginPath(); g.arc(x, h * 0.68 + 12 + (ph - 0.6) * h * 0.6, 4, 0, 6.283); g.fill(); } }
       K.beaker(g, x - 40, h * 0.97, 80, h * 0.12, '#cfe6f5', 0.4);
       K.display(g, w, (an ? Math.floor(an.n * f) : S.last ? S.last.n.toFixed(1) : 0) + ' drops', w - Math.min(w * 0.3, 190) - 12, 12, Math.min(w * 0.3, 190));
-      K.label(g, w, ST[c.liq].name + ', ' + c.T + ' °C', 12, h - 12);
+      K.caption(ST[c.liq].name + ', ' + c.T + ' °C');
     },
   });
 
@@ -191,10 +191,10 @@
     },
     report: (s, a) => [{ id: 'k', label: 'K_sp at 25 °C (enter as × 10⁻³)', unit: '× 10⁻³', truth: KSP_KHT / 1e-3, dp: 2, tol: 0.08 }].concat(a && a.meas && a.meas.dH != null ? [{ id: 'h', label: 'ΔH of solution', unit: 'kJ/mol', truth: DH_KHT / 1000, dp: 0, tol: 0.15 }] : []),
     draw(g, w, h, s, c, S) {
-      K.beaker(g, w * 0.35, h * 0.9, w * 0.28, h * 0.5, '#e2eef4', 0.6);
-      for (let i = 0; i < 26; i++) { g.fillStyle = 'rgba(250,250,250,.9)'; g.fillRect(w * 0.37 + ((i * 37) % (w * 0.24)), h * 0.86 - (i % 3) * 4, 5, 4); }
+      K.beaker(g, w * 0.35, h * 0.92, w * 0.28, h * 0.5, '#e2eef4', 0.6);
+      for (let i = 0; i < 26; i++) { g.fillStyle = 'rgba(250,250,250,.9)'; g.fillRect(w * 0.37 + ((i * 37) % (w * 0.24)), h * 0.88 - (i % 3) * 4, 5, 4); }
       K.thermo(g, w * 0.75, h * 0.15, h * 0.75, c.T, 10, 50); K.label(g, w, c.T + ' °C', w * 0.75, h * 0.12, null, 'center');
-      K.label(g, w, 'saturated KHTa' + (+c.k ? ' in ' + c.k + ' M KCl' : ' in water') + ' with excess solid', 12, h - 12);
+      K.caption('saturated KHTa' + (+c.k ? ' in ' + c.k + ' M KCl' : ' in water') + ' with excess solid');
       K.display(g, w, S.last ? S.last.V.toFixed(2) + ' mL' : '— mL', 12, 12, Math.min(w * 0.28, 170));
     },
   });
@@ -225,7 +225,7 @@
       const above = c.c > this.cmc(s, c.T);
       for (let i = 0; i < 18; i++) { const x = w * 0.38 + ((i * 53) % (w * 0.22)), y = h * 0.6 + ((i * 31) % (h * 0.25)); g.fillStyle = 'rgba(206,114,245,.8)'; if (above && i % 3 === 0) { for (let j = 0; j < 10; j++) { const a = (j / 10) * 6.283; g.fillRect(x + Math.cos(a) * 9, y + Math.sin(a) * 9, 2, 2); } } else { g.fillRect(x, y, 2, 7); } }
       K.display(g, w, (S.last ? S.last.k.toFixed(1) : '—') + ' µS/cm', w - Math.min(w * 0.32, 210) - 12, 12);
-      K.label(g, w, c.c.toFixed(1) + ' mM SDS, ' + c.T + ' °C' + (above ? ': micelles present' : ': single ions'), 12, h - 12);
+      K.caption(c.c.toFixed(1) + ' mM SDS, ' + c.T + ' °C' + (above ? ': micelles present' : ': single ions'));
     },
   });
 
@@ -265,7 +265,7 @@
       K.beaker(g, w * 0.3, h * 0.95, w * 0.4, h * 0.55, '#7fb0d8', 0.7);
       K.tube(g, w * 0.5, h * 0.1, h * 0.88, Math.max(36, w * 0.08), '#f1ece0', 0.45, { turbid });
       K.thermo(g, w * 0.82, h * 0.12, h * 0.75, T, 10, 80); K.label(g, w, T.toFixed(1) + ' °C', w * 0.82, h * 0.09, null, 'center');
-      K.label(g, w, c.w.toFixed(1) + ' % phenol: ' + (tm == null ? 'one phase' : turbid ? 'two phases (turbid)' : 'one phase (clear)'), 12, h - 12);
+      K.caption(c.w.toFixed(1) + ' % phenol: ' + (tm == null ? 'one phase' : turbid ? 'two phases (turbid)' : 'one phase (clear)'));
     },
   });
 
@@ -297,7 +297,8 @@
       g.beginPath(); g.moveTo(-12, top); g.lineTo(-12, top + 20); g.quadraticCurveTo(-w * 0.12, h * 0.3, -w * 0.08, h * 0.62); g.lineTo(-6, h * 0.78); g.lineTo(6, h * 0.78); g.lineTo(w * 0.08, h * 0.62); g.quadraticCurveTo(w * 0.12, h * 0.3, 12, top + 20); g.lineTo(12, top); g.closePath();
       g.save(); g.clip(); g.fillStyle = K.rgba(+c.cu ? '#2b4fd1' : '#d6e9f6', 0.85); g.fillRect(-w, h * 0.3, 2 * w, h * 0.22); g.fillStyle = K.rgba('#eef0f6', 0.9); g.fillRect(-w, h * 0.52, 2 * w, h); g.restore();
       g.strokeStyle = 'rgba(255,255,255,.65)'; g.lineWidth = 2; g.stroke(); g.lineWidth = 1; g.fillStyle = '#c9b8e6'; g.fillRect(-3, h * 0.78, 6, h * 0.12); g.restore();
-      K.label(g, w, 'aqueous layer (top)' + (+c.cu ? ': deep-blue [Cu(NH₃)₄]²⁺' : ''), x + w * 0.14, h * 0.42); K.label(g, w, 'CHCl₃ layer (bottom, denser)', x + w * 0.14, h * 0.6);
+      K.label(g, w, 'aqueous (top)', x + w * 0.14, h * 0.42); K.label(g, w, 'CHCl₃ (bottom)', x + w * 0.14, h * 0.6);
+      K.caption('Upper layer: water' + (+c.cu ? ' with deep-blue [Cu(NH₃)₄]²⁺' : '') + '. Lower layer: chloroform (denser, 1.48 g/mL).');
     },
   });
 })();

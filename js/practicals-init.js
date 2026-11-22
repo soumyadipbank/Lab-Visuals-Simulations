@@ -85,7 +85,7 @@
     api.msg(''); api.chart(); api.answer(null); api.custom(''); $('trialsBox').innerHTML = ''; $('readouts').innerHTML = ''; $('params').innerHTML = ''; $('actions').innerHTML = '';
     $('params').oninput = null; $('actions').onclick = null; S.g = S.p = S.ss = S.o = null;
     $('bench').parentElement.hidden = !!e.noCanvas;
-    $('bench').style.touchAction = '';
+    $('bench').style.touchAction = ''; if ($('benchCap')) $('benchCap').textContent = '';
     if (e.custom) e.custom(api, S);
     else { controlsUI(); actionsUI(); if (e.readouts) api.readouts(e.readouts.call(e, S.sess, S.c, S)); }
     if (window.Theory) Theory.mount(e.id);
@@ -99,7 +99,9 @@
     if (S.anim) { S.anim.t += dt; if (S.anim.dur && S.anim.t > S.anim.dur) S.anim = null; }
     if (S.exp && !S.exp.noCanvas && S.exp.draw) {
       const { w, h, dpr } = size(); g.setTransform(dpr, 0, 0, dpr, 0, 0); PX.draw.bg(g, w, h);
+      PX._cap = '';
       try { S.exp.draw(g, w, h, S.sess, S.c, S); } catch (err) { console.error(err); }
+      const cap = $('benchCap'); if (cap && cap.textContent !== PX._cap) cap.textContent = PX._cap;
     }
     requestAnimationFrame(frame);
   }
