@@ -266,91 +266,150 @@
   });
 
   // ================================================================ chromatography: TLC and column
-  const TLC = { aspirin: { name: 'aspirin', k1: 1.0, acid: true }, paracetamol: { name: 'paracetamol', k1: 1.9 }, caffeine: { name: 'caffeine', k1: 5.0 } };
-  const ELU = { h1: ['hexane : ethyl acetate 1 : 1', 0.5, 1], h3: ['hexane : ethyl acetate 1 : 3', 0.75, 1], ea: ['ethyl acetate', 1, 1], eam: ['ethyl acetate : methanol 9 : 1', 1, 0.22] };
-  const kOf = (c, e) => TLC[c].k1 * Math.pow(10, 1.8 * (1 - ELU[e][1])) * ELU[e][2];
+  // Three samples. Colourless compounds (the analgesics) need UV light or iodine to be seen; coloured ones
+  // (leaf pigments, nitroanilines) are seen directly, and can be watched moving while the plate develops.
+  // R_f = 1/(1 + k), k = k1 × 10^(1.8 (1 − φ)) × f, where φ is the eluent strength and f a polar-additive factor.
+  const TSETS = {
+    analgesic: {
+      name: 'Analgesic tablet (colourless compounds)', unk: 'tablet', std: true, defE: 'ea', acidOpt: true,
+      cmp: { aspirin: { name: 'aspirin', tag: 'A', k1: 1.0, acid: true, col: null, syn: ['aspirin', 'acetylsalicylic'] }, paracetamol: { name: 'paracetamol', tag: 'P', k1: 1.9, col: null, syn: ['paracetamol', 'acetaminophen', '4-acetamidophenol'] }, caffeine: { name: 'caffeine', tag: 'C', k1: 5.0, col: null, iodineWeak: true, syn: ['caffeine'] } },
+      elu: { h1: ['hexane : ethyl acetate 1 : 1', 0.5, 1], h3: ['hexane : ethyl acetate 1 : 3', 0.75, 1], ea: ['ethyl acetate', 1, 1], eam: ['ethyl acetate : methanol 9 : 1', 1, 0.22] },
+      pickMix: (ks) => { const t = ks.filter(() => Math.random() < 0.6); return t.length ? t : [pick(ks)]; },
+    },
+    pigments: {
+      name: 'Spinach leaf extract (coloured pigments)', unk: 'leaf extract', std: false, defE: 'ha73', acidOpt: false,
+      cmp: { carotene: { name: 'β-carotene', tag: '', k1: 0.015, col: '#f08a1c', syn: ['carotene'] }, pheo: { name: 'pheophytin a', tag: '', k1: 0.12, col: '#6f6b3a', syn: ['pheophytin'] }, chla: { name: 'chlorophyll a', tag: '', k1: 0.22, col: '#2f8a62', syn: ['chlorophylla', 'chlorophyll a'] }, chlb: { name: 'chlorophyll b', tag: '', k1: 0.35, col: '#8aab3a', syn: ['chlorophyllb', 'chlorophyll b'] }, lutein: { name: 'lutein (a xanthophyll)', tag: '', k1: 0.55, col: '#e6c22e', syn: ['lutein', 'xanthophyll'] } },
+      elu: { ha91: ['hexane : acetone 9 : 1', 0.4, 1], ha73: ['hexane : acetone 7 : 3', 0.7, 1], ha55: ['hexane : acetone 1 : 1', 1, 1] },
+      pickMix: (ks) => ks.slice(),
+    },
+    nitro: {
+      name: 'Nitroanilines (yellow compounds)', unk: 'unknown', std: true, defE: 'h1', acidOpt: false,
+      cmp: { ona: { name: 'o-nitroaniline', tag: 'o', k1: 0.09, col: '#e89a1e', syn: ['onitroaniline', '2nitroaniline', 'orthonitroaniline'] }, pna: { name: 'p-nitroaniline', tag: 'p', k1: 0.3, col: '#f0cf2a', syn: ['pnitroaniline', '4nitroaniline', 'paranitroaniline'] } },
+      elu: { h4: ['hexane : ethyl acetate 4 : 1', 0.2, 1], h1: ['hexane : ethyl acetate 1 : 1', 0.5, 1], ea: ['ethyl acetate', 1, 1] },
+      pickMix: (ks) => { const r = Math.random(); return r < 0.4 ? ['ona'] : r < 0.8 ? ['pna'] : ['ona', 'pna']; },
+    },
+  };
   PX.add({
-    id: 'tlc', area: 'Organic chemistry', title: 'TLC and column chromatography', short: 'Analgesic tablet: Rf values and identification', aspect: 0.6,
-    steps: ['Spot the standards (aspirin, paracetamol, caffeine) and the dissolved tablet 1 cm from the bottom of a silica gel plate.', 'Develop in a closed tank with the chosen eluent until the solvent front is about 1 cm from the top. Mark the front with a pencil, dry, and view under UV light (254 nm): the colourless compounds show as dark spots on the green fluorescent background.', 'Measure with the ruler beside the plate (0 = start line): click or tap the centre of each spot and the solvent front to place the measuring line (↑ ↓ keys fine-tune it), and note each distance.', 'R_f = distance moved by the spot / distance moved by the solvent front. Polar compounds bind more strongly to the polar silica and move less; a more polar eluent moves everything further.', 'A little acetic acid in the eluent stops aspirin (a carboxylic acid) from streaking. A column works on the same principle: the least strongly held compound comes off first.'],
+    id: 'tlc', area: 'Organic chemistry', title: 'TLC and column chromatography', short: 'Rf values, identification, and how spots are made visible', aspect: 0.6,
+    steps: ['Spot the samples 1 cm from the bottom of a silica gel plate (a pencil line, never ink). Develop in a closed tank, saturated with eluent vapour, until the front is about 1 cm from the top; mark the front with a pencil at once.', 'Make the spots visible. Coloured compounds (leaf pigments, nitroanilines, dyes) are seen directly, even while the plate develops. Colourless compounds need help: under UV light (254 nm) the fluorescent indicator in the plate glows green and compounds that absorb UV show as dark spots; in an iodine chamber most organic compounds take up iodine and show brown spots (circle them in pencil: they fade).', 'Measure with the ruler beside the plate (0 = start line): click or tap the centre of each spot and the solvent front to place the measuring line (↑ ↓ keys fine-tune it), and note each distance.', 'R_f = distance moved by the spot / distance moved by the solvent front. Compounds held more strongly by the polar silica move less; a more polar eluent moves everything further. Aim for R_f values between 0.2 and 0.8.', 'Column chromatography works on the same principle: the least strongly held compound comes off first.'],
     custom(api, S) {
-      const st = (S.tl = { e: 'ea', acid: false, run: 0, devd: false, mode: 'tlc' });
-      const setup = () => { const ks = Object.keys(TLC); st.tab = ks.filter(() => Math.random() < 0.6); if (!st.tab.length) st.tab = [pick(ks)]; st.jit = {}; ks.forEach((k) => (st.jit[k] = N(0.015))); st.devd = false; st.run = 0; st.uv = false; st.my = null; st.meas = []; render(); api.msg(''); api.answer(null); api.table('', [], []); };
-      st.rf = (k) => (1 / (1 + kOf(k, st.e))) * (1 + (st.jit ? st.jit[k] : 0));
+      const st = (S.tl = { set: 'pigments', e: 'ha73', acid: false, run: 0, devd: false, mode: 'tlc', vis: null });
+      const D = () => TSETS[st.set], kOf = (k) => { const d = D(), e = d.elu[st.e]; return d.cmp[k].k1 * Math.pow(10, 1.8 * (1 - e[1])) * e[2]; };
+      st.rf = (k) => (1 / (1 + kOf(k))) * (1 + (st.jit ? st.jit[k] : 0));
+      st.D = D; st.kOf = kOf;
+      const setup = () => { const d = D(), ks = Object.keys(d.cmp); st.tab = d.pickMix(ks); st.jit = {}; ks.forEach((k) => (st.jit[k] = N(0.012))); newPlate(); };
       // measuring line: click or tap on the plate, or use the arrow keys, to line it up with a spot centre or the solvent front
       const cvs = api.$('bench');
       if (!cvs._tlcBound) {
         cvs._tlcBound = true; cvs.tabIndex = 0;
         const setY = (ev) => { const S2 = api.S; if (!S2.exp || S2.exp.id !== 'tlc' || !S2.tl || S2.tl.mode !== 'tlc') return; const r = cvs.getBoundingClientRect(); S2.tl.my = ev.clientY - r.top; };
-        cvs.addEventListener('pointerdown', (ev) => { setY(ev); if (api.S.tl && api.S.tl.uv) { try { cvs.setPointerCapture(ev.pointerId); } catch (e) { /* ignore */ } } });
+        cvs.addEventListener('pointerdown', (ev) => { setY(ev); if (api.S.tl && api.S.tl.vis) { try { cvs.setPointerCapture(ev.pointerId); } catch (e) { /* ignore */ } } });
         cvs.addEventListener('pointermove', (ev) => { if (cvs.hasPointerCapture && cvs.hasPointerCapture(ev.pointerId)) setY(ev); });
         cvs.addEventListener('keydown', (ev) => { const S2 = api.S; if (!S2.exp || S2.exp.id !== 'tlc' || !S2.tl || S2.tl.geo == null) return; const G = S2.tl.geo; if (S2.tl.my == null) S2.tl.my = G.start; if (ev.key === 'ArrowUp') { S2.tl.my -= G.cm * 0.05; ev.preventDefault(); } if (ev.key === 'ArrowDown') { S2.tl.my += G.cm * 0.05; ev.preventDefault(); } });
       }
+      const lanesOf = () => { const d = D(); return (d.std ? Object.keys(d.cmp).map((k) => ({ ks: [k], label: d.cmp[k].tag })) : []).concat([{ ks: st.tab, label: d.unk }]); };
+      st.lanesOf = lanesOf;
       const render = () => {
-        api.$('params').innerHTML = '<div class="two-col">' + sel('tM', 'Technique', [['tlc', 'Thin-layer chromatography'], ['col', 'Column chromatography (same tablet)']], st.mode) + sel('tE', 'Eluent', Object.keys(ELU).map((k) => [k, ELU[k][0]]), st.e) + sel('tA', 'Additive', [['0', 'none'], ['1', '1 % acetic acid']], st.acid ? '1' : '0') + '</div>';
-        const what = [['front', 'solvent front'], ['A', 'spot A (aspirin standard)'], ['P', 'spot P (paracetamol standard)'], ['C', 'spot C (caffeine standard)'], ['t1', 'tablet spot 1'], ['t2', 'tablet spot 2'], ['t3', 'tablet spot 3']];
-        api.$('actions').innerHTML = (st.mode === 'tlc' ? btn('dev', 'Develop the plate', true) + btn('uv', 'View under UV light (254 nm)') +
-          (st.uv ? '<span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"><select id="tW" aria-label="What the measuring line is on" style="min-height:44px;border-radius:12px;padding:8px 10px;background:rgba(10,3,22,.55);color:inherit;border:1px solid var(--line)">' + what.map((x) => '<option value="' + x[0] + '">' + x[1] + '</option>').join('') + '</select>' + btn('note', 'Note this distance') + '</span>' : '') : btn('col', 'Run the column', true)) + btn('reset', 'New tablet');
+        const d = D();
+        api.$('params').innerHTML = '<div class="two-col">' + sel('tS', 'Sample', Object.keys(TSETS).map((k) => [k, TSETS[k].name]), st.set) + sel('tM', 'Technique', [['tlc', 'Thin-layer chromatography'], ['col', 'Column chromatography (same sample)']], st.mode) + sel('tE', 'Eluent', Object.keys(d.elu).map((k) => [k, d.elu[k][0]]), st.e) + (d.acidOpt ? sel('tA', 'Additive', [['0', 'none'], ['1', '1 % acetic acid']], st.acid ? '1' : '0') : '') + '</div>';
+        const marks = [['front', 'solvent front']].concat(d.std ? Object.keys(d.cmp).map((k) => [k, 'spot ' + d.cmp[k].tag + ' (' + d.cmp[k].name + ' standard)']) : []).concat([1, 2, 3, 4, 5].slice(0, d.std ? 3 : 5).map((n) => ['u' + n, d.unk + ' spot ' + n + (n === 1 ? ' (lowest)' : '')]));
+        api.$('actions').innerHTML = (st.mode === 'tlc' ? btn('dev', 'Develop the plate', true) + btn('look', 'Look at the plate') + btn('uv', 'UV lamp (254 nm)') + btn('iodine', 'Iodine chamber') +
+          (st.vis ? '<span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"><select id="tW" aria-label="What the measuring line is on" style="min-height:44px;border-radius:12px;padding:8px 10px;background:rgba(10,3,22,.55);color:inherit;border:1px solid var(--line)">' + marks.map((x) => '<option value="' + x[0] + '">' + x[1] + '</option>').join('') + '</select>' + btn('note', 'Note this distance') + '</span>' : '') : btn('col', 'Run the column', true)) + btn('reset', 'New sample');
       };
-      const newPlate = () => { st.devd = false; st.run = 0; st.uv = false; st.my = null; st.meas = []; api.answer(null); api.table('', [], []); api.msg(''); render(); };   /* a new eluent needs a new plate */
-      api.$('params').oninput = (ev) => { if (ev.target.id === 'tE') { st.e = ev.target.value; newPlate(); } if (ev.target.id === 'tA') { st.acid = ev.target.value === '1'; newPlate(); } if (ev.target.id === 'tM') { st.mode = ev.target.value; newPlate(); } };
+      const newPlate = () => { st.devd = false; st.run = 0; st.vis = null; st.my = null; st.meas = []; api.answer(null); api.table('', [], []); api.msg(''); render(); };   /* a new eluent needs a new plate */
+      const visible = (k, how) => { const c = D().cmp[k]; if (how === 'uv') return true; if (how === 'iodine') return !c.iodineWeak || 'weak'; return !!c.col; };
+      st.visible = visible;
+      const showAnswer = () => {
+        const d = D();
+        if (st.set === 'analgesic') api.answer([{ id: 'r', label: 'R_f of caffeine in this eluent', unit: '', truth: st.rf('caffeine'), dp: 2, abs: true, tol: 0.03 }, { id: 'c', label: 'Components of the tablet (names, comma-separated)', text: true, accept: (v) => { const s2 = v.toLowerCase().replace(/\b(no|not|without)\s+\w+/g, ''); return Object.keys(d.cmp).every((k) => d.cmp[k].syn.some((n) => s2.includes(n)) === st.tab.includes(k)); }, truthText: st.tab.map((k) => d.cmp[k].name).join(', ') }], work);
+        else if (st.set === 'pigments') api.answer([{ id: 'r', label: 'R_f of chlorophyll a (the blue-green spot)', unit: '', truth: st.rf('chla'), dp: 2, abs: true, tol: 0.03 }, { id: 'f', label: 'Which pigment moves furthest?', text: true, accept: (v) => /carotene/i.test(v), truthText: 'β-carotene (an orange hydrocarbon with no polar groups)' }], work);
+        else api.answer([{ id: 'r', label: 'R_f of p-nitroaniline in this eluent', unit: '', truth: st.rf('pna'), dp: 2, abs: true, tol: 0.03 }, { id: 'c', label: 'The unknown contains (o-, p-, or both)', text: true, accept: (v) => { const t = v.toLowerCase().replace(/[^a-z0-9]/g, ''), hasO = /(^|[^a-z])o($|[^a-z])|ortho|2nitro|onitro/.test(v.toLowerCase()) || t.includes('onitro') || t.includes('ortho'), hasP = /(^|[^a-z])p($|[^a-z])|para|4nitro|pnitro/.test(v.toLowerCase()) || t.includes('pnitro') || t.includes('para'), both = /both/.test(v.toLowerCase()); return (both || hasO) === st.tab.includes('ona') && (both || hasP) === st.tab.includes('pna'); }, truthText: st.tab.map((k) => d.cmp[k].name).join(' and ') }], work);
+      };
+      const work = () => { const d = D(); return ['solvent front = 8.00 cm from the start line'].concat(Object.keys(d.cmp).filter((k) => d.std || st.tab.includes(k)).map((k) => `${d.cmp[k].name}: spot at ${(8 * st.rf(k)).toFixed(2)} cm → R_f = ${(8 * st.rf(k)).toFixed(2)} / 8.00 = ${st.rf(k).toFixed(2)}`),
+        st.set === 'analgesic' ? ['Each tablet spot is matched to the standard with the same R_f (same eluent, same plate); co-spotting confirms it.', 'Order of R_f on silica here: aspirin > paracetamol > caffeine.'] :
+        st.set === 'pigments' ? ['Order (top to bottom): β-carotene (hydrocarbon, least polar) > pheophytin a (chlorophyll without Mg²⁺) > chlorophyll a > chlorophyll b (an extra –CHO group makes it more polar) > xanthophylls such as lutein (two –OH groups).'] :
+        ['o-Nitroaniline runs higher than p-nitroaniline: its –NH₂ and –NO₂ groups are next to each other and form an intramolecular hydrogen bond, so they bind less to the silica. In the para isomer both groups are free to hydrogen-bond to the silica.']); };
+      api.$('params').oninput = (ev) => {
+        const id = ev.target.id;
+        if (id === 'tS') { st.set = ev.target.value; st.e = TSETS[st.set].defE; st.acid = false; setup(); }
+        if (id === 'tE') { st.e = ev.target.value; newPlate(); }
+        if (id === 'tA') { st.acid = ev.target.value === '1'; newPlate(); }
+        if (id === 'tM') { st.mode = ev.target.value; newPlate(); }
+      };
       api.$('actions').onclick = (ev) => {
-        const b = ev.target.closest('[data-a]'); if (!b) return; const a = b.dataset.a;
+        const b = ev.target.closest('[data-a]'); if (!b) return; const a = b.dataset.a, d = D();
         if (a === 'reset') { setup(); return; }
-        if (a === 'dev') { st.uv = false; st.my = null; st.meas = []; api.answer(null); api.table('', [], []); st.run = 0.001; st.devd = true; render(); api.msg('Developing…'); }
-        if (a === 'col') { st.run = 0.001; api.msg('Eluting: watch the bands. The compound held least strongly by the silica comes off first.'); }
-        if (a === 'uv') {
+        if (a === 'dev') { st.vis = null; st.my = null; st.meas = []; api.answer(null); api.table('', [], []); st.run = 0.001; st.devd = true; render(); api.msg(Object.values(d.cmp).some((c) => c.col) ? 'Developing: the coloured compounds can be seen moving up the plate.' : 'Developing… (nothing is visible yet: these compounds are colourless).'); }
+        if (a === 'col') { st.run = 0.001; api.msg('Eluting: the compound held least strongly by the silica comes off first.'); }
+        if (a === 'look' || a === 'uv' || a === 'iodine') {
           if (!st.devd || st.run < 1) { api.msg('Develop the plate fully first, then mark the solvent front.', 'warn'); return; }
-          st.uv = true; render();
-          const good = Object.keys(TLC).every((k) => { const rf = st.rf(k); return rf > 0.1 && rf < 0.9; });
-          api.msg('Under UV the plate glows green and the compounds show as dark spots. Use the ruler: 0 is the start line. Click or tap the centre of each spot (or the solvent front) to place the measuring line, fine-tune with the ↑ ↓ keys, then press “Note this distance”. R<sub>f</sub> = spot distance / front distance.' + (good ? '' : '<br><b>Note:</b> some spots are very close to the start or the front: try a different eluent so that R<sub>f</sub> lies between 0.2 and 0.8.') + (!st.acid ? '<br>The aspirin spot is streaked: adding acetic acid to the eluent sharpens it.' : ''), good ? 'ok' : 'warn');
-          api.answer([{ id: 'r', label: 'R_f of caffeine in this eluent', unit: '', truth: st.rf('caffeine'), dp: 2, abs: true, tol: 0.03 }, { id: 'c', label: 'Components of the tablet (names, comma-separated)', text: true, accept: (v) => { const s2 = v.toLowerCase().replace(/\b(no|not|without)\s+\w+/g, ''), syn = { aspirin: ['aspirin', 'acetylsalicylic'], paracetamol: ['paracetamol', 'acetaminophen', '4-acetamidophenol'], caffeine: ['caffeine'] }; return Object.keys(TLC).every((k) => syn[k].some((n) => s2.includes(n)) === st.tab.includes(k)); }, truthText: st.tab.map((k) => TLC[k].name).join(', ') }],
-            () => ['solvent front = 8.00 cm from the start line', ...Object.keys(TLC).map((k) => `${TLC[k].name}: spot at ${(8 * st.rf(k)).toFixed(2)} cm → R_f = ${(8 * st.rf(k)).toFixed(2)} / 8.00 = ${st.rf(k).toFixed(2)}`), 'Each tablet spot is matched to the standard with the same R_f (same eluent, same plate). Co-spotting (tablet + standard in one lane) confirms it: a single spot means the same compound.', 'Order of R_f on silica here: aspirin > paracetamol > caffeine.']);
+          const shown = st.tab.concat(d.std ? Object.keys(d.cmp) : []).filter((k) => visible(k, a));
+          st.vis = shown.length ? a : null; render();
+          if (!shown.length) { api.msg('Nothing can be seen: these compounds are colourless. Use the UV lamp or the iodine chamber.', 'warn'); return; }
+          const good = Object.keys(d.cmp).filter((k) => d.std || st.tab.includes(k)).every((k) => { const rf = st.rf(k); return rf > 0.1 && rf < 0.9; });
+          const how = a === 'look' ? 'The coloured spots are visible in ordinary light.' : a === 'uv' ? 'Under 254 nm light the plate glows green and every compound that absorbs UV shows as a dark spot.' : 'In iodine vapour the compounds take up iodine and show as brown spots' + (Object.values(d.cmp).some((c) => c.iodineWeak) ? ' (caffeine only faintly)' : '') + '. Circle them in pencil: they fade as the iodine evaporates.';
+          api.msg(how + ' Use the ruler (0 = start line): click or tap the centre of each spot and the front, then press “Note this distance”. R<sub>f</sub> = spot distance / front distance.' + (good ? '' : '<br><b>Note:</b> some spots are very close to the start or the front: try a different eluent so that R<sub>f</sub> lies between 0.2 and 0.8.') + (d.acidOpt && !st.acid ? '<br>The aspirin spot is streaked: adding acetic acid to the eluent sharpens it.' : ''), good ? 'ok' : 'warn');
+          showAnswer();
         }
         if (a === 'note') {
           if (st.my == null || !st.geo) { api.msg('Click or tap on the plate first to place the measuring line.', 'warn'); return; }
-          const d = Math.max(0, Math.round(((st.geo.start - st.my) / st.geo.cm) / 0.05) * 0.05), sel2 = api.$('tW'), lab = sel2.options[sel2.selectedIndex].text;
-          st.meas = st.meas.filter((x) => x.what !== lab); st.meas.push({ what: lab, d });
+          const dd = Math.max(0, Math.round(((st.geo.start - st.my) / st.geo.cm) / 0.05) * 0.05), sel2 = api.$('tW'), lab = sel2.options[sel2.selectedIndex].text;
+          st.meas = st.meas.filter((x) => x.what !== lab); st.meas.push({ what: lab, d: dd });
           api.table('Your measurements (from the start line)', [{ k: 'what', label: 'Mark' }, { k: 'd', label: 'distance / cm', dp: 2 }], st.meas);
         }
       };
       setup();
     },
     draw(g, w, h, s, c, S) {
-      const st = S.tl; if (!st) return; const dt = Math.min(0.1, S.t - (st.lt || S.t)); st.lt = S.t; if (st.run > 0 && st.run < 1) st.run = Math.min(1, st.run + dt * 0.4);
+      const st = S.tl; if (!st || !st.D) return; const dt = Math.min(0.1, S.t - (st.lt || S.t)); st.lt = S.t; if (st.run > 0 && st.run < 1) st.run = Math.min(1, st.run + dt * 0.4);
+      const d = st.D();
       if (st.mode === 'tlc') {
         const px = w * 0.32, pw = Math.min(w * 0.36, 300), pt = h * 0.05, pb = h * 0.95, start = pb - h * 0.08, frontFull = pt + h * 0.06, cm = (start - frontFull) / 8, frontY = start - (start - frontFull) * st.run;
         st.geo = { start, cm };
-        g.canvas.style.touchAction = st.uv ? 'none' : '';   // while measuring, a finger drags the line instead of scrolling the page
-        // plate: white silica before UV; under 254 nm the fluorescent indicator glows green and the compounds quench it (dark spots)
-        g.fillStyle = st.uv ? '#86d98f' : '#eef1ee'; g.fillRect(px, pt, pw, pb - pt);
+        g.canvas.style.touchAction = st.vis ? 'none' : '';   // while measuring, a finger drags the line instead of scrolling the page
+        // plate: white silica; green fluorescence only under the UV lamp; faint yellow-brown background after iodine
+        g.fillStyle = st.vis === 'uv' ? '#86d98f' : st.vis === 'iodine' ? '#f1ead2' : '#eef1ee'; g.fillRect(px, pt, pw, pb - pt);
         if (st.run > 0 && st.run < 1) { g.fillStyle = 'rgba(120,180,255,.2)'; g.fillRect(px, frontY, pw, start + 6 - frontY); }
         g.strokeStyle = 'rgba(40,40,40,.65)'; g.beginPath(); g.moveTo(px, start); g.lineTo(px + pw, start); g.stroke();
         if (st.run >= 1) { g.setLineDash([4, 3]); g.beginPath(); g.moveTo(px, frontY); g.lineTo(px + pw, frontY); g.stroke(); g.setLineDash([]); g.fillStyle = '#333'; g.font = '10px Hanken Grotesk, sans-serif'; g.textAlign = 'right'; g.fillText('front', px + pw - 4, frontY - 4); }
-        const lanes = Object.keys(TLC).map((k) => [k]).concat([st.tab]), labels = ['A', 'P', 'C', 'tablet'];
-        lanes.forEach((ks, i) => {
-          const lx = px + pw * (0.14 + i * 0.24);
+        const lanes = st.lanesOf(), n = lanes.length;
+        lanes.forEach((ln, i) => {
+          const lx = px + pw * ((i + 0.5) / n);
           g.fillStyle = 'rgba(60,60,60,.5)'; g.beginPath(); g.arc(lx, start, 1.6, 0, 6.283); g.fill();          // pencil dot where it was spotted
-          if (st.uv && st.run >= 1) ks.forEach((k) => { const y = start - cm * 8 * st.rf(k); g.fillStyle = 'rgba(40,30,55,.85)'; if (TLC[k].acid && !st.acid) { g.globalAlpha = 0.45; g.fillRect(lx - 5, y, 10, Math.min(start - y, 40)); g.globalAlpha = 1; } g.beginPath(); g.ellipse(lx, y, 6, 4, 0, 0, 6.283); g.fill(); });
-          g.fillStyle = '#333'; g.font = '11px Hanken Grotesk, sans-serif'; g.textAlign = 'center'; g.fillText(labels[i], lx, pb - 4);
+          ln.ks.forEach((k) => {
+            const cpd = d.cmp[k], dist = 8 * st.rf(k) * Math.min(1, st.run), y = start - cm * dist;
+            // what is seen: coloured compounds always (also during development); others only under UV / iodine after development
+            let col = null, alpha = 0.9;
+            if (st.vis === 'uv' && st.run >= 1) col = '#2a1e37';
+            else if (st.vis === 'iodine' && st.run >= 1) { col = '#7a4a1e'; if (cpd.iodineWeak) alpha = 0.3; }
+            if (cpd.col && (st.run > 0 || st.vis)) { col = st.vis === 'uv' && st.run >= 1 ? '#2a1e37' : cpd.col; alpha = 0.9; }
+            if (!st.devd && cpd.col) { col = cpd.col; }
+            if (!col) return;
+            g.globalAlpha = alpha; g.fillStyle = col;
+            if (cpd.acid && !st.acid) { g.globalAlpha = alpha * 0.5; g.fillRect(lx - 5, y, 10, Math.min(start - y, 40)); g.globalAlpha = alpha; }
+            g.beginPath(); g.ellipse(lx, y, 6, 4, 0, 0, 6.283); g.fill(); g.globalAlpha = 1;
+          });
+          g.fillStyle = '#333'; g.font = '11px Hanken Grotesk, sans-serif'; g.textAlign = 'center'; g.fillText(ln.label, lx, pb - 4);
         });
         // ruler: 0 at the start line, mm divisions
         const rx = px - 40; g.fillStyle = '#f4ecd2'; g.fillRect(rx, frontFull - cm * 0.6, 34, start - frontFull + cm * 1.0);
         g.strokeStyle = '#2b2b2b'; g.fillStyle = '#2b2b2b'; g.font = '10px Hanken Grotesk, sans-serif'; g.textAlign = 'left';
-        for (let mm = 0; mm <= 85; mm++) { const y = start - (mm / 10) * cm, len = mm % 10 === 0 ? 14 : mm % 5 === 0 ? 10 : 6; if (cm < 25 && mm % 10 && mm % 5 && cm < 18) continue; g.beginPath(); g.moveTo(rx + 34, y); g.lineTo(rx + 34 - len, y); g.stroke(); if (mm % 10 === 0) g.fillText(String(mm / 10), rx + 3, y + 3); }
+        for (let mm = 0; mm <= 85; mm++) { const y = start - (mm / 10) * cm, len = mm % 10 === 0 ? 14 : mm % 5 === 0 ? 10 : 6; if (cm < 18 && mm % 10 && mm % 5) continue; g.beginPath(); g.moveTo(rx + 34, y); g.lineTo(rx + 34 - len, y); g.stroke(); if (mm % 10 === 0) g.fillText(String(mm / 10), rx + 3, y + 3); }
         g.save(); g.translate(rx + 9, frontFull - cm * 0.35); g.fillText('cm', -6, 0); g.restore();
         // measuring line
-        if (st.my != null && st.uv) {
-          const y = Math.max(frontFull - cm * 0.5, Math.min(start + 2, st.my)), d = Math.max(0, Math.round(((start - y) / cm) / 0.05) * 0.05);
+        if (st.my != null && st.vis) {
+          const y = Math.max(frontFull - cm * 0.5, Math.min(start + 2, st.my)), dd = Math.max(0, Math.round(((start - y) / cm) / 0.05) * 0.05);
           g.strokeStyle = '#e0336b'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(rx, y); g.lineTo(px + pw + 8, y); g.stroke(); g.lineWidth = 1;
-          if (px + pw + 124 <= w) K.display(g, w, d.toFixed(2) + ' cm', px + pw + 14, Math.max(8, y - 23), 110); else K.caption('Measuring line: ' + d.toFixed(2) + ' cm from the start line');
+          if (px + pw + 124 <= w) K.display(g, w, dd.toFixed(2) + ' cm', px + pw + 14, Math.max(8, y - 23), 110); else K.caption('Measuring line: ' + dd.toFixed(2) + ' cm from the start line');
         }
-        if (w >= 620) { K.label(g, w, 'A aspirin · P paracetamol · C caffeine', px + pw + 14, h * 0.1); K.label(g, w, ELU[st.e][0] + (st.acid ? ' + AcOH' : ''), px + pw + 14, h * 0.1 + 18); }
+        if (w >= 620) { if (d.std) K.label(g, w, Object.values(d.cmp).map((x) => x.tag + ' ' + x.name).join(' · '), px + pw + 14, h * 0.1); K.label(g, w, d.elu[st.e][0] + (st.acid ? ' + AcOH' : ''), px + pw + 14, h * 0.1 + 18); }
+        K.caption(st.vis === 'uv' ? 'Viewing under the UV lamp (254 nm).' : st.vis === 'iodine' ? 'After the iodine chamber.' : st.vis === 'look' ? 'Ordinary light.' : '');
       } else {
         const cx = w * 0.45, top = h * 0.05, bot = h * 0.9; g.fillStyle = '#e8e4d8'; g.fillRect(cx - 18, top + 20, 36, bot - top - 40); g.strokeStyle = 'rgba(255,255,255,.6)'; g.strokeRect(cx - 18, top, 36, bot - top);
-        const cols = { aspirin: '#9c6ad8', paracetamol: '#d86a9c', caffeine: '#6a9cd8' };
-        st.tab.forEach((k) => { const v = 1 / (1 + kOf(k, st.e)), y = top + 30 + (bot - top - 60) * Math.min(1.2, st.run * 2.4 * v); if (y < bot - 20) { g.fillStyle = K.rgba(cols[k], 0.85); g.fillRect(cx - 17, y, 34, 10); } });
-        K.label(g, w, st.tab.length + ' band' + (st.tab.length > 1 ? 's' : '') + ' (coloured here for clarity)', w * 0.58, h * 0.2);
-        K.caption('The band that moves fastest is the one held least strongly by the silica; collect fractions and check each by TLC against the standards.');
+        const fake = ['#9c6ad8', '#d86a9c', '#6a9cd8'], coloured = st.tab.some((k) => d.cmp[k].col);
+        st.tab.forEach((k, i) => { const v = 1 / (1 + st.kOf(k)), y = top + 30 + (bot - top - 60) * Math.min(1.2, st.run * 2.4 * v); if (y < bot - 20) { g.fillStyle = K.rgba(d.cmp[k].col || fake[i % 3], 0.85); g.fillRect(cx - 17, y, 34, 10); } });
+        K.label(g, w, st.tab.length + ' band' + (st.tab.length > 1 ? 's' : '') + (coloured ? ' (their own colours)' : ' (colourless: coloured here for clarity; in practice fractions are checked by TLC)'), w * 0.58, h * 0.2);
+        K.caption('The band that moves fastest is the one held least strongly by the silica.' + (coloured ? ' With coloured compounds you can see each band and collect it separately.' : ' Collect fractions and check each by TLC against the standards.'));
       }
     },
   });
