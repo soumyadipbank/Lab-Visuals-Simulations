@@ -23,7 +23,7 @@
       selects: [{ id: 'cat', label: 'Catalyst', opts: [['KI', 'KI'], ['FeCl3', 'FeCl₃']] }],
       params: [{ id: 'c', label: 'Catalyst concentration', min: 0.03, max: 0.1, step: 0.01, val: 0.05, unit: 'M', dp: 2 }, { id: 'T', label: 'Temperature', min: 20, max: 45, step: 5, val: 25, unit: '°C', dp: 0 }],
       begin: (p) => { const Vinf = 42 + noise(0.4); return { k: L.h2o2K(p.cat, p.c, p.T), gas: p.cat === 'KI', V0: 24 + noise(0.08), Vinf, Vinf_read: Vinf + noise(0.15) }; },
-      sample: (m, t) => (m.gas ? Math.round((m.Vinf * (1 - Math.exp(-m.k * t)) + noise(0.12)) / 0.1) * 0.1 : Math.max(0.05, Math.round((m.V0 * Math.exp(-m.k * t) + noise(0.06)) / 0.05) * 0.05)),
+      sample: (m, t) => (m.gas ? Math.max(0, Math.round((m.Vinf * (1 - Math.exp(-m.k * t)) + (t ? noise(0.12) : 0)) / 0.1) * 0.1) : Math.max(0.05, Math.round((m.V0 * Math.exp(-m.k * t) + noise(0.06)) / 0.05) * 0.05)),
       rate: (m, t) => m.k * Math.exp(-m.k * t) * 6,
       analyse(rows, m, S) {
         if (m.gas) { if (S.vinf == null) return { err: 'Read V∞ first (wait until gas evolution stops).' }; const r = rows.filter((x) => S.vinf - x.v > 0.5); if (r.length < 4) return { err: 'Take at least 4 readings before the reaction is nearly over.' }; const ys = r.map((x) => Math.log(S.vinf - x.v)), f = L.linreg(r.map((x) => x.t), ys), k = -f.m; return { meas: { k }, chart: { x: r.map((x) => x.t), y: ys, fit: f, xl: 't / min', yl: 'ln (V∞ − Vₜ)' }, lines: ['V(O₂) is proportional to the H₂O₂ that has decomposed, so V∞ − Vₜ ∝ [H₂O₂]ₜ', `slope of ln(V∞ − Vₜ) against t = ${f.m.toFixed(4)} min⁻¹ (r² = ${f.r2.toFixed(4)})`, `k = −slope = ${k.toFixed(4)} min⁻¹; half-life = 0.693 / k = ${(Math.LN2 / k).toFixed(1)} min`] }; }

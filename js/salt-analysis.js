@@ -17,7 +17,7 @@
     shelf(); notebook(); history.replaceState(null, '', '?level=' + level + '&n=' + S.n);
   }
   function shelf() {
-    const tests = S.n <= 2 ? SA.TESTS : SA.TESTS; let h = '', grp = '';
+    const tests = SA.TESTS; let h = '', grp = '';
     tests.forEach((t) => {
       if (t.g !== grp) { grp = t.g; h += '<p class="lbl" style="margin:10px 0 4px;font-size:.74rem;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;font-weight:700">' + grp + '</p>'; }
       const used = S.log.some((x) => x.id === t.id);
@@ -40,8 +40,7 @@
   function chips() {
     const mk = (arr, name) => arr.map((x) => '<label><input type="checkbox" name="' + name + '" value="' + x[0] + '"><span>' + x[1] + '</span></label>').join('');
     $('catChips').innerHTML = mk(SA.CATIONS, 'cat'); $('anChips').innerHTML = mk(SA.ANIONS, 'an');
-    let r = '<table class="data-table" style="min-width:560px"><thead><tr><th>Test</th>' + '</tr></thead><tbody>';
-    r = '';
+    let r = '';
     SA.TESTS.forEach((t) => { const rows = Object.keys(SA.OBS[t.id]).map((ion) => '<tr><td>' + SA.sym[ion] + '</td><td style="text-align:left">' + esc(SA.OBS[t.id][ion].t) + '</td></tr>').join(''); r += '<h4 style="margin:12px 0 2px;font-size:.9rem">' + esc(t.label) + '</h4><table class="data-table"><tbody>' + rows + '</tbody></table>'; });
     $('ref').innerHTML = r;
   }

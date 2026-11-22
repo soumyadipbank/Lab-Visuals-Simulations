@@ -11,19 +11,19 @@
   // sol: [water, 5% NaOH, 5% NaHCO3, 5% HCl] as 's' soluble, 'p' partly/sparingly, 'i' insoluble, 'e' soluble with effervescence
   const ORG = {
     benzoic: { name: 'benzoic acid', state: 'White crystalline flakes; faint odour.', mp: 122, el: '', sol: 'pspi', t: { nahco3: 'Brisk effervescence (CO₂): a carboxylic acid.', fecl3: 'Buff (flesh-coloured) precipitate of iron(III) benzoate (after neutralising).' } },
-    salicylic: { name: 'salicylic acid', state: 'White needles; odourless.', mp: 159, el: '', sol: 'pspi', t: { nahco3: 'Effervescence (CO₂): a carboxylic acid.', fecl3: 'Intense violet colour: a phenolic –OH.', br2: 'Bromine water decolourised; white precipitate.', kmno4: 'Decolourised slowly.' } },
-    oxalic: { name: 'oxalic acid dihydrate', state: 'Colourless crystals; odourless.', mp: 101, el: '', sol: 'sssi', t: { nahco3: 'Brisk effervescence (CO₂).', kmno4: 'Warm acidified KMnO₄ is decolourised with effervescence (CO₂).' } },
-    cinnamic: { name: 'cinnamic acid', state: 'White crystals; faint balsamic odour.', mp: 133, el: '', sol: 'pspi', t: { nahco3: 'Effervescence (CO₂): a carboxylic acid.', br2: 'Bromine water decolourised without a precipitate: C=C addition.', kmno4: 'Cold alkaline KMnO₄ decolourised, brown MnO₂ (Baeyer test): unsaturation.' } },
+    salicylic: { name: 'salicylic acid', state: 'White needles; odourless.', mp: 159, el: '', sol: 'pspi', t: { nahco3: 'Effervescence (CO₂): a carboxylic acid.', fecl3: 'Intense violet colour: a phenolic –OH.', br2: 'Bromine water decolourised; white precipitate.', kmno4: 'Decolourised slowly.', can: 'Brown precipitate (phenolic –OH).' } },
+    oxalic: { name: 'oxalic acid dihydrate', state: 'Colourless crystals; odourless.', mp: 101, el: '', sol: 'ssss', t: { nahco3: 'Brisk effervescence (CO₂).', kmno4: 'Decolourised slowly (fast on warming with acid, with effervescence of CO₂).' } },
+    cinnamic: { name: 'cinnamic acid', state: 'White crystals; faint balsamic odour.', mp: 133, el: '', sol: 'pspi', t: { fecl3: 'Buff precipitate (iron(III) salt of the carboxylic acid, after neutralising).', nahco3: 'Effervescence (CO₂): a carboxylic acid.', br2: 'Bromine water decolourised without a precipitate: C=C addition.', kmno4: 'Cold alkaline KMnO₄ decolourised, brown MnO₂ (Baeyer test): unsaturation.' } },
     phenol: { name: 'phenol', state: 'Colourless to pinkish deliquescent crystals; characteristic “carbolic” odour.', mp: 41, el: '', sol: 'psii', t: { fecl3: 'Violet colour: a phenol.', br2: 'Bromine water decolourised at once; white precipitate of 2,4,6-tribromophenol.', can: 'Brown/green-brown precipitate (phenol).', kmno4: 'Decolourised.', phthalein: 'Pink-red in NaOH: phenolphthalein formed.' } },
     naphthol: { name: 'β-naphthol (2-naphthol)', state: 'White to pinkish flakes; faint phenolic odour.', mp: 123, el: '', sol: 'isii', t: { fecl3: 'Green colour, then a white turbidity.', br2: 'Bromine water decolourised.', can: 'Brown precipitate (phenol).', kmno4: 'Decolourised.' } },
-    resorcinol: { name: 'resorcinol', state: 'White crystals, turning pinkish; odourless.', mp: 110, el: '', sol: 'ssii', t: { fecl3: 'Blue-violet colour: a phenol.', br2: 'Bromine water decolourised; white precipitate.', can: 'Brown precipitate (phenol).', kmno4: 'Decolourised.', phthalein: 'Intense green fluorescence in NaOH: fluorescein formed (resorcinol).' } },
+    resorcinol: { name: 'resorcinol', state: 'White crystals, turning pinkish; odourless.', mp: 110, el: '', sol: 'ssss', t: { fecl3: 'Blue-violet colour: a phenol.', br2: 'Bromine water decolourised; white precipitate.', can: 'Brown precipitate (phenol).', kmno4: 'Decolourised.', phthalein: 'Intense green fluorescence in NaOH: fluorescein formed (resorcinol).' } },
     acetanilide: { name: 'acetanilide', state: 'White shiny flakes; odourless.', mp: 114, el: 'N', sol: 'piii', t: { naohheat: 'No ammonia. On prolonged boiling, oily drops and the smell of aniline (amide hydrolysis to aniline + acetate).' } },
     benzamide: { name: 'benzamide', state: 'White crystals; odourless.', mp: 128, el: 'N', sol: 'piii', t: { naohheat: 'Ammonia evolved on warming (turns red litmus blue): a primary amide.' } },
     urea: { name: 'urea', state: 'White crystals; odourless.', mp: 133, el: 'N', sol: 'ssss', t: { naohheat: 'Ammonia evolved on warming.', biuret: 'Heated dry, then CuSO₄ + NaOH: violet colour (biuret).' } },
-    glucose: { name: 'glucose', state: 'White crystalline powder; sweet taste (do not taste in the lab).', mp: 146, el: '', sol: 'ssii', t: { molisch: 'Violet ring at the junction (carbohydrate).', fehling: 'Red precipitate of Cu₂O: a reducing sugar.', tollens: 'Silver mirror.', kmno4: 'Decolourised.' }, note: 'chars on strong heating' },
+    glucose: { name: 'glucose', state: 'White crystalline powder; sweet taste (do not taste in the lab).', mp: 146, el: '', sol: 'ssss', t: { molisch: 'Violet ring at the junction (carbohydrate).', fehling: 'Red precipitate of Cu₂O: a reducing sugar.', tollens: 'Silver mirror.', kmno4: 'Decolourised.' }, note: 'chars on strong heating' },
     naphthalene: { name: 'naphthalene', state: 'White shiny flakes; strong mothball odour; sublimes.', mp: 80, el: '', sol: 'iiii', t: {} },
     dnb: { name: 'm-dinitrobenzene', state: 'Pale yellow needles; odourless.', mp: 90, el: 'N', sol: 'iiii', t: { nitro: 'Zn/NH₄Cl, then Tollens: grey-black precipitate (Mulliken–Barker): a nitro group. With acetone and NaOH: violet colour (Janovsky, typical of m-dinitro compounds).' } },
-    sulfanilic: { name: 'sulfanilic acid', state: 'White to greyish crystals; odourless; decomposes without melting (≈ 288 °C).', mp: 288, el: 'NS', sol: 'pspi', t: { nahco3: 'Slow effervescence: an acidic –SO₃H group.', azo: 'Diazotised, then coupled with alkaline β-naphthol: orange-red dye (a primary aromatic amine).' } },
+    sulfanilic: { name: 'sulfanilic acid', state: 'White to greyish crystals; odourless.', mp: 288, el: 'NS', sol: 'pspi', t: { nahco3: 'Slow effervescence: an acidic –SO₃H group.', azo: 'Diazotised, then coupled with alkaline β-naphthol: orange-red dye (a primary aromatic amine).' } },
     acetone: { name: 'acetone', liquid: true, state: 'Colourless mobile liquid; sweet, pungent odour.', bp: 56, el: '', sol: 'ssss', t: { dnp: 'Yellow-orange precipitate (2,4-DNP derivative): a carbonyl.', iodoform: 'Yellow precipitate of CHI₃ with an antiseptic smell: CH₃CO– group.' } },
     ethanol: { name: 'ethanol', liquid: true, state: 'Colourless liquid; characteristic spirit odour.', bp: 78, el: '', sol: 'ssss', t: { iodoform: 'Yellow precipitate of CHI₃: CH₃CH(OH)– group.', can: 'Red colour with ceric ammonium nitrate: an alcohol.' } },
     benzaldehyde: { name: 'benzaldehyde', liquid: true, state: 'Colourless to pale yellow oily liquid; bitter-almond odour.', bp: 178, el: '', sol: 'iiii', t: { dnp: 'Orange-red precipitate: a carbonyl.', tollens: 'Silver mirror: an aldehyde.', kmno4: 'Decolourised.' } },
@@ -32,6 +32,8 @@
     chlorobenzene: { name: 'chlorobenzene', liquid: true, state: 'Colourless liquid; faint almond-like odour; heavier than water.', bp: 132, el: 'Cl', sol: 'iiii', t: {} },
     nitrobenzene: { name: 'nitrobenzene', liquid: true, state: 'Pale yellow oily liquid; bitter-almond odour; heavier than water.', bp: 211, el: 'N', sol: 'iiii', t: { nitro: 'Zn/NH₄Cl, then Tollens: grey-black precipitate (Mulliken–Barker): a nitro group.' } },
   };
+  // compounds that contain oxygen (for the element summary)
+  const ORGO = { benzoic: 1, salicylic: 1, oxalic: 1, cinnamic: 1, phenol: 1, naphthol: 1, resorcinol: 1, acetanilide: 1, benzamide: 1, urea: 1, glucose: 1, dnb: 1, sulfanilic: 1, acetone: 1, ethanol: 1, benzaldehyde: 1, acetophenone: 1, nitrobenzene: 1 };
   const OT = [
     ['look', 'Preliminary', 'Appearance and odour'], ['mpbp', 'Preliminary', 'Melting or boiling point'], ['sol', 'Preliminary', 'Solubility (water, NaOH, NaHCO₃, HCl)'], ['lass', 'Preliminary', 'Lassaigne’s test (N, S, halogens)'],
     ['nahco3', 'Functional groups', 'NaHCO₃ solution'], ['fecl3', 'Functional groups', 'Neutral FeCl₃'], ['br2', 'Functional groups', 'Bromine water'], ['kmno4', 'Functional groups', 'Dilute KMnO₄ (Baeyer)'],
@@ -45,7 +47,7 @@
     const o = ORG[id];
     if (test === 'look') return o.state;
     if (test === 'mpbp') return o.liquid ? 'Boils at ' + (o.bp - 0.5 + Math.random()).toFixed(0) + '–' + (o.bp + 1).toFixed(0) + ' °C.' : o.mp > 250 ? 'Does not melt below 280 °C; darkens and decomposes.' : 'Melts sharply at ' + (o.mp - 1).toFixed(0) + '–' + o.mp.toFixed(0) + ' °C.' + (o.note ? ' (' + o.note + ')' : '');
-    if (test === 'sol') { const t = ['water', '5 % NaOH', '5 % NaHCO₃', '5 % HCl'], s = o.sol.split(''); if (o.t.nahco3 && s[2] === 's') s[2] = 'e'; return t.map((x, i) => x + ': ' + SOLW[s[i]]).join('; ') + '.'; }
+    if (test === 'sol') { const t = ['water', '5 % NaOH', '5 % NaHCO₃', '5 % HCl'], s = o.sol.split(''); if (o.t.nahco3 && s[2] === 's') s[2] = 'e'; return t.map((x, i) => x + ': ' + SOLW[s[i]]).join('; ') + '.' + (s[0] === 's' ? ' (Soluble in water, so solubility in the acid and base solutions says nothing about acidity: use the NaHCO₃ effervescence and functional-group tests.)' : ''); }
     if (test === 'lass') { const e = o.el; return 'Nitrogen: ' + (e.includes('N') ? 'Prussian-blue colour (present)' : 'no blue colour (absent)') + '. Sulfur: ' + (e.includes('S') ? 'violet with sodium nitroprusside; black PbS with lead acetate (present)' : 'no violet colour (absent)') + '. Halogen: ' + (e.includes('Cl') ? 'white precipitate with AgNO₃ after boiling with HNO₃, soluble in NH₃ (chlorine present)' : 'no precipitate with AgNO₃ (absent)') + '.'; }
     return o.t[test] || NEG[test];
   }
@@ -72,7 +74,7 @@
       api.$('oCheck').onclick = () => {
         const v = api.$('oN').value, o = ORG[st.id]; if (!v) return;
         const ok = v === o.name, keyTests = Object.keys(o.t).map((k) => OT.find((x) => x[0] === k)[2] + ': ' + o.t[k]);
-        api.$('oVerdict').innerHTML = '<div class="callout ' + (ok ? 'ok' : 'bad') + '">' + (ok ? 'Correct: ' : 'Not quite. It was ') + '<b>' + esc(o.name) + '</b>' + (o.liquid ? ' (b.p. ' + o.bp + ' °C)' : o.mp > 250 ? '' : ' (m.p. ' + o.mp + ' °C)') + '.</div><div class="work-lines">' + ['Elements: ' + (o.el ? o.el.split('').join(', ') : 'C, H, O only'), 'Solubility: ' + orgObserve(st.id, 'sol')].concat(keyTests.length ? keyTests : ['No functional-group test is positive: a neutral hydrocarbon or aryl halide; the m.p./b.p. and Lassaigne’s test decide.']).map(esc).join('<br>') + '</div>';
+        api.$('oVerdict').innerHTML = '<div class="callout ' + (ok ? 'ok' : 'bad') + '">' + (ok ? 'Correct: ' : 'Not quite. It was ') + '<b>' + esc(o.name) + '</b>' + (o.liquid ? ' (b.p. ' + o.bp + ' °C)' : o.mp > 250 ? '' : ' (m.p. ' + o.mp + ' °C)') + '.</div><div class="work-lines">' + ['Elements: ' + ['C', 'H'].concat(ORGO[st.id] ? ['O'] : [], o.el.split('').filter(Boolean)).join(', '), 'Solubility: ' + orgObserve(st.id, 'sol')].concat(keyTests.length ? keyTests : ['No functional-group test is positive: a neutral hydrocarbon or aryl halide; the m.p./b.p. and Lassaigne’s test decide.']).map(esc).join('<br>') + '</div>';
       };
       render();
     },
@@ -80,7 +82,9 @@
 
   // ================================================================ melting and boiling points
   const MPS = { benzoic: ['benzoic acid', 122], naphthol: ['β-naphthol', 123], urea: ['urea', 133], cinnamic: ['cinnamic acid', 133] };
-  const BPS = { acetone: ['acetone', 56], etac: ['ethyl acetate', 77], ethanol: ['ethanol', 78], chlorobenzene: ['chlorobenzene', 132] };
+  const BPS = { acetone: ['acetone', 56], methanol: ['methanol', 65], ethanol: ['ethanol', 78], chlorobenzene: ['chlorobenzene', 132] };
+  const SYN = { benzoic: ['benzoicacid', 'benzenecarboxylicacid'], naphthol: ['βnaphthol', 'betanaphthol', 'bnaphthol', '2naphthol', 'naphthalen2ol', '2hydroxynaphthalene'], urea: ['urea', 'carbamide'], cinnamic: ['cinnamicacid', '3phenylpropenoicacid', '3phenylprop2enoicacid', 'transcinnamicacid'], acetone: ['acetone', 'propanone', 'dimethylketone'], methanol: ['methanol', 'methylalcohol'], ethanol: ['ethanol', 'ethylalcohol'], chlorobenzene: ['chlorobenzene', 'phenylchloride'] };
+  const nameOK = (v, key) => { const t = v.toLowerCase().replace(/[^a-zβ0-9]/g, ''); return SYN[key].some((x) => t === x || t === x.replace('acid', '')); };
   PX.add({
     id: 'mp-bp', area: 'Organic chemistry', title: 'Melting point and boiling point', short: 'Capillary melting point, mixed m.p., Siwoloboff b.p.', aspect: 0.55,
     steps: ['Melting point: a little dry, powdered sample in a capillary sealed at one end, tied to the thermometer bulb in a Thiele tube (liquid paraffin). Heat quickly to about 15 °C below the expected m.p., then only 1–2 °C per minute.', 'Record the temperature when the first liquid appears and when the last solid disappears. A pure compound melts sharply (within 1–2 °C); impurities lower and broaden the range.', 'Mixed melting point: mix the unknown with an authentic sample. If they are the same compound the m.p. is unchanged; if different, it is depressed and broad.', 'Boiling point (Siwoloboff): a few drops in a fusion tube with an inverted capillary. Heat until a rapid stream of bubbles leaves the capillary, stop heating, and record the temperature at which bubbling stops and the liquid is sucked into the capillary: there the vapour pressure equals the atmospheric pressure.'],
@@ -107,8 +111,8 @@
         render(); answer();
       };
       const answer = () => {
-        if (st.mode === 'mp') api.answer([{ id: 'n', label: 'The unknown solid is', text: true, accept: (v) => v.trim().toLowerCase().replace(/[^a-z]/g, '').includes(MPS[st.unk][0].toLowerCase().replace(/[^a-z]/g, '').replace('naphthol', 'naphthol')), truthText: MPS[st.unk][0] + ' (m.p. ' + MPS[st.unk][1] + ' °C)' }], ['Two candidates melt at almost the same temperature, so the melting point alone cannot decide.', 'Mixed with the authentic sample of the same compound the m.p. is unchanged; mixed with the other it is lowered by several degrees and the range is broad (the second compound acts as an impurity).']);
-        else api.answer([{ id: 'n', label: 'The unknown liquid is', text: true, accept: (v) => v.trim().toLowerCase().replace(/\s+/g, ' ').includes(BPS[st.unkL][0]), truthText: BPS[st.unkL][0] + ' (b.p. ' + BPS[st.unkL][1] + ' °C)' }], ['Ethyl acetate (77 °C) and ethanol (78 °C) boil within 1 °C of each other: here a boiling point alone cannot tell them apart, and a chemical test (e.g. iodoform, CAN or the smell) is needed.']);
+        if (st.mode === 'mp') api.answer([{ id: 'n', label: 'The unknown solid is', text: true, accept: (v) => nameOK(v, st.unk), truthText: MPS[st.unk][0] + ' (m.p. ' + MPS[st.unk][1] + ' °C)' }], ['Two candidates melt at almost the same temperature, so the melting point alone cannot decide.', 'Mixed with the authentic sample of the same compound the m.p. is unchanged; mixed with the other it is lowered by several degrees and the range is broad (the second compound acts as an impurity).']);
+        else api.answer([{ id: 'n', label: 'The unknown liquid is', text: true, accept: (v) => nameOK(v, st.unkL), truthText: BPS[st.unkL][0] + ' (b.p. ' + BPS[st.unkL][1] + ' °C)' }], ['The candidates boil at 56 (acetone), 65 (methanol), 78 (ethanol) and 132 °C (chlorobenzene): a careful Siwoloboff reading (±1 °C) separates them.', 'Liquids with boiling points within a few degrees of each other (e.g. ethyl acetate 77 °C and ethanol 78 °C) cannot be told apart this way: a chemical test is then needed.']);
       };
       S.mpTick = (dt) => {
         if (st.mode === 'mp') {
@@ -287,18 +291,19 @@
         api.$('actions').innerHTML = (st.mode === 'tlc' ? btn('dev', 'Develop the plate', true) + btn('uv', 'View under UV light (254 nm)') +
           (st.uv ? '<span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"><select id="tW" aria-label="What the measuring line is on" style="min-height:44px;border-radius:12px;padding:8px 10px;background:rgba(10,3,22,.55);color:inherit;border:1px solid var(--line)">' + what.map((x) => '<option value="' + x[0] + '">' + x[1] + '</option>').join('') + '</select>' + btn('note', 'Note this distance') + '</span>' : '') : btn('col', 'Run the column', true)) + btn('reset', 'New tablet');
       };
-      api.$('params').oninput = (ev) => { if (ev.target.id === 'tE') { st.e = ev.target.value; st.devd = false; st.run = 0; } if (ev.target.id === 'tA') { st.acid = ev.target.value === '1'; st.devd = false; st.run = 0; } if (ev.target.id === 'tM') { st.mode = ev.target.value; st.run = 0; render(); } };
+      const newPlate = () => { st.devd = false; st.run = 0; st.uv = false; st.my = null; st.meas = []; api.answer(null); api.table('', [], []); api.msg(''); render(); };   /* a new eluent needs a new plate */
+      api.$('params').oninput = (ev) => { if (ev.target.id === 'tE') { st.e = ev.target.value; newPlate(); } if (ev.target.id === 'tA') { st.acid = ev.target.value === '1'; newPlate(); } if (ev.target.id === 'tM') { st.mode = ev.target.value; newPlate(); } };
       api.$('actions').onclick = (ev) => {
         const b = ev.target.closest('[data-a]'); if (!b) return; const a = b.dataset.a;
         if (a === 'reset') { setup(); return; }
-        if (a === 'dev') { st.run = 0.001; st.devd = true; api.msg('Developing…'); }
+        if (a === 'dev') { st.uv = false; st.my = null; st.meas = []; api.answer(null); api.table('', [], []); st.run = 0.001; st.devd = true; render(); api.msg('Developing…'); }
         if (a === 'col') { st.run = 0.001; api.msg('Eluting: watch the bands. The compound held least strongly by the silica comes off first.'); }
         if (a === 'uv') {
           if (!st.devd || st.run < 1) { api.msg('Develop the plate fully first, then mark the solvent front.', 'warn'); return; }
           st.uv = true; render();
           const good = Object.keys(TLC).every((k) => { const rf = st.rf(k); return rf > 0.1 && rf < 0.9; });
           api.msg('Under UV the plate glows green and the compounds show as dark spots. Use the ruler: 0 is the start line. Click or tap the centre of each spot (or the solvent front) to place the measuring line, fine-tune with the ↑ ↓ keys, then press “Note this distance”. R<sub>f</sub> = spot distance / front distance.' + (good ? '' : '<br><b>Note:</b> some spots are very close to the start or the front: try a different eluent so that R<sub>f</sub> lies between 0.2 and 0.8.') + (!st.acid ? '<br>The aspirin spot is streaked: adding acetic acid to the eluent sharpens it.' : ''), good ? 'ok' : 'warn');
-          api.answer([{ id: 'r', label: 'R_f of caffeine in this eluent', unit: '', truth: st.rf('caffeine'), dp: 2, abs: true, tol: 0.03 }, { id: 'c', label: 'Components of the tablet (names, comma-separated)', text: true, accept: (v) => { const s2 = v.toLowerCase(); return Object.keys(TLC).every((k) => s2.includes(TLC[k].name) === st.tab.includes(k)); }, truthText: st.tab.map((k) => TLC[k].name).join(', ') }],
+          api.answer([{ id: 'r', label: 'R_f of caffeine in this eluent', unit: '', truth: st.rf('caffeine'), dp: 2, abs: true, tol: 0.03 }, { id: 'c', label: 'Components of the tablet (names, comma-separated)', text: true, accept: (v) => { const s2 = v.toLowerCase().replace(/\b(no|not|without)\s+\w+/g, ''), syn = { aspirin: ['aspirin', 'acetylsalicylic'], paracetamol: ['paracetamol', 'acetaminophen', '4-acetamidophenol'], caffeine: ['caffeine'] }; return Object.keys(TLC).every((k) => syn[k].some((n) => s2.includes(n)) === st.tab.includes(k)); }, truthText: st.tab.map((k) => TLC[k].name).join(', ') }],
             () => ['solvent front = 8.00 cm from the start line', ...Object.keys(TLC).map((k) => `${TLC[k].name}: spot at ${(8 * st.rf(k)).toFixed(2)} cm → R_f = ${(8 * st.rf(k)).toFixed(2)} / 8.00 = ${st.rf(k).toFixed(2)}`), 'Each tablet spot is matched to the standard with the same R_f (same eluent, same plate). Co-spotting (tablet + standard in one lane) confirms it: a single spot means the same compound.', 'Order of R_f on silica here: aspirin > paracetamol > caffeine.']);
         }
         if (a === 'note') {
@@ -337,15 +342,15 @@
         if (st.my != null && st.uv) {
           const y = Math.max(frontFull - cm * 0.5, Math.min(start + 2, st.my)), d = Math.max(0, Math.round(((start - y) / cm) / 0.05) * 0.05);
           g.strokeStyle = '#e0336b'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(rx, y); g.lineTo(px + pw + 8, y); g.stroke(); g.lineWidth = 1;
-          const bx = px + pw + 124 > w ? w - 112 : px + pw + 14; K.display(g, w, d.toFixed(2) + ' cm', bx, Math.max(8, y - 23), 110);
+          if (px + pw + 124 <= w) K.display(g, w, d.toFixed(2) + ' cm', px + pw + 14, Math.max(8, y - 23), 110); else K.caption('Measuring line: ' + d.toFixed(2) + ' cm from the start line');
         }
         if (w >= 620) { K.label(g, w, 'A aspirin · P paracetamol · C caffeine', px + pw + 14, h * 0.1); K.label(g, w, ELU[st.e][0] + (st.acid ? ' + AcOH' : ''), px + pw + 14, h * 0.1 + 18); }
       } else {
         const cx = w * 0.45, top = h * 0.05, bot = h * 0.9; g.fillStyle = '#e8e4d8'; g.fillRect(cx - 18, top + 20, 36, bot - top - 40); g.strokeStyle = 'rgba(255,255,255,.6)'; g.strokeRect(cx - 18, top, 36, bot - top);
         const cols = { aspirin: '#9c6ad8', paracetamol: '#d86a9c', caffeine: '#6a9cd8' };
         st.tab.forEach((k) => { const v = 1 / (1 + kOf(k, st.e)), y = top + 30 + (bot - top - 60) * Math.min(1.2, st.run * 2.4 * v); if (y < bot - 20) { g.fillStyle = K.rgba(cols[k], 0.85); g.fillRect(cx - 17, y, 34, 10); } });
-        K.label(g, w, 'bands (coloured here for clarity): ' + st.tab.map((k) => TLC[k].name).join(', '), w * 0.58, h * 0.2);
-        const order = st.tab.slice().sort((a, b) => kOf(a, st.e) - kOf(b, st.e)); K.label(g, w, 'elution order: ' + order.map((k) => TLC[k].name).join(' → '), w * 0.58, h * 0.3);
+        K.label(g, w, st.tab.length + ' band' + (st.tab.length > 1 ? 's' : '') + ' (coloured here for clarity)', w * 0.58, h * 0.2);
+        K.caption('The band that moves fastest is the one held least strongly by the silica; collect fractions and check each by TLC against the standards.');
       }
     },
   });
@@ -356,8 +361,8 @@
     ethylacetate: { name: 'ethyl acetate', f: 'C₄H₈O₂', C: 4, H: 8, nmr: [[1.26, 't', 3, 'CH₃ of the ethyl group'], [2.05, 's', 3, 'CH₃ on C=O: no neighbours, singlet'], [4.12, 'q', 2, 'OCH₂: strongly deshielded by the ester oxygen']], ir: [[2985, 0.5, 30, 'sp³ C–H'], [1742, 1, 18, 'ester C=O stretch (higher than ketones)'], [1240, 0.9, 30, 'C–O stretch of the ester']] },
     acetone: { name: 'acetone', f: 'C₃H₆O', C: 3, H: 6, nmr: [[2.17, 's', 6, 'two equivalent CH₃ next to C=O: one singlet']], ir: [[3000, 0.4, 30, 'C–H'], [1715, 1, 18, 'ketone C=O stretch'], [1220, 0.6, 25, 'C–C(=O)–C stretch']] },
     toluene: { name: 'toluene', f: 'C₇H₈', C: 7, H: 8, nmr: [[2.35, 's', 3, 'Ar–CH₃ (benzylic)'], [7.2, 'm', 5, 'five aromatic H (ring current deshields them)']], ir: [[3030, 0.3, 25, 'aromatic C–H (above 3000)'], [2920, 0.5, 25, 'sp³ C–H'], [1605, 0.6, 12, 'aromatic C=C'], [1495, 0.7, 12, 'aromatic C=C'], [730, 0.9, 15, 'C–H bend, monosubstituted ring']] },
-    acetophenone: { name: 'acetophenone', f: 'C₈H₈O', C: 8, H: 8, nmr: [[2.6, 's', 3, 'CH₃ on C=O'], [7.45, 'm', 2, 'meta H'], [7.56, 'm', 1, 'para H'], [7.96, 'd', 2, 'ortho H: deshielded by the C=O']], ir: [[3060, 0.25, 25, 'aromatic C–H (weak)'], [2925, 0.2, 25, 'C–H of CH₃'], [1685, 1, 18, 'conjugated ketone C=O (lower than 1715)'], [1600, 0.6, 12, 'aromatic C=C'], [1265, 0.8, 25, 'C–C(=O)']] },
-    benzaldehyde: { name: 'benzaldehyde', f: 'C₇H₆O', C: 7, H: 6, nmr: [[10.0, 's', 1, 'CHO: aldehyde H, very deshielded'], [7.52, 'm', 2, 'meta H'], [7.62, 'm', 1, 'para H'], [7.87, 'd', 2, 'ortho H']], ir: [[3060, 0.25, 25, 'aromatic C–H (weak)'], [2820, 0.5, 15, 'aldehyde C–H (Fermi doublet)'], [2730, 0.5, 15, 'aldehyde C–H (Fermi doublet)'], [1700, 1, 18, 'conjugated aldehyde C=O']] },
+    acetophenone: { name: 'acetophenone', f: 'C₈H₈O', C: 8, H: 8, nmr: [[2.6, 's', 3, 'CH₃ on C=O'], [7.45, 't', 2, 'meta H (appears as a triplet: two ortho-type neighbours)'], [7.56, 't', 1, 'para H (triplet)'], [7.96, 'd', 2, 'ortho H: deshielded by the C=O']], ir: [[3060, 0.25, 25, 'aromatic C–H (weak)'], [2925, 0.2, 25, 'C–H of CH₃'], [1685, 1, 18, 'conjugated ketone C=O (lower than 1715)'], [1600, 0.6, 12, 'aromatic C=C'], [1265, 0.8, 25, 'C–C(=O)']] },
+    benzaldehyde: { name: 'benzaldehyde', f: 'C₇H₆O', C: 7, H: 6, nmr: [[10.0, 's', 1, 'CHO: aldehyde H, very deshielded'], [7.52, 't', 2, 'meta H (triplet)'], [7.62, 't', 1, 'para H (triplet)'], [7.87, 'd', 2, 'ortho H']], ir: [[3060, 0.25, 25, 'aromatic C–H (weak)'], [2820, 0.3, 15, 'aldehyde C–H (Fermi doublet, medium)'], [2730, 0.3, 15, 'aldehyde C–H (Fermi doublet, medium)'], [1700, 1, 18, 'conjugated aldehyde C=O']] },
     propanoic: { name: 'propanoic acid', f: 'C₃H₆O₂', C: 3, H: 6, nmr: [[1.16, 't', 3, 'CH₃'], [2.38, 'q', 2, 'CH₂ next to C=O'], [11.7, 'br s', 1, 'COOH: very deshielded, broad']], ir: [[3000, 0.9, 380, 'very broad O–H of a hydrogen-bonded acid dimer (2500–3300)'], [1715, 1, 20, 'acid C=O'], [1240, 0.7, 30, 'C–O']] },
     ipa: { name: '2-propanol', f: 'C₃H₈O', C: 3, H: 8, nmr: [[1.2, 'd', 6, 'two CH₃ split by one CH (doublet)'], [4.02, 'sept', 1, 'CH–O: six neighbours → septet'], [2.2, 'br s', 1, 'O–H']], ir: [[3350, 0.9, 120, 'broad O–H'], [2970, 0.6, 30, 'C–H'], [1130, 0.8, 25, 'C–O (secondary alcohol)']] },
     butanone: { name: 'butanone', f: 'C₄H₈O', C: 4, H: 8, nmr: [[1.06, 't', 3, 'CH₃ of the ethyl group'], [2.14, 's', 3, 'CH₃ on C=O'], [2.44, 'q', 2, 'CH₂ on C=O']], ir: [[2980, 0.5, 30, 'C–H'], [1715, 1, 18, 'ketone C=O'], [1170, 0.6, 25, 'C–C(=O)']] },
@@ -395,10 +400,11 @@
       // lines narrower than a pixel would be drawn at random heights, so every line is at least ~1 px wide;
       // heights then follow the number of protons (broad O–H / COOH signals are lower and wider, as in real spectra)
       const ppx = 12.8 / (R1 - L1), lines = [];
-      d.nmr.forEach((p) => { const pat = MULT[p[1]], tot = pat.reduce((a, b) => a + b, 0), J = 7 / 400, wdt = Math.max(p[1].startsWith('br') ? 0.06 : 0.004, ppx * 0.9); pat.forEach((r, i) => lines.push([p[0] + (i - (pat.length - 1) / 2) * J, (p[2] * r) / tot, wdt])); });
+      const MOFF = [-2.6, -1.4, -0.5, 0.3, 1.1, 2.4];   /* a multiplet: unevenly spaced lines, not a clean n + 1 pattern */
+      d.nmr.forEach((p) => { const pat = p[1] === 'm' ? [1, 2, 3, 3, 2, 1] : MULT[p[1]], tot = pat.reduce((a, b) => a + b, 0), J = 7 / 400, wdt = Math.max(p[1].startsWith('br') ? 0.06 : 0.004, ppx * 0.9); pat.forEach((r, i) => lines.push([p[0] + (p[1] === 'm' ? MOFF[i] : i - (pat.length - 1) / 2) * J, (p[2] * r) / tot, wdt])); });
       const yAt = (ppm) => lines.reduce((a, l) => a + (l[1] * (ppx * 0.9 / l[2])) / (1 + ((ppm - l[0]) / l[2]) ** 2), 0);
       const pk = (p) => { let m = 0; for (let k = -6; k <= 6; k++) m = Math.max(m, yAt(p[0] + k * 0.002)); return m; };
-      const maxY = Math.max(...d.nmr.map(pk)) * 1.05, H = B1 - T1 - 40, Y = (v) => B1 - (v / maxY) * H;
+      const maxY = Math.max(...d.nmr.map(pk)) * 1.05, H = B1 - T1 - 48, Y = (v) => B1 - (v / maxY) * H;
       g.strokeStyle = '#ce72f5'; g.lineWidth = 1.2; g.beginPath();
       for (let x = L1; x <= R1; x++) { let v = 0; for (let k = 0; k < 4; k++) v = Math.max(v, yAt(((R1 - x - k / 4) / (R1 - L1)) * 12.8 - 0.3)); x === L1 ? g.moveTo(x, Y(v)) : g.lineTo(x, Y(v)); }
       g.stroke(); g.lineWidth = 1;
@@ -407,14 +413,23 @@
       g.strokeStyle = 'rgba(124,240,180,.75)'; g.beginPath();
       for (let x = L1; x <= R1; x++) { const ppm = ((R1 - x) / (R1 - L1)) * 12.8 - 0.3; let cum = 0; d.nmr.forEach((p) => { const wd = p[1].startsWith('br') ? 0.08 : 0.03 + 0.012 * MULT[p[1]].length; cum += p[2] * (0.5 + Math.atan((p[0] - ppm) / wd) / Math.PI); }); const y = ib - (cum / totH) * IH; x === L1 ? g.moveTo(x, y) : g.lineTo(x, y); }
       g.stroke();
-      // labels: above each peak top; crowded labels are stacked and joined to their peak by a thin leader line
+      // labels: one row above the spectrum, spread sideways so they never overlap, each joined to its own peak
       g.font = '11px Hanken Grotesk, sans-serif'; g.textAlign = 'center';
-      const lab = d.nmr.map((p) => ({ x: X(p[0]), top: Y(pk(p)), t: p[2] + 'H' })).sort((a, b) => a.x - b.x), placed = [];
-      lab.forEach((l) => { let y = Math.max(T1 + 12, l.top - 6); const wl = g.measureText(l.t).width + 6; while (placed.some((q) => Math.abs(q.x - l.x) < (wl + q.w) / 2 && Math.abs(q.y - y) < 13)) y -= 13; placed.push({ x: l.x, y, w: wl }); l.y = Math.max(T1 + 2, y); });
-      lab.forEach((l) => { if (l.top - l.y > 10) { g.strokeStyle = 'rgba(124,240,180,.45)'; g.beginPath(); g.moveTo(l.x, l.y + 2); g.lineTo(l.x, l.top - 2); g.stroke(); } g.fillStyle = '#0d0618'; const tw = g.measureText(l.t).width; g.fillRect(l.x - tw / 2 - 2, l.y - 10, tw + 4, 12); g.fillStyle = '#7cf0b4'; g.fillText(l.t, l.x, l.y); });
+      const lab = d.nmr.map((p) => ({ px: X(p[0]), top: Y(pk(p)), t: p[2] + 'H' })).sort((a, b) => a.px - b.px), rowY = T1 + 12;
+      lab.forEach((l) => { l.w = g.measureText(l.t).width + 8; l.x = l.px; });
+      for (let pass = 0; pass < 30; pass++) {          // push apart, then keep each cluster centred on its peaks
+        let moved = false;
+        for (let k = 1; k < lab.length; k++) { const need = (lab[k - 1].w + lab[k].w) / 2 + 3, gap = lab[k].x - lab[k - 1].x; if (gap < need) { const sh = (need - gap) / 2; lab[k - 1].x -= sh; lab[k].x += sh; moved = true; } }
+        lab.forEach((l) => { l.x = Math.max(L1 + l.w / 2, Math.min(R1 - l.w / 2, l.x)); });
+        if (!moved) break;
+      }
+      lab.forEach((l) => {
+        g.strokeStyle = 'rgba(124,240,180,.55)'; g.beginPath(); g.moveTo(l.x, rowY + 3); g.lineTo(l.x, rowY + 9); g.lineTo(l.px, Math.min(l.top - 3, rowY + 22)); g.lineTo(l.px, l.top - 3); g.stroke();
+        g.fillStyle = '#0d0618'; g.fillRect(l.x - l.w / 2, rowY - 10, l.w, 13); g.fillStyle = '#7cf0b4'; g.fillText(l.t, l.x, rowY);
+      });
       // IR: 4000 -> 500 cm-1, % transmittance
       const T2 = Math.max(h * 0.58, B1 + 46), B2 = h - 26, X2 = (nu) => R1 - ((nu - 500) / 3500) * (R1 - L1);
-      g.fillStyle = 'rgba(235,225,250,.85)'; g.font = '12px Hanken Grotesk, sans-serif'; g.textAlign = 'left'; g.fillText('IR (liquid film)', L1, T2 - 8);
+      g.fillStyle = 'rgba(235,225,250,.85)'; g.font = '12px Hanken Grotesk, sans-serif'; g.textAlign = 'left'; g.save(); g.translate(12, (T2 + B2) / 2); g.rotate(-Math.PI / 2); g.textAlign = 'center'; g.font = '10px Hanken Grotesk, sans-serif'; g.fillText('% T', 0, 0); g.restore(); g.textAlign = 'left'; g.font = '12px Hanken Grotesk, sans-serif'; g.fillText('IR (liquid film)', L1, T2 - 8);
       g.strokeStyle = 'rgba(255,255,255,.25)'; g.strokeRect(L1, T2, R1 - L1, B2 - T2);
       g.textAlign = 'center'; g.font = '10px Hanken Grotesk, sans-serif'; for (let nu = 4000; nu >= 500; nu -= 500) g.fillText(String(nu), X2(nu), B2 + 12); g.fillText('wavenumber / cm⁻¹', (L1 + R1) / 2, B2 + 24);
       const tr = (nu) => { let a = 0.04 + 0.006 * Math.sin(nu / 37) + 0.005 * Math.sin(nu / 11.3 + 1) + 0.004 * Math.sin(nu / 5.7); d.ir.forEach((b) => (a += b[1] / (1 + ((nu - b[0]) / b[2]) ** 2))); (d.fp || (d.fp = (() => { const r = L.rng([...st.id].reduce((x, ch) => x * 31 + ch.charCodeAt(0), 7)); const out = [[1460, 0.3, 12]].concat(d.nmr.some((p) => p[2] % 3 === 0 && p[0] < 2.7) ? [[1375, 0.22, 10]] : []); /* CH₃ umbrella bend only when there is a CH₃ */ for (let k = 0; k < 5; k++) out.push([620 + r() * 780, 0.1 + r() * 0.25, 6 + r() * 10]); return out; })())).forEach((b) => (a += b[1] / (1 + ((nu - b[0]) / b[2]) ** 2))); return Math.pow(10, -Math.min(2, a)); };   // C–H bends near 1460/1375 plus compound-specific fingerprint bands
