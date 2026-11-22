@@ -28,21 +28,22 @@
     const X = (x) => L + ((x - xmin) / (xmax - xmin)) * pw, Y = (y) => T + ph - ((y - ymin) / (ymax - ymin)) * ph;
     g.font = '11px Hanken Grotesk, system-ui, sans-serif'; g.lineWidth = 1;
     const nx = nice(xmin, xmax, Math.max(3, Math.floor(pw / 70))), ny = nice(ymin, ymax, Math.max(3, Math.floor(ph / 40)));
-    g.strokeStyle = 'rgba(255,255,255,.08)'; g.fillStyle = 'rgba(235,225,250,.7)'; g.textAlign = 'center';
+    const T_ = window.TH, cl = (c) => (T_ ? T_.col(c) : c);
+    g.strokeStyle = T_ ? T_.grid(.08) : 'rgba(255,255,255,.08)'; g.fillStyle = T_ ? T_.text(.7) : 'rgba(235,225,250,.7)'; g.textAlign = 'center';
     nx.ticks.forEach((v) => { g.beginPath(); g.moveTo(X(v), T); g.lineTo(X(v), T + ph); g.stroke(); g.fillText(fmt(v, nx.step), X(v), T + ph + 14); });
     g.textAlign = 'right';
     ny.ticks.forEach((v) => { g.beginPath(); g.moveTo(L, Y(v)); g.lineTo(L + pw, Y(v)); g.stroke(); g.fillText(fmt(v, ny.step), L - 6, Y(v) + 4); });
-    g.strokeStyle = 'rgba(255,255,255,.35)'; g.strokeRect(L, T, pw, ph);
+    g.strokeStyle = T_ ? T_.line(.35) : 'rgba(255,255,255,.35)'; g.strokeRect(L, T, pw, ph);
     g.save(); g.beginPath(); g.rect(L, T, pw, ph); g.clip();
-    (o.vlines || []).forEach((v) => { g.strokeStyle = v.color || '#ffcb83'; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(X(v.x), T); g.lineTo(X(v.x), T + ph); g.stroke(); g.setLineDash([]); if (v.label) { g.fillStyle = v.color || '#ffcb83'; g.textAlign = 'left'; g.fillText(v.label, X(v.x) + 4, T + 12); } });
-    (o.hlines || []).forEach((v) => { g.strokeStyle = v.color || '#ffcb83'; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(L, Y(v.y)); g.lineTo(L + pw, Y(v.y)); g.stroke(); g.setLineDash([]); });
+    (o.vlines || []).forEach((v) => { g.strokeStyle = cl(v.color || '#ffcb83'); g.setLineDash([5, 4]); g.beginPath(); g.moveTo(X(v.x), T); g.lineTo(X(v.x), T + ph); g.stroke(); g.setLineDash([]); if (v.label) { g.fillStyle = cl(v.color || '#ffcb83'); g.textAlign = 'left'; g.fillText(v.label, X(v.x) + 4, T + 12); } });
+    (o.hlines || []).forEach((v) => { g.strokeStyle = cl(v.color || '#ffcb83'); g.setLineDash([5, 4]); g.beginPath(); g.moveTo(L, Y(v.y)); g.lineTo(L + pw, Y(v.y)); g.stroke(); g.setLineDash([]); });
     (o.series || []).forEach((s) => {
-      const c = s.color || '#ce72f5', pts = s.pts.filter((p) => isFinite(p[0]) && isFinite(p[1]));
+      const c = cl(s.color || '#ce72f5'), pts = s.pts.filter((p) => isFinite(p[0]) && isFinite(p[1]));
       if (s.line && pts.length > 1) { g.strokeStyle = c; g.lineWidth = s.width || 2; g.beginPath(); pts.forEach((p, i) => (i ? g.lineTo(X(p[0]), Y(p[1])) : g.moveTo(X(p[0]), Y(p[1])))); g.stroke(); g.lineWidth = 1; }
       if (s.dots) { g.fillStyle = c; pts.forEach((p) => { g.beginPath(); g.arc(X(p[0]), Y(p[1]), s.r || 3.2, 0, 6.283); g.fill(); }); }
     });
     g.restore();
-    g.fillStyle = 'rgba(235,225,250,.8)'; g.textAlign = 'center';
+    g.fillStyle = T_ ? T_.text(.8) : 'rgba(235,225,250,.8)'; g.textAlign = 'center';
     if (o.xLabel) g.fillText(o.xLabel, L + pw / 2, h - 6);
     if (o.yLabel) { g.save(); g.translate(12, T + ph / 2); g.rotate(-Math.PI / 2); g.fillText(o.yLabel, 0, 0); g.restore(); }
     cv._map = { X, Y, xmin, xmax, ymin, ymax, L, T, pw, ph };

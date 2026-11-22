@@ -87,23 +87,23 @@
   function size() { const dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv.clientWidth || 760, h = Math.round(w * 0.5); if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.height = h + 'px'; } return { w, h, dpr }; }
   function frame() {
     const { w, h, dpr } = size(); g.setTransform(dpr, 0, 0, dpr, 0, 0); S.tt += 0.016;
-    const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#22123b'); bg.addColorStop(1, '#120a22'); g.fillStyle = bg; g.fillRect(0, 0, w, h);
+    TH.bg(g, w, h);
     const T = S.model ? tempAt(S.t) : 25, dT = S.model ? T - S.model.T0 : 0, e = S.exp;
     // outer cup
     const cx = w * 0.5, cy = h * 0.88, cw = w * 0.26, ch = h * 0.55;
-    g.fillStyle = 'rgba(240,235,250,.12)'; g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - cw / 2 - 10, cy - ch - 8); g.lineTo(cx - cw / 2, cy); g.lineTo(cx + cw / 2, cy); g.lineTo(cx + cw / 2 + 10, cy - ch - 8); g.stroke(); g.lineWidth = 1;
+    g.fillStyle = TH.tint(.12); g.strokeStyle = TH.line(.5); g.lineWidth = 2; g.beginPath(); g.moveTo(cx - cw / 2 - 10, cy - ch - 8); g.lineTo(cx - cw / 2, cy); g.lineTo(cx + cw / 2, cy); g.lineTo(cx + cw / 2 + 10, cy - ch - 8); g.stroke(); g.lineWidth = 1;
     // liquid colour reflects temperature
     const hot = Math.max(-1, Math.min(1, dT / 5)), col = hot >= 0 ? C.mix('#cfe6f5', '#ff9a6a', hot) : C.mix('#cfe6f5', '#6ab6ff', -hot), rg = C.hex2rgb(col);
     g.fillStyle = 'rgba(' + rg.join(',') + ',.85)'; g.beginPath(); g.moveTo(cx - cw / 2 - 6, cy - ch * 0.75); g.lineTo(cx - cw / 2 + 2, cy - 2); g.lineTo(cx + cw / 2 - 2, cy - 2); g.lineTo(cx + cw / 2 + 6, cy - ch * 0.75); g.fill();
     // stirrer swirl after mixing
-    if (S.mixed && S.t < TM + 120) { g.strokeStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.ellipse(cx, cy - ch * 0.5, cw * 0.3, 8, 0, 0, 6.283); g.stroke(); }
+    if (S.mixed && S.t < TM + 120) { g.strokeStyle = TH.line(.35); g.beginPath(); g.ellipse(cx, cy - ch * 0.5, cw * 0.3, 8, 0, 0, 6.283); g.stroke(); }
     // thermometer
-    const tx = cx + cw * 0.18, tTop = cy - ch - h * 0.12, tBot = cy - 14; g.fillStyle = 'rgba(255,255,255,.9)'; g.fillRect(tx - 5, tTop, 10, tBot - tTop);
+    const tx = cx + cw * 0.18, tTop = cy - ch - h * 0.12, tBot = cy - 14; g.fillStyle = 'rgba(255,255,255,.9)'; g.fillRect(tx - 5, tTop, 10, tBot - tTop); if (TH.light) { g.strokeStyle = TH.line(.35); g.strokeRect(tx - 5, tTop, 10, tBot - tTop); }
     const frac = Math.max(0.05, Math.min(1, (T - 15) / 25)); g.fillStyle = '#e53935'; g.fillRect(tx - 2.5, tBot - (tBot - tTop) * frac, 5, (tBot - tTop) * frac); g.beginPath(); g.arc(tx, tBot + 2, 8, 0, 6.283); g.fill();
     // digital display
     g.fillStyle = '#0d0618'; g.strokeStyle = 'rgba(206,114,245,.7)'; const sw = Math.min(w * 0.3, 200); g.beginPath(); g.roundRect ? g.roundRect(12, 12, sw, 52, 12) : g.rect(12, 12, sw, 52); g.fill(); g.stroke();
     g.fillStyle = '#7cf0b4'; g.font = '700 ' + Math.max(18, w * 0.03) + 'px ui-monospace, Menlo, monospace'; g.textAlign = 'center'; g.fillText(T.toFixed(1) + ' °C', 12 + sw / 2, 46);
-    g.fillStyle = 'rgba(235,225,250,.8)'; g.textAlign = 'left'; g.font = Math.max(10, w * 0.016) + 'px Hanken Grotesk, sans-serif';
+    g.fillStyle = TH.text(.8); g.textAlign = 'left'; g.font = Math.max(10, w * 0.016) + 'px Hanken Grotesk, sans-serif';
     g.fillText(S.mixed ? 'Mixed at t = 120 s, stirring' : (S.t >= TM ? 'Ready to mix' : 'Before mixing: taking baseline readings'), 12, h - 12);
     requestAnimationFrame(frame);
   }

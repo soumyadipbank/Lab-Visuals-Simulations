@@ -227,7 +227,7 @@
   function frame() {
     const { w, h, dpr } = size(); g.setTransform(dpr, 0, 0, dpr, 0, 0);
     const dt = 0.016, e = S.exp; S.tt += dt;
-    const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#22123b'); bg.addColorStop(1, '#120a22'); g.fillStyle = bg; g.fillRect(0, 0, w, h);
+    TH.bg(g, w, h);
     let col = '#cfe6f5', bubble = 0, label = '';
     if (e.type === 'clock') {
       const c = S.clock;
@@ -244,13 +244,13 @@
     g.save(); path(); g.clip(); const ly = fy - fh * 0.42;
     const lg = g.createLinearGradient(0, ly, 0, fy); const rg = C.hex2rgb(col); lg.addColorStop(0, 'rgba(' + rg.join(',') + ',.92)'); lg.addColorStop(1, 'rgba(' + C.hex2rgb(mixHex(col, '#000000', 0.25)).join(',') + ',.96)');
     g.fillStyle = lg; g.fillRect(fx - fw, ly, fw * 2, fh); g.restore();
-    g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2; path(); g.stroke(); g.lineWidth = 1;
+    g.strokeStyle = TH.line(.55); g.lineWidth = 2; path(); g.stroke(); g.lineWidth = 1;
     // bubbles
     if (bubble > 0.001) { const n = Math.min(14, Math.ceil(bubble * 40)); for (let i = 0; i < n; i++) { const ph = (S.tt * (0.6 + bubble * 3) + i * 0.37) % 1, bx = fx + Math.sin(i * 7.3) * fw * 0.3, by = fy - 8 - ph * (fh * 0.42); g.fillStyle = 'rgba(255,255,255,' + (0.5 * (1 - ph)) + ')'; g.beginPath(); g.arc(bx, by, 2 + (i % 3), 0, 6.283); g.fill(); } }
     // stopwatch
     g.fillStyle = '#0d0618'; g.strokeStyle = 'rgba(206,114,245,.7)'; const sw = Math.min(w * 0.3, 200); g.beginPath(); g.roundRect ? g.roundRect(12, 12, sw, 52, 12) : g.rect(12, 12, sw, 52); g.fill(); g.stroke();
     g.fillStyle = '#7cf0b4'; g.font = '700 ' + Math.max(18, w * 0.03) + 'px ui-monospace, Menlo, monospace'; g.textAlign = 'center'; g.fillText(label || '—', 12 + sw / 2, 46);
-    g.fillStyle = 'rgba(235,225,250,.8)'; g.textAlign = 'left'; g.font = Math.max(10, w * 0.016) + 'px Hanken Grotesk, sans-serif';
+    g.fillStyle = TH.text(.8); g.textAlign = 'left'; g.font = Math.max(10, w * 0.016) + 'px Hanken Grotesk, sans-serif';
     const t1 = e.type === 'clock' ? e.cv.flask : S.model ? 'Reaction running: ' + (S.p.T) + ' °C' : 'Press Start to begin';
     g.fillText(t1, 12, h - 12);
     requestAnimationFrame(frame);

@@ -135,16 +135,16 @@
     draw(g, w, h, s, c, S) {
       const st = S.m; if (!st) return; const dt = Math.min(0.1, S.t - (st.lt || S.t)); st.lt = S.t; S.mpTick && S.mpTick(dt); const ms = S.mpState();
       // Thiele tube outline
-      g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 3; g.beginPath(); g.moveTo(w * 0.42, h * 0.08); g.lineTo(w * 0.42, h * 0.82); g.quadraticCurveTo(w * 0.42, h * 0.95, w * 0.5, h * 0.95); g.quadraticCurveTo(w * 0.62, h * 0.95, w * 0.62, h * 0.7); g.lineTo(w * 0.62, h * 0.45); g.quadraticCurveTo(w * 0.62, h * 0.32, w * 0.54, h * 0.32); g.stroke(); g.lineWidth = 1;
+      g.strokeStyle = TH.line(.55); g.lineWidth = 3; g.beginPath(); g.moveTo(w * 0.42, h * 0.08); g.lineTo(w * 0.42, h * 0.82); g.quadraticCurveTo(w * 0.42, h * 0.95, w * 0.5, h * 0.95); g.quadraticCurveTo(w * 0.62, h * 0.95, w * 0.62, h * 0.7); g.lineTo(w * 0.62, h * 0.45); g.quadraticCurveTo(w * 0.62, h * 0.32, w * 0.54, h * 0.32); g.stroke(); g.lineWidth = 1;
       g.fillStyle = 'rgba(240,220,160,.25)'; g.fillRect(w * 0.425, h * 0.3, w * 0.04, h * 0.6);
       K.thermo(g, w * 0.445, h * 0.06, h * 0.72, st.T, 20, 220);
       if (st.mode === 'mp') {
-        g.strokeStyle = 'rgba(255,255,255,.7)'; g.strokeRect(w * 0.47, h * 0.52, 6, h * 0.22);
+        g.strokeStyle = TH.line(.7); g.strokeRect(w * 0.47, h * 0.52, 6, h * 0.22);
         const m = ms.melt; g.fillStyle = m >= 1 ? 'rgba(235,235,225,.6)' : 'rgba(250,250,250,.95)'; g.fillRect(w * 0.47 + 1, h * 0.66, 4, h * 0.07);
         if (m > 0 && m < 1) { g.fillStyle = 'rgba(200,225,250,.8)'; g.fillRect(w * 0.47 + 1, h * 0.73 - h * 0.07 * m, 4, h * 0.07 * m); }
         K.label(g, w, m <= 0 ? 'solid' : m >= 1 ? 'clear liquid' : 'melting…', w * 0.52, h * 0.7);
       } else {
-        g.strokeStyle = 'rgba(255,255,255,.7)'; g.strokeRect(w * 0.47, h * 0.5, 10, h * 0.24); g.fillStyle = 'rgba(200,225,250,.7)'; g.fillRect(w * 0.47 + 1, h * 0.62, 8, h * 0.12);
+        g.strokeStyle = TH.line(.7); g.strokeRect(w * 0.47, h * 0.5, 10, h * 0.24); g.fillStyle = 'rgba(200,225,250,.7)'; g.fillRect(w * 0.47 + 1, h * 0.62, 8, h * 0.12);
         g.strokeRect(w * 0.47 + 3, h * 0.52, 4, h * 0.2); if (ms.entered) { g.fillStyle = 'rgba(200,225,250,.9)'; g.fillRect(w * 0.47 + 4, h * 0.6, 2, h * 0.12); }
         for (let i = 0; i < 8 * ms.bubbles; i++) { const p = (S.t * 2 + i * 0.13) % 1; g.fillStyle = 'rgba(255,255,255,.8)'; g.beginPath(); g.arc(w * 0.47 + 5, h * 0.72 - p * h * 0.1, 1.6, 0, 6.283); g.fill(); }
         K.label(g, w, ms.entered ? 'bubbling stopped: liquid enters the capillary' : ms.bubbles > 0 ? 'stream of bubbles' : '', w * 0.52, h * 0.7);
@@ -197,7 +197,7 @@
       g.save(); g.translate(x, 0);
       g.beginPath(); g.moveTo(-10, top); g.lineTo(-10, top + 18); g.quadraticCurveTo(-w * 0.11, h * 0.32, -w * 0.07, h * 0.62); g.lineTo(-5, h * 0.78); g.lineTo(5, h * 0.78); g.lineTo(w * 0.07, h * 0.62); g.quadraticCurveTo(w * 0.11, h * 0.32, 10, top + 18); g.lineTo(10, top); g.closePath();
       g.save(); g.clip(); g.fillStyle = K.rgba('#f4eedd', 0.8); g.fillRect(-w, h * 0.28, 2 * w, h * 0.22); g.fillStyle = K.rgba('#cfe6f5', 0.85); g.fillRect(-w, h * 0.5, 2 * w, h); g.restore();
-      g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 2; g.stroke(); g.lineWidth = 1; g.fillStyle = '#c9b8e6'; g.fillRect(-3, h * 0.78, 6, h * 0.12); g.restore();
+      g.strokeStyle = TH.line(.6); g.lineWidth = 2; g.stroke(); g.lineWidth = 1; g.fillStyle = TH.metal; g.fillRect(-3, h * 0.78, 6, h * 0.12); g.restore();
       K.label(g, w, 'ether layer (top, ρ 0.71)', x + w * 0.12, h * 0.4); K.label(g, w, 'aqueous layer (bottom)', x + w * 0.12, h * 0.6);
       st.ext.forEach((e, i) => { K.beaker(g, w * 0.66 + i * w * 0.07, h * 0.95, w * 0.05, h * 0.18, '#cfe6f5', 0.6); K.label(g, w, String(i + 1), w * 0.685 + i * w * 0.07, h * 0.74, null, 'center'); });
     },
@@ -314,7 +314,7 @@
         api.$('params').innerHTML = '<div class="two-col">' + sel('tS', 'Sample', Object.keys(TSETS).map((k) => [k, TSETS[k].name]), st.set) + sel('tM', 'Technique', [['tlc', 'Thin-layer chromatography'], ['col', 'Column chromatography (same sample)']], st.mode) + sel('tE', 'Eluent', Object.keys(d.elu).map((k) => [k, d.elu[k][0]]), st.e) + (d.acidOpt ? sel('tA', 'Additive', [['0', 'none'], ['1', '1 % acetic acid']], st.acid ? '1' : '0') : '') + '</div>';
         const marks = [['front', 'solvent front']].concat(d.std ? Object.keys(d.cmp).map((k) => [k, 'spot ' + d.cmp[k].tag + ' (' + d.cmp[k].name + ' standard)']) : []).concat([1, 2, 3, 4, 5].slice(0, d.std ? 3 : 5).map((n) => ['u' + n, d.unk + ' spot ' + n + (n === 1 ? ' (lowest)' : '')]));
         api.$('actions').innerHTML = (st.mode === 'tlc' ? btn('dev', 'Develop the plate', true) + btn('look', 'Look at the plate') + btn('uv', 'UV lamp (254 nm)') + btn('iodine', 'Iodine chamber') +
-          (st.vis ? '<span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"><select id="tW" aria-label="What the measuring line is on" style="min-height:44px;border-radius:12px;padding:8px 10px;background:rgba(10,3,22,.55);color:inherit;border:1px solid var(--line)">' + marks.map((x) => '<option value="' + x[0] + '">' + x[1] + '</option>').join('') + '</select>' + btn('note', 'Note this distance') + '</span>' : '') : btn('col', 'Run the column', true)) + btn('reset', 'New sample');
+          (st.vis ? '<span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"><select id="tW" aria-label="What the measuring line is on" style="min-height:44px;border-radius:12px;padding:8px 10px;background:var(--field);color:inherit;border:1px solid var(--line)">' + marks.map((x) => '<option value="' + x[0] + '">' + x[1] + '</option>').join('') + '</select>' + btn('note', 'Note this distance') + '</span>' : '') : btn('col', 'Run the column', true)) + btn('reset', 'New sample');
       };
       const newPlate = () => { st.devd = false; st.run = 0; st.vis = null; st.my = null; st.meas = []; api.answer(null); api.table('', [], []); api.msg(''); render(); };   /* a new eluent needs a new plate */
       const visible = (k, how) => { const c = D().cmp[k]; if (how === 'uv') return true; if (how === 'iodine') return !c.iodineWeak || 'weak'; return !!c.col; };
@@ -405,7 +405,7 @@
         if (w >= 620) { if (d.std) K.label(g, w, Object.values(d.cmp).map((x) => x.tag + ' ' + x.name).join(' · '), px + pw + 14, h * 0.1); K.label(g, w, d.elu[st.e][0] + (st.acid ? ' + AcOH' : ''), px + pw + 14, h * 0.1 + 18); }
         K.caption(st.vis === 'uv' ? 'Viewing under the UV lamp (254 nm).' : st.vis === 'iodine' ? 'After the iodine chamber.' : st.vis === 'look' ? 'Ordinary light.' : '');
       } else {
-        const cx = w * 0.45, top = h * 0.05, bot = h * 0.9; g.fillStyle = '#e8e4d8'; g.fillRect(cx - 18, top + 20, 36, bot - top - 40); g.strokeStyle = 'rgba(255,255,255,.6)'; g.strokeRect(cx - 18, top, 36, bot - top);
+        const cx = w * 0.45, top = h * 0.05, bot = h * 0.9; g.fillStyle = '#e8e4d8'; g.fillRect(cx - 18, top + 20, 36, bot - top - 40); g.strokeStyle = TH.line(.6); g.strokeRect(cx - 18, top, 36, bot - top);
         const fake = ['#9c6ad8', '#d86a9c', '#6a9cd8'], coloured = st.tab.some((k) => d.cmp[k].col);
         st.tab.forEach((k, i) => { const v = 1 / (1 + st.kOf(k)), y = top + 30 + (bot - top - 60) * Math.min(1.2, st.run * 2.4 * v); if (y < bot - 20) { g.fillStyle = K.rgba(d.cmp[k].col || fake[i % 3], 0.85); g.fillRect(cx - 17, y, 34, 10); } });
         K.label(g, w, st.tab.length + ' band' + (st.tab.length > 1 ? 's' : '') + (coloured ? ' (their own colours)' : ' (colourless: coloured here for clarity; in practice fractions are checked by TLC)'), w * 0.58, h * 0.2);
@@ -452,8 +452,8 @@
       const st = S.nm; if (!st) return; const d = SPEC[st.id];
       // 1H NMR, 400 MHz: 12 -> 0 ppm, Lorentzian lines with first-order multiplets (J = 7 Hz)
       const L1 = 40, R1 = w - 16, T1 = 24, B1 = h * 0.46, X = (ppm) => R1 - ((ppm + 0.3) / 12.8) * (R1 - L1);
-      g.fillStyle = 'rgba(235,225,250,.85)'; g.font = '12px Hanken Grotesk, sans-serif'; g.textAlign = 'left'; g.fillText('¹H NMR (400 MHz, CDCl₃)', L1, 16);
-      g.strokeStyle = 'rgba(255,255,255,.25)'; g.beginPath(); g.moveTo(L1, B1); g.lineTo(R1, B1); g.stroke();
+      g.fillStyle = TH.text(.85); g.font = '12px Hanken Grotesk, sans-serif'; g.textAlign = 'left'; g.fillText('¹H NMR (400 MHz, CDCl₃)', L1, 16);
+      g.strokeStyle = TH.line(.25); g.beginPath(); g.moveTo(L1, B1); g.lineTo(R1, B1); g.stroke();
       g.textAlign = 'center'; g.font = '10px Hanken Grotesk, sans-serif'; for (let p = 0; p <= 12; p++) { g.fillText(String(p), X(p), B1 + 12); }
       g.fillText('δ / ppm', (L1 + R1) / 2, B1 + 24);
       // lines narrower than a pixel would be drawn at random heights, so every line is at least ~1 px wide;
@@ -464,12 +464,12 @@
       const yAt = (ppm) => lines.reduce((a, l) => a + (l[1] * (ppx * 0.9 / l[2])) / (1 + ((ppm - l[0]) / l[2]) ** 2), 0);
       const pk = (p) => { let m = 0; for (let k = -6; k <= 6; k++) m = Math.max(m, yAt(p[0] + k * 0.002)); return m; };
       const maxY = Math.max(...d.nmr.map(pk)) * 1.05, H = B1 - T1 - 48, Y = (v) => B1 - (v / maxY) * H;
-      g.strokeStyle = '#ce72f5'; g.lineWidth = 1.2; g.beginPath();
+      g.strokeStyle = TH.accent; g.lineWidth = 1.2; g.beginPath();
       for (let x = L1; x <= R1; x++) { let v = 0; for (let k = 0; k < 4; k++) v = Math.max(v, yAt(((R1 - x - k / 4) / (R1 - L1)) * 12.8 - 0.3)); x === L1 ? g.moveTo(x, Y(v)) : g.lineTo(x, Y(v)); }
       g.stroke(); g.lineWidth = 1;
       // integral trace (steps proportional to the number of H), as printed on a real spectrum
       const totH = d.nmr.reduce((a, p) => a + p[2], 0), IH = H * 0.45, ib = B1 - 6;
-      g.strokeStyle = 'rgba(124,240,180,.75)'; g.beginPath();
+      g.strokeStyle = TH.light ? 'rgba(15,138,74,.75)' : 'rgba(124,240,180,.75)'; g.beginPath();
       for (let x = L1; x <= R1; x++) { const ppm = ((R1 - x) / (R1 - L1)) * 12.8 - 0.3; let cum = 0; d.nmr.forEach((p) => { const wd = p[1].startsWith('br') ? 0.08 : 0.03 + 0.012 * MULT[p[1]].length; cum += p[2] * (0.5 + Math.atan((p[0] - ppm) / wd) / Math.PI); }); const y = ib - (cum / totH) * IH; x === L1 ? g.moveTo(x, y) : g.lineTo(x, y); }
       g.stroke();
       // labels: one row above the spectrum, spread sideways so they never overlap, each joined to its own peak
@@ -483,16 +483,16 @@
         if (!moved) break;
       }
       lab.forEach((l) => {
-        g.strokeStyle = 'rgba(124,240,180,.55)'; g.beginPath(); g.moveTo(l.x, rowY + 3); g.lineTo(l.x, rowY + 9); g.lineTo(l.px, Math.min(l.top - 3, rowY + 22)); g.lineTo(l.px, l.top - 3); g.stroke();
-        g.fillStyle = '#0d0618'; g.fillRect(l.x - l.w / 2, rowY - 10, l.w, 13); g.fillStyle = '#7cf0b4'; g.fillText(l.t, l.x, rowY);
+        g.strokeStyle = TH.light ? 'rgba(15,138,74,.5)' : 'rgba(124,240,180,.55)'; g.beginPath(); g.moveTo(l.x, rowY + 3); g.lineTo(l.x, rowY + 9); g.lineTo(l.px, Math.min(l.top - 3, rowY + 22)); g.lineTo(l.px, l.top - 3); g.stroke();
+        g.fillStyle = TH.light ? '#ffffff' : '#0d0618'; g.fillRect(l.x - l.w / 2, rowY - 10, l.w, 13); g.fillStyle = TH.good; g.fillText(l.t, l.x, rowY);
       });
       // IR: 4000 -> 500 cm-1, % transmittance
       const T2 = Math.max(h * 0.58, B1 + 46), B2 = h - 26, X2 = (nu) => R1 - ((nu - 500) / 3500) * (R1 - L1);
-      g.fillStyle = 'rgba(235,225,250,.85)'; g.font = '12px Hanken Grotesk, sans-serif'; g.textAlign = 'left'; g.save(); g.translate(12, (T2 + B2) / 2); g.rotate(-Math.PI / 2); g.textAlign = 'center'; g.font = '10px Hanken Grotesk, sans-serif'; g.fillText('% T', 0, 0); g.restore(); g.textAlign = 'left'; g.font = '12px Hanken Grotesk, sans-serif'; g.fillText('IR (liquid film)', L1, T2 - 8);
-      g.strokeStyle = 'rgba(255,255,255,.25)'; g.strokeRect(L1, T2, R1 - L1, B2 - T2);
+      g.fillStyle = TH.text(.85); g.font = '12px Hanken Grotesk, sans-serif'; g.textAlign = 'left'; g.save(); g.translate(12, (T2 + B2) / 2); g.rotate(-Math.PI / 2); g.textAlign = 'center'; g.font = '10px Hanken Grotesk, sans-serif'; g.fillText('% T', 0, 0); g.restore(); g.textAlign = 'left'; g.font = '12px Hanken Grotesk, sans-serif'; g.fillText('IR (liquid film)', L1, T2 - 8);
+      g.strokeStyle = TH.line(.25); g.strokeRect(L1, T2, R1 - L1, B2 - T2);
       g.textAlign = 'center'; g.font = '10px Hanken Grotesk, sans-serif'; for (let nu = 4000; nu >= 500; nu -= 500) g.fillText(String(nu), X2(nu), B2 + 12); g.fillText('wavenumber / cm⁻¹', (L1 + R1) / 2, B2 + 24);
       const tr = (nu) => { let a = 0.04 + 0.006 * Math.sin(nu / 37) + 0.005 * Math.sin(nu / 11.3 + 1) + 0.004 * Math.sin(nu / 5.7); d.ir.forEach((b) => (a += b[1] / (1 + ((nu - b[0]) / b[2]) ** 2))); (d.fp || (d.fp = (() => { const r = L.rng([...st.id].reduce((x, ch) => x * 31 + ch.charCodeAt(0), 7)); const out = [[1460, 0.3, 12]].concat(d.nmr.some((p) => p[2] % 3 === 0 && p[0] < 2.7) ? [[1375, 0.22, 10]] : []); /* CH₃ umbrella bend only when there is a CH₃ */ for (let k = 0; k < 5; k++) out.push([620 + r() * 780, 0.1 + r() * 0.25, 6 + r() * 10]); return out; })())).forEach((b) => (a += b[1] / (1 + ((nu - b[0]) / b[2]) ** 2))); return Math.pow(10, -Math.min(2, a)); };   // C–H bends near 1460/1375 plus compound-specific fingerprint bands
-      g.strokeStyle = '#7cb8f0'; g.beginPath(); for (let x = L1; x <= R1; x++) { const nu = 500 + ((R1 - x) / (R1 - L1)) * 3500, y = T2 + 4 + (1 - tr(nu)) * (B2 - T2 - 8); x === L1 ? g.moveTo(x, y) : g.lineTo(x, y); } g.stroke();
+      g.strokeStyle = TH.light ? '#1f63c4' : '#7cb8f0'; g.beginPath(); for (let x = L1; x <= R1; x++) { const nu = 500 + ((R1 - x) / (R1 - L1)) * 3500, y = T2 + 4 + (1 - tr(nu)) * (B2 - T2 - 8); x === L1 ? g.moveTo(x, y) : g.lineTo(x, y); } g.stroke();
     },
   });
 })();

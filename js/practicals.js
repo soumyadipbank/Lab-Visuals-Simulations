@@ -32,9 +32,9 @@
   const K = (PX.draw = {});
   // status text shown as a caption under the drawing (wraps on phones instead of overlapping the apparatus)
   K.caption = (txt) => { if (txt) PX._cap = (PX._cap ? PX._cap + ' · ' : '') + txt; };
-  K.bg = (g, w, h) => { const b = g.createLinearGradient(0, 0, 0, h); b.addColorStop(0, '#22123b'); b.addColorStop(1, '#120a22'); g.fillStyle = b; g.fillRect(0, 0, w, h); };
+  K.bg = (g, w, h) => TH.bg(g, w, h);
   K.rgba = (hex, a) => { const r = C.hex2rgb(hex); return 'rgba(' + r[0] + ',' + r[1] + ',' + r[2] + ',' + a + ')'; };
-  K.label = (g, w, txt, x, y, size, align) => { g.fillStyle = 'rgba(235,225,250,.85)'; g.font = (size || Math.max(10, w * 0.016)) + 'px Hanken Grotesk, sans-serif'; g.textAlign = align || 'left'; g.fillText(txt, x, y); };
+  K.label = (g, w, txt, x, y, size, align) => { g.fillStyle = TH.text(.85); g.font = (size || Math.max(10, w * 0.016)) + 'px Hanken Grotesk, sans-serif'; g.textAlign = align || 'left'; g.fillText(txt, x, y); };
   K.display = (g, w, txt, x, y, ww) => {
     ww = ww || Math.min(w * 0.32, 210); g.fillStyle = '#0d0618'; g.strokeStyle = 'rgba(206,114,245,.7)';
     g.beginPath(); if (g.roundRect) g.roundRect(x, y, ww, 46, 10); else g.rect(x, y, ww, 46); g.fill(); g.stroke();
@@ -43,7 +43,7 @@
   K.beaker = (g, x, y, bw, bh, col, level) => {            // x,y = bottom-left
     g.save(); g.beginPath(); g.rect(x, y - bh, bw, bh); g.clip();
     g.fillStyle = K.rgba(col || '#cfe6f5', 0.88); g.fillRect(x, y - bh * (level == null ? 0.6 : level), bw, bh);
-    g.restore(); g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 2; g.beginPath(); g.moveTo(x - 4, y - bh); g.lineTo(x, y - bh + 4); g.lineTo(x, y); g.lineTo(x + bw, y); g.lineTo(x + bw, y - bh); g.stroke(); g.lineWidth = 1;
+    g.restore(); g.strokeStyle = TH.line(.6); g.lineWidth = 2; g.beginPath(); g.moveTo(x - 4, y - bh); g.lineTo(x, y - bh + 4); g.lineTo(x, y); g.lineTo(x + bw, y); g.lineTo(x + bw, y - bh); g.stroke(); g.lineWidth = 1;
   };
   K.tube = (g, cx, top, bot, tw, col, level, opts) => {      // test tube
     opts = opts || {};
@@ -52,15 +52,15 @@
     g.fillStyle = K.rgba(col || '#cfe6f5', 0.9); g.fillRect(cx - tw, ly, tw * 2, bot);
     if (opts.turbid) { g.fillStyle = 'rgba(245,245,250,' + 0.75 * opts.turbid + ')'; g.fillRect(cx - tw, ly, tw * 2, bot); }
     if (opts.lower) { g.fillStyle = K.rgba(opts.lower, 0.9); g.fillRect(cx - tw, bot - (bot - top) * opts.lowerLevel, tw * 2, bot); }
-    g.restore(); g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 2; path(); g.stroke(); g.lineWidth = 1;
+    g.restore(); g.strokeStyle = TH.line(.6); g.lineWidth = 2; path(); g.stroke(); g.lineWidth = 1;
   };
   K.thermo = (g, x, top, bot, T, tmin, tmax) => {
-    g.fillStyle = 'rgba(255,255,255,.9)'; g.fillRect(x - 4, top, 8, bot - top);
+    g.fillStyle = 'rgba(255,255,255,.9)'; g.fillRect(x - 4, top, 8, bot - top); if (TH.light) { g.strokeStyle = TH.line(.35); g.strokeRect(x - 4, top, 8, bot - top); }
     const f = Math.max(0.04, Math.min(1, (T - tmin) / (tmax - tmin))); g.fillStyle = '#e53935'; g.fillRect(x - 2, bot - (bot - top) * f, 4, (bot - top) * f);
     g.beginPath(); g.arc(x, bot + 4, 7, 0, 6.283); g.fill();
   };
   K.cell = (g, cx, top, bot) => {                          // conductivity cell dipping into a beaker
-    g.fillStyle = '#c9b8e6'; g.fillRect(cx - 5, top, 10, bot - top - 20);
+    g.fillStyle = TH.metal; g.fillRect(cx - 5, top, 10, bot - top - 20);
     g.fillStyle = '#9aa6b8'; g.fillRect(cx - 12, bot - 22, 24, 18); g.fillStyle = '#4b4f5a'; g.fillRect(cx - 9, bot - 20, 3, 14); g.fillRect(cx + 6, bot - 20, 3, 14);
   };
 })();

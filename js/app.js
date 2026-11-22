@@ -490,7 +490,8 @@
   function init() {
     sim = new C.Sim({ beaker: $('#beaker'), temp: $('#temp'), energy: $('#energy') });
     sim.onFrame = onFrame;
-    sim.dark = true;
+    sim.dark = !(window.TH && TH.light);
+    window.addEventListener('lv-theme', () => { sim.dark = !TH.light; });
     renderGroups(); renderPresets(); renderGrid(); renderTray();
     bind();
     let start = ['agno3', 'nacl'];

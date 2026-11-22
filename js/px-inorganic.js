@@ -65,7 +65,7 @@
     draw(g, w, h, s, c, S) {
       const st = S.g; if (!st) return; const d = GRAV[st.a];
       // balance
-      g.fillStyle = '#3a2b57'; g.fillRect(w * 0.08, h * 0.75, w * 0.3, h * 0.12); g.fillStyle = '#0d0618'; g.fillRect(w * 0.1, h * 0.775, w * 0.26, h * 0.07);
+      g.fillStyle = TH.stand; g.fillRect(w * 0.08, h * 0.75, w * 0.3, h * 0.12); g.fillStyle = '#0d0618'; g.fillRect(w * 0.1, h * 0.775, w * 0.26, h * 0.07);
       const last = st.w.length ? st.w[st.w.length - 1].m.toFixed(4) + ' g' : '0.0000 g'; g.fillStyle = '#7cf0b4'; g.font = '700 ' + Math.min(Math.max(10, w * 0.022), (w * 0.26) / 6.5) + 'px ui-monospace, monospace'; g.textAlign = 'center'; g.fillText(last, w * 0.23, h * 0.825);
       // crucible on the balance
       g.fillStyle = '#d6d0c4'; g.beginPath(); g.moveTo(w * 0.18, h * 0.55); g.lineTo(w * 0.28, h * 0.55); g.lineTo(w * 0.26, h * 0.74); g.lineTo(w * 0.2, h * 0.74); g.fill();

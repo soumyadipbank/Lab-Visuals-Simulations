@@ -1183,7 +1183,7 @@
         ctx.fillText('ΔH = ' + (res.dh > 0 ? '+' : '−') .replace('−', res.dh < 0 ? '−' : '') + Math.abs(res.dh) + ' kJ', ax - 6, Math.min(yR, yP) - 8);
       } else if (res.dh == null) {
         ctx.textAlign = 'right'; ctx.font = '11px system-ui, sans-serif'; ctx.fillStyle = d ? '#bba8d6' : '#6b7b8d';
-        ctx.fillText('ΔH: not tabulated here (qualitative)', X(1) + 20, 210);
+        ctx.fillText('ΔH: not tabulated here (qualitative)', X(1) + 20, 22);   // top right: the axis title sits at the bottom
       }
       // Ea
       if (res.reacts !== false) {
