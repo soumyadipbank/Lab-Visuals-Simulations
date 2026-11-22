@@ -92,5 +92,7 @@ const ok = (name, cond) => { if (!cond) { problems++; console.log('PROBLEM: ' + 
 // regression helper
 { const f = L.linreg([1, 2, 3, 4], [2, 4, 6, 8]); near('linreg slope', f.m, 2, 1e-9); near('linreg r2', f.r2, 1, 1e-9); }
 
+{ const X=[],y=[]; for (let i=0;i<6;i++) for (let j=0;j<3;j++){X.push([1,i,j]);y.push(2+3*i-j);} const b=L.ols(X,y); ok('ols', b && Math.abs(b[1]-3)<1e-9 && Math.abs(b[2]+1)<1e-9); ok('ols singular', L.ols([[1,1],[1,1],[1,1]],[1,2,3])===null); }
+
 console.log(problems ? `\n${problems} problem(s)` : 'Lab calculation tests passed.');
 process.exit(problems ? 1 : 0);

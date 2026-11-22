@@ -25,6 +25,20 @@
     return { m, b, r2: syy === 0 ? 1 : (sxy * sxy) / (sxx * syy) };
   };
 
+  // multiple linear regression y = X b (rows of X include the leading 1); returns null when the columns are dependent
+  L.ols = function (X, y) {
+    const n = X.length, k = X[0].length, A = [];
+    for (let i = 0; i < k; i++) { A.push([]); for (let j = 0; j < k; j++) { let t = 0; for (let r = 0; r < n; r++) t += X[r][i] * X[r][j]; A[i].push(t); } let t = 0; for (let r = 0; r < n; r++) t += X[r][i] * y[r]; A[i].push(t); }
+    for (let c = 0; c < k; c++) {
+      let piv = c; for (let r = c + 1; r < k; r++) if (Math.abs(A[r][c]) > Math.abs(A[piv][c])) piv = r;
+      const scale = Math.max(...A.map((row, i) => Math.abs(A[i][i]))) || 1;
+      if (Math.abs(A[piv][c]) < 1e-12 * scale) return null;
+      [A[c], A[piv]] = [A[piv], A[c]];
+      for (let r = 0; r < k; r++) if (r !== c) { const f = A[r][c] / A[c][c]; for (let j = c; j <= k; j++) A[r][j] -= f * A[c][j]; }
+    }
+    return A.map((row, i) => row[k] / row[i]);
+  };
+
   // ------------------------------------------------------------ acid-base equilibria
   // fraction of each species of H_nA (index j = number of protons lost)
   L.alphas = function (pK, h) {

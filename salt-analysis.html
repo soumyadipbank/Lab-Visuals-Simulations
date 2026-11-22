@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Salt analysis · Lab Visuals</title>
+  <meta name="description" content="Virtual qualitative inorganic analysis: an unknown salt or mixture, a reagent shelf, a notebook. Identify the cations and anions from your observations.">
+  <meta name="theme-color" content="#160923">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23160923'/%3E%3Cpath d='M26 10h12v4h-3v14l12 20c2 4-1 8-5 8H22c-4 0-7-4-5-8l12-20V14h-3z' fill='%23ce72f5'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-sim="salts">
+  <div id="siteHeader"></div>
+  <main>
+    <div class="wrap">
+      <section class="page-head">
+        <p class="crumbs"><a href="index.html">Home</a> / <a id="crumbLevel" href="bsc.html">Lab</a> / Salt analysis</p>
+        <h1>The <em>salt analysis</em> lab</h1>
+        <p class="lead" id="lead">You are given an unknown salt. Choose tests from the reagent shelf, read the observations, keep your notebook, and decide which cations and anions are present.</p>
+      </section>
+      <section class="sim-grid">
+        <aside class="panel">
+          <h3 style="margin:0 0 6px;font-size:1rem">Sample</h3>
+          <div class="field"><label for="lvl">Difficulty</label><select id="lvl"></select></div>
+          <div class="btn-row"><button type="button" class="btn-sm primary" id="newSample">New unknown sample</button></div>
+          <p class="sub" id="sampleInfo" style="margin:6px 0 12px"></p>
+          <h3 style="margin:10px 0 6px;font-size:1rem">Reagent shelf</h3>
+          <div id="shelf"></div>
+        </aside>
+        <div class="panel" id="work">
+          <h2 style="margin:0 0 4px">Test tube</h2>
+          <p class="sub" id="tubeSub" style="margin:0 0 8px">Pick a test from the shelf.</p>
+          <div class="sim-canvas-wrap"><canvas id="bench" width="760" height="330" aria-label="Test tube"></canvas></div>
+          <div id="current" role="status" aria-live="polite"></div>
+          <h4 class="lbl-sum" style="padding-top:14px">Your notebook <span id="nbCount"></span></h4>
+          <div id="notebook" class="obs-log"></div>
+          <h4 class="lbl-sum" style="padding-top:14px">Your conclusion</h4>
+          <p class="sub" style="margin:0 0 6px">Tick every radical you think is present.</p>
+          <p class="lbl" style="margin:8px 0 4px;font-size:.78rem;letter-spacing:.08em;color:var(--faint);text-transform:uppercase;font-weight:700">Cations</p><div class="check-chips" id="catChips"></div>
+          <p class="lbl" style="margin:10px 0 4px;font-size:.78rem;letter-spacing:.08em;color:var(--faint);text-transform:uppercase;font-weight:700">Anions</p><div class="check-chips" id="anChips"></div>
+          <div class="btn-row"><button type="button" class="btn-sm primary" id="submit">Submit my answer</button><button type="button" class="btn-sm" id="giveup">Show the answer</button></div>
+          <div id="result"></div>
+          <details style="margin-top:14px"><summary class="lbl-sum">Reference chart: what each radical does (spoils the puzzle)</summary><div id="ref" style="overflow:auto"></div></details>
+          <p class="note-box">In a real mixture you would first separate the cations into groups. Here every test simply shows what the components would do, without telling you which radical caused which observation. Work them out by comparing tests.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+  <div id="siteFooter"></div>
+  <script src="js/common.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/labcalc.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/salts.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/salt-analysis.js"></script>
+  <script src="js/fx.js"></script>
+</body>
+</html>
