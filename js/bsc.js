@@ -3,7 +3,7 @@
   'use strict';
   const S = globalThis.Syllabus;
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const st = { status: 'all', area: 'all', q: '' };
+  const st = { area: 'all', q: '' };
 
   function stats() {
     document.getElementById('stats').innerHTML = '<div><b>' + S.EXPERIMENTS.length + '</b><span>total reactions</span></div>';
@@ -13,23 +13,21 @@
     const chip = (key, val, label) => '<button type="button" class="chipbtn" data-k="' + key + '" data-v="' + esc(val) + '" aria-pressed="' + (st[key] === val) + '">' + esc(label) + '</button>';
     document.getElementById('filters').innerHTML =
       '<input type="search" id="q" placeholder="Search experiments: titration, kinetics, EDTA…" value="' + esc(st.q) + '" aria-label="Search experiments">' +
-      '<div class="row"><b>Status</b>' + chip('status', 'all', 'All') + chip('status', 'live', 'Live now') + chip('status', 'soon', 'Planned') + '</div>' +
       '<div class="row"><b>Area</b>' + chip('area', 'all', 'All') + S.AREAS.map((a) => chip('area', a, a)).join('') + '</div>';
   }
 
   function list() {
     const q = st.q.trim().toLowerCase();
     const items = S.EXPERIMENTS.filter((e) =>
-      (st.status === 'all' || e.status === st.status) && (st.area === 'all' || e.area === st.area) &&
+      (st.area === 'all' || e.area === st.area) &&
       (!q || (e.title + ' ' + e.note + ' ' + e.area).toLowerCase().includes(q)));
     let h = '';
     S.AREAS.forEach((a) => {
       const g = items.filter((e) => e.area === a);
       if (!g.length) return;
-      const live = g.filter((e) => e.status === 'live').length;
-      h += '<div class="syl-group"><h3>' + esc(a) + ' <small>' + live + ' live · ' + (g.length - live) + ' planned</small></h3>';
+      h += '<div class="syl-group"><h3>' + esc(a) + ' <small>' + g.length + ' experiment' + (g.length > 1 ? 's' : '') + '</small></h3>';
       g.forEach((e) => {
-        const tags = '<span class="pill-tag ' + e.status + '">' + (e.status === 'live' ? 'Live' : 'Planned') + '</span>';
+        const tags = '<span class="go-arrow" aria-hidden="true">→</span>';
         const inner = '<div><div class="t">' + esc(e.title) + '</div>' + (e.note ? '<div class="n">' + esc(e.note) + '</div>' : '') + '</div><div class="tags">' + tags + '</div>';
         h += e.sim ? '<a class="syl-row live" href="' + esc(e.sim + (e.sim.includes('?') ? '&' : '?') + 'level=bsc') + '">' + inner + '</a>' : '<div class="syl-row">' + inner + '</div>';
       });
