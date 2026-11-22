@@ -7,14 +7,17 @@ require(path.join(__dirname, '../js/titrations.js'));
 const C = globalThis.Chem, L = C.Lab, T = C.Titr;
 let problems = 0;
 const ok = (n, c) => { if (!c) { problems++; console.log('PROBLEM: ' + n); } };
-ok('has 15 experiments', T.EXPS.length === 15);
+ok('has 25 experiments', T.EXPS.length === 25);
 for (const e of T.EXPS) {
   for (let seed = 1; seed <= 5; seed++) {
     const s = e.make(L.rng(seed * 77));
-    const veq = [].concat(s.veq);
-    const st = s.state(0, {}); ok(e.id + ' state(0)', st && typeof st === 'object');
+    const parts = s.parts || [s];
+    const veq = s.parts ? s.parts.map((p) => p.veq) : [].concat(s.veq);
+    parts.forEach((p, i) => { [0, p.veq * 0.5, p.veq * 0.98, p.veq * 1.02, p.vmax].forEach((v) => { const st = p.state(v, { starch: true, heated: true, formol: true }); ok(e.id + ' part ' + i + ' state', st && typeof st === 'object'); }); { const vv = [].concat(p.veq); ok(e.id + ' part ' + i + ' end point before vmax', p.vmax > Math.max(...vv) + 3 && Math.min(...vv) > 2); } });
+    // the end-point colour must differ clearly from just before it (for indicator titrations)
+    if (e.mode === 'indicator') parts.forEach((p, i) => { const ctx = { starch: true, heated: true, formol: true }, a = p.state(p.veq - 0.2, ctx).colour || '#cfe6f5', b = p.state(p.veq + 0.15, ctx).colour || '#cfe6f5'; const A = C.hex2rgb(a), B = C.hex2rgb(b); ok(e.id + ' part ' + i + ' visible end point (' + a + ' -> ' + b + ')', Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]) > 20); });
     const m = {};
-    if (e.mode === 'indicator') m.t = veq[0];
+    if (e.mode === 'indicator') m.t = s.parts ? veq : veq[0];
     else if (e.mode === 'indicator2') { m.t1 = veq[0]; m.t2 = veq[1]; }
     else if (e.mode === 'conductometric') { m.v = veq[0]; m.v1 = veq[0]; m.v2 = veq[1]; }
     else { m.veq = veq[0]; m.eHalf = s.curve(veq[0] / 2); m.eEq = s.curve(veq[0]); }
@@ -24,7 +27,7 @@ for (const e of T.EXPS) {
       const bad = rep.abs ? Math.abs(got - rep.truth) > tol : Math.abs(got - rep.truth) / Math.abs(rep.truth) > tol;
       if (bad) { problems++; console.log(`PROBLEM: ${e.id} seed ${seed} ${rep.id}: got ${got}, truth ${rep.truth}`); }
     }
-    ok(e.id + ' vmax beyond end point', s.vmax > Math.max(...veq) + 3);
+    
   }
 }
 // fitBreaks recovers two breaks of a V-shaped conductometric curve
