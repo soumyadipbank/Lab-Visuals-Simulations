@@ -17,10 +17,17 @@
   const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => {
     es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
   }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' }) : null;
-  document.querySelectorAll('.reveal').forEach((el, i) => {
-    el.style.setProperty('--d', (i % 5) * 70 + 'ms');
-    if (io) io.observe(el); else el.classList.add('in');
-  });
+  // pages that build their content in script (the Grade 11 / 12 hub) add .reveal sections after this file runs,
+  // so look again once the DOM is ready and after load; each element is observed only once
+  function watchReveals() {
+    document.querySelectorAll('.reveal:not([data-rv])').forEach((el, i) => {
+      el.dataset.rv = '1'; el.style.setProperty('--d', (i % 5) * 70 + 'ms');
+      if (io) io.observe(el); else el.classList.add('in');
+    });
+  }
+  watchReveals();
+  document.addEventListener('DOMContentLoaded', watchReveals);
+  window.addEventListener('load', watchReveals);
 
   // ---------------------------------------------------------- hero canvas
   const cv = document.getElementById('heroCanvas');

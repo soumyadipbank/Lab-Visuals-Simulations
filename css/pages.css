@@ -252,3 +252,5 @@ details:not([open]) > .lbl-sum::before { content: "▸ "; }
 :root[data-theme="light"] .canvas-wrap, :root[data-theme="light"] .sim-canvas-wrap { background: #f3f0f8; box-shadow: inset 0 0 40px rgba(60, 30, 110, .06); }
 :root[data-theme="light"] .canvas-wrap.drop::after { background: rgba(240, 232, 252, .7); color: #3a1f66; }
 :root[data-theme="light"] .chips button[aria-pressed="true"], :root[data-theme="light"] .chipbtn[aria-pressed="true"] { color: #ffffff; }
+/* Grade 11 / 12 hub: a section's cards share the row (4 cards = one row of 4, not 3 + a lonely 1) */
+.cards.fit { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
