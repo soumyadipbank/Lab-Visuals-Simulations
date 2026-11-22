@@ -82,7 +82,7 @@
       '<div class="btn-row" style="margin-top:18px"><a class="btn-glow" href="' + lab(lv, []).replace('&mix=', '') + '">Open the free-play Reaction Lab</a>' +
       '<a class="btn-ghost" href="index.html" style="text-decoration:none;display:inline-block">Change level</a></div></section>';
     d.sections.forEach((s) => {
-      h += '<section class="section reveal"><h2>' + esc(s.h) + '</h2>' + (s.sub ? '<p class="sub">' + esc(s.sub) + '</p>' : '') + '<div class="cards">';
+      h += '<section class="section reveal"><h2>' + esc(s.h) + '</h2>' + (s.sub ? '<p class="sub">' + esc(s.sub) + '</p>' : '') + '<div class="cards fit">';
       s.items.forEach((it) => {
         const href = it.href || lab(lv, it.mix);
         h += '<a class="xcard" href="' + href + '"><div class="meta"><span class="pill-tag">' + esc(it.tag) + '</span></div><h3>' + esc(it.t) + '</h3><p>' + esc(it.d) + '</p><span class="go">' + (it.href ? 'Open simulator' : 'Set up and mix') + '</span></a>';
@@ -93,5 +93,5 @@
     h += '<p style="margin:26px 0 0"><a class="btn-ghost" href="' + d.next.href + '" style="text-decoration:none;display:inline-block">' + esc(d.next.label) + ' →</a></p></div>';
     root.innerHTML = h;
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render); else render();
+  if (document.getElementById('levelRoot')) render(); else document.addEventListener('DOMContentLoaded', render);   // render at once so the reveal-on-scroll code finds the sections
 })();
