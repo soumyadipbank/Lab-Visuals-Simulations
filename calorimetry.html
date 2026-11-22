@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calorimetry · Lab Visuals</title>
+  <meta name="description" content="Virtual calorimetry lab: heat of neutralisation (strong and weak acid) and heat of solution, with a cooling correction by extrapolation.">
+  <meta name="theme-color" content="#160923">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23160923'/%3E%3Cpath d='M26 10h12v4h-3v14l12 20c2 4-1 8-5 8H22c-4 0-7-4-5-8l12-20V14h-3z' fill='%23ce72f5'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-sim="calorimetry">
+  <div id="siteHeader"></div>
+  <main>
+    <div class="wrap">
+      <section class="page-head">
+        <p class="crumbs"><a href="index.html">Home</a> / <a id="crumbLevel" href="bsc.html">Lab</a> / Calorimetry</p>
+        <h1>The <em>calorimetry</em> lab</h1>
+        <p class="lead" id="lead">Measure the temperature change in a calorimeter, correct for heat loss by extrapolation, and calculate the enthalpy change yourself.</p>
+      </section>
+      <section class="sim-grid">
+        <aside class="panel">
+          <details id="expDetails" open><summary class="lbl-sum">Experiments <span id="expCount"></span></summary>
+            <div class="exp-list" id="expList"></div>
+            <p class="note-box" id="levelNote" hidden></p>
+          </details>
+        </aside>
+        <div class="panel" id="work">
+          <h2 id="expTitle" style="margin:0 0 4px"></h2>
+          <p class="sub" id="expSub" style="margin:0 0 10px"></p>
+          <details class="steps-box" open><summary class="lbl-sum">Procedure</summary><ol class="steps" id="steps"></ol></details>
+          <div class="sim-canvas-wrap" style="margin-top:12px"><canvas id="bench" width="760" height="400" aria-label="Calorimeter with thermometer"></canvas></div>
+          <div class="readout-row" id="readouts"></div>
+          <div id="params"></div>
+          <div class="btn-row" id="actions"></div>
+          <div id="msg" role="status" aria-live="polite"></div>
+          <div class="chart-box" id="chartBox" hidden><h4 id="chartTitle">Plot</h4><canvas id="chart" style="height:250px"></canvas></div>
+          <div id="trialsBox"></div>
+          <div id="answerBox"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <div id="siteFooter"></div>
+  <script src="js/common.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/labcalc.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/calorimetry.js"></script>
+  <script src="js/fx.js"></script>
+</body>
+</html>

@@ -18,6 +18,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
       - run: node tests/verify.js
+      - run: node tests/labcalc.test.js
+      - run: node tests/titrations.test.js
+      - run: node tests/salts.test.js
+      - run: node tests/site.test.js
   deploy:
     needs: test
     runs-on: ubuntu-latest

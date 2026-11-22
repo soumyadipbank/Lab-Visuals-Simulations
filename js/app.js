@@ -22,18 +22,20 @@
     },
   };
 
-  const PRESETS = [
-    ['Silver chloride', ['agno3', 'nacl']], ['Golden rain', ['pbno32', 'ki']], ['Sulfate test', ['bacl2', 'na2so4']],
-    ['Neutralisation', ['hcl', 'naoh', 'phph']], ['Zn in CuSO₄', ['zn', 'cuso4h']], ['Silver tree', ['cu', 'agno3']],
-    ['Na in water', ['na', 'h2o', 'phph']], ['Mg in HCl', ['mg', 'hcl']], ['Baking soda + vinegar', ['nahco3', 'ch3cooh']],
-    ['Elephant toothpaste', ['h2o2', 'mno2']], ['Cold pack', ['nh4no3', 'h2o']], ['Hot pack', ['cacl2', 'h2o']],
-    ['Limewater test', ['caoh2', 'co2']], ['Ammonia + Cu²⁺', ['cuso4h', 'nh3']], ['Blood-red complex', ['fecl3', 'kscn']],
-    ['KMnO₄ + Fe²⁺', ['kmno4', 'feso4', 'h2so4']], ['Breathalyser', ['k2cr2o7', 'ethanol', 'h2so4']],
-    ['Starch–iodine', ['h2o2', 'ki', 'h2so4', 'starch']], ['Burning Mg', ['mg', 'heat']], ['Thermite', ['al', 'fe2o3', 'heat']],
-    ['Sugar + conc. H₂SO₄', ['sugar', 'h2so4c']], ['Endothermic: Ba(OH)₂ + NH₄Cl', ['baoh2', 'nh4cl']], ['Cu + HNO₃', ['cu', 'hno3']],
-    ['Thiosulfate + HCl', ['na2s2o3', 'hcl']], ['Rusting', ['fe', 'h2o', 'o2']], ['Limestone kiln', ['caco3', 'heat']],
-    ['Blue vitriol, heated', ['cuso4h', 'heat']], ['Chromate ⇌ dichromate', ['k2cr2o7', 'naoh']], ['Al in NaOH', ['al', 'naoh']],
+  // [title, chemicals, minimum level]: 11 = everyone, 12 = Class 12 and BSc, bsc = BSc only
+  const PRESETS_ALL = [
+    ['Silver chloride', ['agno3', 'nacl'], '11'], ['Sulfate test', ['bacl2', 'na2so4'], '11'], ['Neutralisation', ['hcl', 'naoh', 'phph'], '11'],
+    ['Zn in CuSO₄', ['zn', 'cuso4h'], '11'], ['Mg in HCl', ['mg', 'hcl'], '11'], ['Na in water', ['na', 'h2o', 'phph'], '11'],
+    ['Baking soda + vinegar', ['nahco3', 'ch3cooh'], '11'], ['Limewater test', ['caoh2', 'co2'], '11'], ['Cold pack', ['nh4no3', 'h2o'], '11'], ['Hot pack', ['cacl2', 'h2o'], '11'],
+    ['Golden rain', ['pbno32', 'ki'], '11'], ['Silver tree', ['cu', 'agno3'], '12'],
+    ['Elephant toothpaste', ['h2o2', 'mno2'], '12'], ['Ammonia + Cu²⁺', ['cuso4h', 'nh3'], '12'], ['Blood-red complex', ['fecl3', 'kscn'], '12'],
+    ['KMnO₄ + Fe²⁺', ['kmno4', 'feso4', 'h2so4'], '12'], ['Starch–iodine', ['h2o2', 'ki', 'h2so4', 'starch'], '12'], ['Chromate ⇌ dichromate', ['k2cr2o7', 'naoh'], '12'],
+    ['Cu + HNO₃', ['cu', 'hno3'], '12'], ['Al in NaOH', ['al', 'naoh'], '12'], ['Rusting', ['fe', 'h2o', 'o2'], '12'], ['Thiosulfate + HCl', ['na2s2o3', 'hcl'], '12'],
+    ['Breathalyser', ['k2cr2o7', 'ethanol', 'h2so4'], 'bsc'], ['Endothermic: Ba(OH)₂ + NH₄Cl', ['baoh2', 'nh4cl'], 'bsc'], ['Burning Mg', ['mg', 'heat'], 'bsc'], ['Thermite', ['al', 'fe2o3', 'heat'], 'bsc'],
+    ['Sugar + conc. H₂SO₄', ['sugar', 'h2so4c'], 'bsc'], ['Limestone kiln', ['caco3', 'heat'], 'bsc'], ['Blue vitriol, heated', ['cuso4h', 'heat'], 'bsc'],
   ];
+  const lvlApi = window.LevelInfo || { allows: () => true };
+  const PRESETS = PRESETS_ALL.filter((p) => lvlApi.allows(p[2]));
 
   const state = { sel: [], group: 'all', q: '', predict: false, pred: {}, revealed: true, res: null, doneHandled: false, phIdx: null };
   let sim = null;
