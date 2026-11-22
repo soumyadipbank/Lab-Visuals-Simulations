@@ -41,6 +41,7 @@
     p += '<p class="sub" style="margin:4px 0">Water equivalent of the calorimeter: <b>' + S.W.toFixed(1) + ' g</b> (given for this calorimeter).</p>';
     $('params').innerHTML = p; if ($('saltSel')) $('saltSel').onchange = (ev) => { S.salt = +ev.target.value; S.rows = []; S.t = 0; S.mixed = false; S.analysis = null; setup(); render(); $('chartBox').hidden = true; $('answerBox').innerHTML = ''; };
     history.replaceState(null, '', '?level=' + level + '&exp=' + e.id); render();
+    if (window.Theory) Theory.mount(e.id);
   }
   function render() {
     const e = S.exp;
@@ -105,7 +106,7 @@
 
   function init() {
     $('expCount').textContent = '(' + list.length + ')';
-    $('expList').innerHTML = list.map((e) => '<button type="button" class="exp-btn" data-id="' + e.id + '" aria-pressed="false"><b>' + e.title + '</b><span>' + e.short + (e.unis.length ? ' · ' + e.unis.join(' ') : '') + '</span></button>').join('');
+    $('expList').innerHTML = list.map((e) => '<button type="button" class="exp-btn" data-id="' + e.id + '" aria-pressed="false"><b>' + e.title + '</b><span>' + e.short + '</span></button>').join('');
     const nl = EXPS.length - list.length; if (nl > 0) { const n = $('levelNote'); n.hidden = false; n.innerHTML = nl + ' more calorimetry experiments open at the <a href="bsc.html?level=bsc" style="color:var(--pink)">Bachelors (BSc / BS) level</a>.'; }
     const LV = window.LevelInfo && LevelInfo.LV[level], lk = $('crumbLevel'); if (lk && LV) { lk.textContent = LV.name; lk.href = LV.page + '?level=' + level; }
     if (innerWidth < 900) $('expDetails').open = false;

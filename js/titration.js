@@ -19,18 +19,21 @@
   function clearFlow() { S.V = 0; S.Vd = 0; S.Vf = 0; S.queue = 0; S.drops = []; S.blooms = []; S.ripples = []; S.bead = 0; S.marks = []; S.run = 0; }
   function pick(id) {
     const e = (list.find((x) => x.id === id)) || list[0];
-    S.exp = e; S.sess = e.make(L.rng((Math.random() * 1e9) | 0)); clearFlow(); S.trials = []; S.pts = []; S.recorded = {}; S.graded = false;
-    S.opts = { ph: e.mode === 'indicator2', mo: false, ind: (e.indicators && e.indicators[0]) || null, heat: false, starch: false, meter: false };
+    S.exp = e; S.sess = e.make(L.rng((Math.random() * 1e9) | 0)); clearFlow(); S.pts = []; S.recorded = {}; S.graded = false;
+    S.pi = 0; S.trialsBy = (S.sess.parts || [0]).map(() => []); S.trials = S.trialsBy[0];
+    S.opts = { ph: e.mode === 'indicator2', mo: false, ind: (e.indicators && e.indicators[0]) || null, heat: false, starch: false, meter: false, formol: false };
     S.shown = null; refresh(true);
     history.replaceState(null, '', '?level=' + level + '&exp=' + e.id);
   }
   function fresh() { // new trial, same unknown
-    clearFlow(); S.recorded = {}; S.pts = []; S.shown = null;
+    clearFlow(); S.recorded = {}; S.pts = []; S.shown = null; S.opts.heat = false; S.opts.starch = false; S.opts.formol = false;
     if (S.exp.mode === 'indicator2') { S.opts.ph = true; S.opts.mo = false; }
     refresh(false);
   }
-  const ctx = () => ({ ind: S.opts.ind, ph: S.opts.ph, mo: S.opts.mo, starch: S.opts.starch, heated: S.opts.heat });
-  const cur = () => S.sess.state(S.Vf, ctx());
+  const ctx = () => ({ ind: S.opts.ind, ph: S.opts.ph, mo: S.opts.mo, starch: S.opts.starch, heated: S.opts.heat, formol: S.opts.formol });
+  // a multi-part experiment (e.g. blank + sample, or two different titrations) keeps one session per part
+  const P = () => (S.sess.parts ? S.sess.parts[S.pi] : S.sess);
+  const cur = () => P().state(S.Vf, ctx());
   const reading = () => Math.round(S.Vd / 0.05) * 0.05;
   const busy = () => S.queue > 1e-9 || S.drops.length > 0 || S.run;
 
@@ -42,7 +45,7 @@
   function logPoint() {
     const st = cur(), e = S.exp;
     if (e.mode === 'conductometric' || e.mode === 'potentiometric') {
-      const y = e.mode === 'conductometric' ? st.kappa : st.E + (S.sess.noiseV ? L.gauss(Math.random) * S.sess.noiseV : 0);
+      const y = e.mode === 'conductometric' ? st.kappa : st.E + (P().noiseV ? L.gauss(Math.random) * P().noiseV : 0);
       S.pts.push([+S.Vf.toFixed(3), y]);
     } else if (S.opts.meter) S.pts.push([+S.Vf.toFixed(3), st.pH]);
     refresh(false);
@@ -53,7 +56,7 @@
   function land(vol, x) {
     const before = cur();
     S.Vf = Math.min(S.Vd, S.Vf + vol);
-    const bulk = cur(), local = S.sess.state(S.Vf + 1.2, ctx());
+    const bulk = cur(), local = P().state(S.Vf + 1.2, ctx());
     S.ripples.push({ x, r: 2, a: 1 });
     let col = null, life = 0.7;
     if (bulk.flash) { col = bulk.flash.c; life = bulk.flash.slow ? 2.2 : 0.9; }
@@ -99,7 +102,7 @@
     S.shown = S.shown ? C.absMix(S.shown, target, Math.min(1, dt * 6)) : target;
     const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#22123b'); bg.addColorStop(1, '#120a22'); g.fillStyle = bg; g.fillRect(0, 0, w, h);
     const cx = w * 0.5, bx = cx, bTop = h * 0.05, bBot = h * 0.5, bw = Math.max(20, w * 0.045);
-    const tcol = S.sess.titrantColour;
+    const tcol = P().titrantColour;
     // stand
     g.fillStyle = '#35204f'; g.fillRect(bx + bw * 3.2, bTop, 7, h * 0.88); g.fillRect(bx + bw * 3.2 - w * 0.12, h * 0.93, w * 0.24, 9);
     g.fillRect(bx + bw * 0.7, bTop + h * 0.1, bw * 2.6, 6);
@@ -144,7 +147,7 @@
     g.globalAlpha = 1; g.restore();
     g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2; path(); g.stroke(); g.lineWidth = 1;
     // heater flame
-    if (S.exp.needsHeat) {
+    if (S.exp.needsHeat || P().needsHeat) {
       g.fillStyle = '#3a2b57'; g.fillRect(fcx - fw * 0.7, fy + 2, fw * 1.4, 6);
       if (S.opts.heat) for (let i = 0; i < 7; i++) { const fx2 = fcx - fw * 0.45 + (i / 6) * fw * 0.9, fl = 8 + Math.sin(S.t * 14 + i * 2) * 3; g.fillStyle = 'rgba(70,130,255,.55)'; g.beginPath(); g.ellipse(fx2, fy + 4, 3, fl, 0, 0, 6.283); g.fill(); }
     }
@@ -157,7 +160,7 @@
       g.strokeStyle = 'rgba(206,114,245,.7)'; g.beginPath(); g.moveTo(mx + 14, my + mh); g.lineTo(fcx + fw * 0.14, top + 8); g.lineTo(fcx + fw * 0.14, fy - 10); g.stroke();
     }
     g.fillStyle = 'rgba(235,225,250,.8)'; g.textAlign = 'left'; g.font = Math.max(10, w * 0.016) + 'px Hanken Grotesk, sans-serif';
-    g.fillText('Burette: ' + S.sess.titrant, 12, 20); g.fillText('Flask: ' + S.sess.flask, 12, 38);
+    g.fillText('Burette: ' + P().titrant, 12, 20); g.fillText('Flask: ' + P().flask, 12, 38);
     requestAnimationFrame(draw);
   }
 
@@ -168,13 +171,21 @@
       '<div class="big-read"><span>Trials recorded</span><b>' + S.trials.length + '</b></div>' +
       (S.opts.meter && S.exp.mode.startsWith('indicator') ? '<div class="big-read"><span>pH meter</span><b>' + st.pH.toFixed(2) + '</b></div>' : '');
   }
+  function partTabs() {
+    const ps = S.sess.parts, el = $('parts');
+    if (!ps) { el.innerHTML = ''; el.hidden = true; return; }
+    el.hidden = false;
+    el.innerHTML = '<span class="lbl" style="font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:700;align-self:center">Part</span>' +
+      ps.map((p, i) => '<button type="button" class="btn-sm" data-part="' + i + '" aria-pressed="' + (i === S.pi) + '">' + esc(p.label) + (S.trialsBy[i].length ? ' ✓' : '') + '</button>').join('');
+  }
   function optBtns() {
     const e = S.exp, o = [];
     const b = (id, label, on) => '<button type="button" class="btn-sm" data-opt="' + id + '" aria-pressed="' + !!on + '">' + label + '</button>';
     if (e.mode === 'indicator' && e.indicators && e.indicators.length > 1) e.indicators.forEach((i) => o.push('<button type="button" class="btn-sm" data-ind="' + i + '" aria-pressed="' + (S.opts.ind === i) + '">' + (i === 'phph' ? 'Phenolphthalein' : 'Methyl orange') + '</button>'));
     if (e.mode === 'indicator2') { o.push(b('ph', 'Phenolphthalein', S.opts.ph)); o.push(b('mo', 'Methyl orange', S.opts.mo)); }
-    if (e.needsHeat) o.push(b('heat', 'Heat to 60–70 °C', S.opts.heat));
-    if (e.needsStarch) o.push(b('starch', 'Add starch', S.opts.starch));
+    if (e.needsHeat || P().needsHeat) o.push(b('heat', 'Heat to 60–70 °C', S.opts.heat));
+    if (e.needsStarch || P().needsStarch) o.push(b('starch', 'Add starch', S.opts.starch));
+    if (P().needsFormol) o.push(b('formol', 'Add neutralised formalin', S.opts.formol));
     if (e.mode.startsWith('indicator')) o.push(b('meter', 'pH meter', S.opts.meter));
     $('opts').innerHTML = o.join('');
   }
@@ -195,7 +206,8 @@
       const t = S.trials, last = t.slice(-2);
       const conc = t.length >= 2 && Math.abs(last[0] - last[1]) <= 0.101;
       const rows = t.map((v, i) => '<tr class="' + (conc && i >= t.length - 2 ? 'good' : '') + '"><td>Trial ' + (i + 1) + '</td><td>0.00</td><td>' + v.toFixed(2) + '</td><td>' + v.toFixed(2) + '</td></tr>').join('');
-      $('trialsBox').innerHTML = '<h4 class="lbl-sum" style="padding-top:14px">Observation table</h4><table class="data-table"><thead><tr><th>Trial</th><th>Initial / mL</th><th>Final / mL</th><th>Titre / mL</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      $('trialsBox').innerHTML = '<h4 class="lbl-sum" style="padding-top:14px">Observation table' + (S.sess.parts ? ': ' + esc(P().label) : '') + '</h4><table class="data-table"><thead><tr><th>Trial</th><th>Initial / mL</th><th>Final / mL</th><th>Titre / mL</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+        (S.sess.parts ? '<p class="sub" style="margin:4px 0">' + S.sess.parts.map((p, i) => esc(p.label) + ': ' + (S.trialsBy[i].length ? meanOf(S.trialsBy[i]).toFixed(2) + ' mL' : 'not done yet')).join(' · ') + '</p>' : '') +
         (conc ? '<div class="callout ok">Concordant: your last two titres agree within 0.1 mL. Mean titre = <b>' + ((last[0] + last[1]) / 2).toFixed(2) + ' mL</b>.</div>' : '<div class="callout">' + (t.length < 2 ? 'The first trial is a rough one. Repeat more carefully near the end point (use single drops).' : 'Not concordant yet. Repeat until two titres agree within 0.1 mL.') + '</div>');
     } else if (e.mode === 'indicator2') {
       const r = S.trials;
@@ -217,7 +229,7 @@
     const series = [{ pts: S.pts.slice().sort((a, b) => a[0] - b[0]), color: '#ce72f5', dots: true, line: S.opts.meter || e.mode === 'potentiometric' }];
     const vl = [];
     if (S.graded && S.analysis) S.analysis.forEach((a) => vl.push({ x: a, label: a.toFixed(1) + ' mL', color: '#7cf0b4' }));
-    Chart.draw($('chart'), { series, xmin: 0, xmax: S.sess.vmax, xLabel: 'volume added / mL', yLabel: e.mode === 'conductometric' ? 'κ / mS cm⁻¹' : e.mode === 'potentiometric' ? 'E / V' : 'pH', vlines: vl, ymin: e.mode.startsWith('indicator') ? 0 : undefined, ymax: e.mode.startsWith('indicator') ? 14 : undefined });
+    Chart.draw($('chart'), { series, xmin: 0, xmax: P().vmax, xLabel: 'volume added / mL', yLabel: e.mode === 'conductometric' ? 'κ / mS cm⁻¹' : e.mode === 'potentiometric' ? 'E / V' : 'pH', vlines: vl, ymin: e.mode.startsWith('indicator') ? 0 : undefined, ymax: e.mode.startsWith('indicator') ? 14 : undefined });
   }
 
   function answerUI(meas) {
@@ -240,8 +252,10 @@
   }
 
   // ------------------------------------------------------------ analysis
+  const meanOf = (t) => (t.length < 2 ? t[t.length - 1] : (t[t.length - 1] + t[t.length - 2]) / 2);
   function meanTrials() {
     const e = S.exp, t = S.trials;
+    if (S.sess.parts) return S.trialsBy.every((x) => x.length) ? { t: S.trialsBy.map(meanOf) } : null;
     if (e.mode === 'indicator') { if (t.length < 2) return t.length ? { t: t[t.length - 1] } : null; const l = t.slice(-2); return { t: (l[0] + l[1]) / 2 }; }
     if (e.mode === 'indicator2') { if (!t.length) return null; const l = t.slice(-2); return { t1: l.reduce((a, b) => a + b[0], 0) / l.length, t2: l.reduce((a, b) => a + b[1], 0) / l.length }; }
     return null;
@@ -282,14 +296,15 @@
       $('steps').innerHTML = e.steps.map((s) => '<li>' + esc(s) + '</li>').join('');
       $('expList').querySelectorAll('.exp-btn').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === e.id)));
       actions(); $('msg').innerHTML = ''; $('answerBox').innerHTML = ''; S.analysis = null;
+      if (window.Theory) Theory.mount(e.id);
     }
-    optBtns(); readouts(); trialsUI(); chart();
+    partTabs(); optBtns(); readouts(); trialsUI(); chart();
   }
 
   function init() {
     if (!list.length) return;
     $('expCount').textContent = '(' + list.length + ')';
-    $('expList').innerHTML = list.map((e) => '<button type="button" class="exp-btn" data-id="' + e.id + '" aria-pressed="false"><b>' + esc(e.title) + '</b><span>' + esc(e.short) + (e.unis.length ? ' · ' + e.unis.join(' ') : '') + '</span></button>').join('');
+    $('expList').innerHTML = list.map((e) => '<button type="button" class="exp-btn" data-id="' + e.id + '" aria-pressed="false"><b>' + esc(e.title) + '</b><span>' + esc(e.short) + '</span></button>').join('');
     const nl = T.EXPS.length - list.length;
     if (nl > 0) { const n = $('levelNote'); n.hidden = false; n.innerHTML = nl + ' more titrations (iodometry, EDTA, conductometric, potentiometric…) open at the <a href="bsc.html?level=bsc" style="color:var(--pink)">Bachelors (BSc / BS) level</a>.'; }
     const lk = $('crumbLevel'); const LV = window.LevelInfo && LevelInfo.LV[level]; if (lk && LV) { lk.textContent = LV.name; lk.href = LV.page + '?level=' + level; }
@@ -301,6 +316,11 @@
     const go = (ev) => { ev.preventDefault(); S.run = 1; };
     hold.addEventListener('pointerdown', go); ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach((n) => hold.addEventListener(n, stop));
     hold.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); add(0.5); } });
+    $('parts').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-part]'); if (!b) return;
+      S.trialsBy[S.pi] = S.trials; S.pi = +b.dataset.part; S.trials = S.trialsBy[S.pi];
+      fresh(); $('msg').innerHTML = '<div class="callout">' + esc(P().label) + ': ' + esc(P().flask) + '. Burette: ' + esc(P().titrant) + '.</div>';
+    });
     $('opts').addEventListener('click', (e) => {
       const b = e.target.closest('button'); if (!b) return;
       if (b.dataset.ind) S.opts.ind = b.dataset.ind;
@@ -315,7 +335,9 @@
         const v = reading();
         if (v < 0.5) { m.innerHTML = '<div class="callout warn">Add titrant first.</div>'; return; }
         S.trials.push(v); m.innerHTML = '<div class="callout">Titre recorded: ' + v.toFixed(2) + ' mL. Press “Refill and new trial” to repeat.</div>';
-        const mm = meanTrials(); if (S.trials.length >= 2 && Math.abs(S.trials[S.trials.length - 1] - S.trials[S.trials.length - 2]) <= 0.101) answerUI(mm); else answerUI(S.trials.length ? mm : null);
+        const mm = meanTrials();
+        if (S.sess.parts) { answerUI(mm); if (!mm) m.innerHTML += '<div class="callout">Now do the other part of the experiment (buttons above the burette controls).</div>'; }
+        else if (S.trials.length >= 2 && Math.abs(S.trials[S.trials.length - 1] - S.trials[S.trials.length - 2]) <= 0.101) answerUI(mm); else answerUI(S.trials.length ? mm : null);
         refresh(false);
       } else if (b.id === 'rec1') { S.recorded.v1 = reading(); m.innerHTML = '<div class="callout">First end point recorded at ' + S.recorded.v1.toFixed(2) + ' mL. Now add methyl orange and continue.</div>'; if (!S.opts.mo) { S.opts.mo = true; } refresh(false); }
       else if (b.id === 'rec2') {

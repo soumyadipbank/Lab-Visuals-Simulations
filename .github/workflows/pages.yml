@@ -22,6 +22,7 @@ jobs:
       - run: node tests/titrations.test.js
       - run: node tests/salts.test.js
       - run: node tests/site.test.js
+      - run: node tests/theory.test.js
   deploy:
     needs: test
     runs-on: ubuntu-latest

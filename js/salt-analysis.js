@@ -101,6 +101,7 @@
     $('shelf').addEventListener('click', (e) => { const b = e.target.closest('[data-t]'); if (b) { run(b.dataset.t); if (innerWidth < 900) $('work').scrollIntoView({ behavior: 'smooth' }); } });
     $('newSample').onclick = newSample; $('submit').onclick = () => submit(false); $('giveup').onclick = () => submit(true);
     newSample(); requestAnimationFrame(frame);
+    if (window.Theory) Theory.mount('salt-analysis');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

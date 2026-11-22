@@ -11,11 +11,14 @@ See what happens when chemicals react: colour changes, precipitates, gases, heat
 | `school.html` | Class 11 / 12: guided experiments that open the Reaction Lab pre-loaded, plus simulators (`class11.html` and `class12.html` redirect here) |
 | `bsc.html` | Bachelors: searchable list of practical experiments with the interactive labs |
 | `lab.html` | Free-play Reaction Lab (any chemicals) |
-| `titration.html` | 15 titrations with an animated burette (drops form, fall and swirl in): acid-base, KMnO4, K2Cr2O7, iodometric, EDTA, conductometric, potentiometric |
-| `kinetics.html` | Iodine clock, H2O2 decomposition, ester hydrolysis, saponification |
+| `titration.html` | 25 titrations (including two-part and back titrations) with an animated burette (drops form, fall and swirl in): acid-base, KMnO4, K2Cr2O7, iodometric, EDTA, conductometric, potentiometric |
+| `kinetics.html` | Two clock reactions, H2O2 decomposition, ester hydrolysis, saponification (conductometric and titrimetric), sucrose inversion |
+| `practicals.html` | Practical bench: 18 physical, inorganic, organic and computing practicals (conductance, viscosity, surface tension, Ksp, CMC, phase diagram, distribution law, gravimetry, preparations, organic analysis, chromatography, NMR/IR, spreadsheets) |
 | `calorimetry.html` | Heat of neutralisation and of solution with cooling correction |
 | `colorimetry.html` | Beer-Lambert law, lambda max scan, calibration line |
 | `salt-analysis.html` | Qualitative analysis of unknown salts and mixtures |
+
+Every experiment ends with "The science": principle, reactions, why the method is done that way, the calculation, and sources of error (`js/theory.js`).
 
 ## Reaction Lab features
 - 59 chemicals (acids, bases, salts, metals, oxidisers, oxides, gases, organics, indicators, a Bunsen flame). Pick up to four.
@@ -30,7 +33,7 @@ See what happens when chemicals react: colour changes, precipitates, gases, heat
 No build step. Open `index.html`, or `python3 -m http.server`.
 
 ## Tests
-Run `node tests/verify.js` (reaction engine), `node tests/labcalc.test.js` (simulator maths), `node tests/titrations.test.js`, `node tests/salts.test.js` and `node tests/site.test.js` (links between pages). The titration and salt tests check that every experiment can be solved from its own observations.
+Run `node tests/verify.js` (reaction engine), `node tests/labcalc.test.js` (simulator maths), `node tests/titrations.test.js`, `node tests/salts.test.js` and `node tests/site.test.js` (links between pages) and `node tests/theory.test.js` (every experiment has its explanation). The titration and salt tests check that every experiment can be solved from its own observations.
 
 ## Deploy to GitHub Pages
 Merge to `main`, then in the repo go to Settings > Pages > Source: **GitHub Actions**. The included workflow tests and deploys on every push to `main`.

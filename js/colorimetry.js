@@ -31,6 +31,7 @@
     $('params').onclick = (ev) => { const b = ev.target.closest('[data-v]'); if (!b) return; const v = +b.dataset.v, c = (v * STOCK) / FLASK; S.cur = { label: v + ' mL standard', c }; const A = meas(c, S.lam); S.rows.push({ kind: 'std', c, A, lam: S.lam, label: v + ' mL' }); S.shownA = A; render(); };
     $('actions').innerHTML = '<button type="button" class="btn-sm" id="blank">Measure blank</button><button type="button" class="btn-sm" id="unk">Measure the unknown</button><button type="button" class="btn-sm primary" id="scan">Scan the spectrum</button><button type="button" class="btn-sm primary" id="fit">Fit the line</button><button type="button" class="btn-sm" id="clear">Clear</button>';
     history.replaceState(null, '', '?level=' + level + '&exp=' + e.id); render();
+    if (window.Theory) Theory.mount(e.id);
   }
   function render() {
     $('readouts').innerHTML = '<div class="big-read"><span>Wavelength</span><b>' + S.lam + ' nm</b></div><div class="big-read"><span>Absorbance</span><b>' + S.shownA.toFixed(3) + '</b></div><div class="big-read"><span>Cuvette</span><b style="font-size:1.1rem">' + esc(S.cur.label) + '</b></div>';
@@ -91,7 +92,7 @@
 
   function init() {
     $('expCount').textContent = '(' + list.length + ')';
-    $('expList').innerHTML = list.map((e) => '<button type="button" class="exp-btn" data-id="' + e.id + '" aria-pressed="false"><b>' + e.title + '</b><span>' + e.short + ' · ' + e.unis.join(' ') + '</span></button>').join('');
+    $('expList').innerHTML = list.map((e) => '<button type="button" class="exp-btn" data-id="' + e.id + '" aria-pressed="false"><b>' + e.title + '</b><span>' + e.short + '</span></button>').join('');
     const nl = EXPS.length - list.length; if (nl > 0) { const n = $('levelNote'); n.hidden = false; n.innerHTML = nl + ' more experiment opens at the <a href="bsc.html?level=bsc" style="color:var(--pink)">Bachelors (BSc / BS) level</a>.'; }
     const LV = window.LevelInfo && LevelInfo.LV[level], lk = $('crumbLevel'); if (lk && LV) { lk.textContent = LV.name; lk.href = LV.page + '?level=' + level; }
     if (innerWidth < 900) $('expDetails').open = false;
