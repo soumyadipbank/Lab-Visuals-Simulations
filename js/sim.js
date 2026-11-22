@@ -171,7 +171,8 @@
         for (let i = 0; i < n; i++) this.pptP.push({ x: rnd(BX + 12, BX + BW - 12), y: rnd(0, 1), thr: rnd(0.04, 0.75), vy: rnd(14, 30), s: rnd(1.4, 3.4), settled: false, ox: rnd(0, 6.28), sx: 0, sy: 0, started: false });
       }
       this.sedLayer = [];
-      for (let i = 0; i < 40; i++) this.sedLayer.push(rnd(0.7, 1.3));
+      for (let i = 0; i < 40; i++) this.sedLayer.push(rnd(0.75, 1.25));
+      this.sedLayer = this.sedLayer.map((v, i, a) => (a[Math.max(0, i - 1)] + v * 2 + a[Math.min(a.length - 1, i + 1)]) / 4);   // gentle mounds, not spikes
       // solid granules
       this.granules = [];
       this.items.forEach((it, idx) => {
@@ -356,7 +357,7 @@
       if (!this.fx.ppt || this.fx.ppt.noSettle) return 0;
       const n = this.pptP.length || 1;
       const st = this.pptP.filter((q) => q.settled).length;
-      let h = (st / n) * 26 * clamp(this.fx.ppt.amount, 0.3, 1);
+      let h = (st / n) * 38 * clamp(this.fx.ppt.amount, 0.35, 1);
       if (this.fx.ppt.redissolve) h *= 1 - smooth((this.p - 0.55) / 0.3);
       return h;
     }
@@ -637,7 +638,7 @@
         if (fx.ppt) {
           let cloud;
           if (fx.ppt.noSettle) cloud = clamp(fx.ppt.amount, 0, 1) * 0.55 * smooth(p * 2);
-          else { const n = this.pptP.length || 1; const susp = this.pptP.filter((q) => q.started && !q.settled).length / n; cloud = susp * 0.7 * clamp(fx.ppt.amount + 0.2, 0, 1); }
+          else { const n = this.pptP.length || 1; const susp = this.pptP.filter((q) => q.started && !q.settled).length / n; cloud = Math.max(susp * 0.75, 0.2 * smooth(p * 1.5)) * clamp(fx.ppt.amount + 0.2, 0, 1); }   /* fine particles keep the liquid milky long after most has settled */
           if (fx.ppt.redissolve) cloud *= 1 - smooth((p - 0.55) / 0.3);
           if (cloud > 0.01) { ctx.fillStyle = rgba(fx.ppt.color, cloud); this.liquidPath(ctx, surf); ctx.fill(); }
         }
@@ -649,17 +650,23 @@
       // sediment
       const sh = this.sedHeight();
       if (sh > 0.5) {
-        ctx.fillStyle = rgba(fx.ppt.color, 0.95);
+        // shaded so that even a white precipitate stands out against a pale liquid
+        const sg = ctx.createLinearGradient(0, BBOT - sh - 4, 0, BBOT);
+        sg.addColorStop(0, rgba(C.mix(fx.ppt.color, '#ffffff', 0.25), 1)); sg.addColorStop(1, rgba(C.mix(fx.ppt.color, '#5a6478', 0.32), 1));
+        ctx.fillStyle = sg;
         ctx.beginPath(); ctx.moveTo(BX, BBOT);
-        const n = this.sedLayer.length;
-        for (let i = 0; i <= n; i++) { const x = BX + (BW * i) / n; const y = BBOT - 2 - sh * this.sedLayer[Math.min(i, n - 1)] * (0.85 + 0.15 * Math.sin(i * 1.7)); ctx.lineTo(x, y); }
-        ctx.lineTo(BX + BW, BBOT); ctx.closePath(); ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,.12)'; ctx.lineWidth = 1; ctx.stroke();
+        const n = this.sedLayer.length, top = [];
+        for (let i = 0; i <= n; i++) { const x = BX + (BW * i) / n; const y = BBOT - 2 - sh * this.sedLayer[Math.min(i, n - 1)]; top.push([x, y]); }
+        const curve = (move) => { if (move) ctx.moveTo(top[0][0], top[0][1]); else ctx.lineTo(top[0][0], top[0][1]); for (let i = 1; i < top.length - 1; i++) { const mx = (top[i][0] + top[i + 1][0]) / 2, my = (top[i][1] + top[i + 1][1]) / 2; ctx.quadraticCurveTo(top[i][0], top[i][1], mx, my); } ctx.lineTo(top[top.length - 1][0], top[top.length - 1][1]); };
+        ctx.beginPath(); ctx.moveTo(BX, BBOT); ctx.lineTo(top[0][0], top[0][1]); curve(); ctx.lineTo(BX + BW, BBOT); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = 'rgba(40,50,72,.5)'; ctx.lineWidth = 1.4; ctx.beginPath(); curve(true); ctx.stroke();
+        // curdy lumps along the top of the layer, each with a light top and a shadowed underside
+        for (let i = 1; i < top.length - 1; i += 2) { const x = top[i][0], y = top[i][1] + 1.5, r = 2.2 + (i % 3) * 0.8; ctx.fillStyle = rgba(C.mix(fx.ppt.color, '#5a6478', 0.3), 0.9); ctx.beginPath(); ctx.arc(x + 0.8, y + 1.2, r, 0, 6.3); ctx.fill(); ctx.fillStyle = rgba(C.mix(fx.ppt.color, '#ffffff', 0.3), 1); ctx.beginPath(); ctx.arc(x, y, r, 0, 6.3); ctx.fill(); }
       }
       // suspended ppt particles
       if (fx.ppt) {
         const fade = fx.ppt.redissolve ? 1 - smooth((p - 0.55) / 0.3) : 1;
-        ctx.fillStyle = rgba(fx.ppt.color, 0.95 * fade); ctx.strokeStyle = 'rgba(40,60,90,' + (0.22 * fade) + ')'; ctx.lineWidth = 0.8;
+        ctx.fillStyle = rgba(fx.ppt.color, 0.95 * fade); ctx.strokeStyle = 'rgba(40,55,85,' + (0.45 * fade) + ')'; ctx.lineWidth = 0.9;
         this.pptP.forEach((q) => { if (q.started && !q.settled && fade > 0.02) { ctx.beginPath(); ctx.arc(q.x, q.y, q.s * 1.25, 0, 6.3); ctx.fill(); ctx.stroke(); } });
       }
       // solid granules
