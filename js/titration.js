@@ -5,7 +5,7 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const level = (window.LevelInfo && LevelInfo.level) || 'bsc';
   const q = new URLSearchParams(location.search);
-  const TOL = { indicator: 0.02, indicator2: 0.03, conductometric: 0.06, potentiometric: 0.04 };
+  const TOL = { indicator: 0.02, indicator2: 0.05, conductometric: 0.06, potentiometric: 0.04 };
   const cv = $('bench'), g = cv.getContext('2d');
   // V = volume asked for, Vd = volume that has left the burette (the reading), Vf = volume that has reached the flask
   const S = { exp: null, sess: null, V: 0, Vd: 0, Vf: 0, queue: 0, drops: [], blooms: [], ripples: [], bead: 0, emitT: 0, marks: [], shown: null, trials: [], pts: [], opts: {}, recorded: {}, run: 0, t: 0, graded: false, lastRead: '' };
@@ -26,7 +26,7 @@
     history.replaceState(null, '', '?level=' + level + '&exp=' + e.id);
   }
   function fresh() { // new trial, same unknown
-    clearFlow(); S.recorded = {}; S.pts = []; S.shown = null; S.opts.heat = false; S.opts.starch = false; S.opts.formol = false;
+    clearFlow(); S.recorded = {}; S.pts = []; S.shown = null; S.opts.heat = false; S.opts.starch = false; S.opts.formol = false; S.opts.meter = false; S.graded = false; S.analysis = null;
     if (S.exp.mode === 'indicator2') { S.opts.ph = true; S.opts.mo = false; }
     refresh(false);
   }
@@ -47,7 +47,7 @@
     if (e.mode === 'conductometric' || e.mode === 'potentiometric') {
       const y = e.mode === 'conductometric' ? st.kappa : st.E + (P().noiseV ? L.gauss(Math.random) * P().noiseV : 0);
       S.pts.push([+S.Vf.toFixed(3), y]);
-    } else if (S.opts.meter) S.pts.push([+S.Vf.toFixed(3), st.pH]);
+    } else if (S.opts.meter && st.pH != null) S.pts.push([+S.Vf.toFixed(3), st.pH]);
     refresh(false);
   }
   const cdist = (a, b) => { if (!a || !b) return a || b ? 99 : 0; const A = hexRgb(a), B = hexRgb(b); return Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]); };
@@ -152,7 +152,7 @@
       if (S.opts.heat) for (let i = 0; i < 7; i++) { const fx2 = fcx - fw * 0.45 + (i / 6) * fw * 0.9, fl = 8 + Math.sin(S.t * 14 + i * 2) * 3; g.fillStyle = 'rgba(70,130,255,.55)'; g.beginPath(); g.ellipse(fx2, fy + 4, 3, fl, 0, 0, 6.283); g.fill(); }
     }
     // meter
-    if (S.opts.meter || S.exp.mode === 'potentiometric' || S.exp.mode === 'conductometric') {
+    if ((S.opts.meter && cur().pH != null) || S.exp.mode === 'potentiometric' || S.exp.mode === 'conductometric') {
       const st = cur(), lab = S.exp.mode === 'conductometric' ? st.kappa.toFixed(2) + ' mS/cm' : S.exp.mode === 'potentiometric' ? (st.E).toFixed(3) + ' V' : 'pH ' + st.pH.toFixed(2);
       g.fillStyle = '#0d0618'; g.strokeStyle = 'rgba(206,114,245,.7)'; const mw = Math.min(w * 0.3, 190), mh = 44, mx = w - mw - 12, my = 12;
       g.beginPath(); if (g.roundRect) g.roundRect(mx, my, mw, mh, 10); else g.rect(mx, my, mw, mh); g.fill(); g.stroke();
@@ -160,7 +160,7 @@
       g.strokeStyle = 'rgba(206,114,245,.7)'; g.beginPath(); g.moveTo(mx + 14, my + mh); g.lineTo(fcx + fw * 0.14, top + 8); g.lineTo(fcx + fw * 0.14, fy - 10); g.stroke();
     }
     g.fillStyle = 'rgba(235,225,250,.8)'; g.textAlign = 'left'; g.font = Math.max(10, w * 0.016) + 'px Hanken Grotesk, sans-serif';
-    g.fillText('Burette: ' + P().titrant, 12, 20); g.fillText('Flask: ' + P().flask, 12, 38);
+    const capTxt = 'Burette: ' + P().titrant + ' · Flask: ' + P().flask, cap = $('benchCap'); if (cap && cap.textContent !== capTxt) cap.textContent = capTxt;
     requestAnimationFrame(draw);
   }
 
@@ -169,7 +169,7 @@
     const st = cur();
     $('readouts').innerHTML = '<div class="big-read"><span>Burette reading</span><b>' + reading().toFixed(2) + ' mL</b></div>' +
       '<div class="big-read"><span>Trials recorded</span><b>' + S.trials.length + '</b></div>' +
-      (S.opts.meter && S.exp.mode.startsWith('indicator') ? '<div class="big-read"><span>pH meter</span><b>' + st.pH.toFixed(2) + '</b></div>' : '');
+      (S.opts.meter && st.pH != null ? '<div class="big-read"><span>pH meter</span><b>' + st.pH.toFixed(2) + '</b></div>' : '');
   }
   function partTabs() {
     const ps = S.sess.parts, el = $('parts');
@@ -186,7 +186,7 @@
     if (e.needsHeat || P().needsHeat) o.push(b('heat', 'Heat to 60–70 °C', S.opts.heat));
     if (e.needsStarch || P().needsStarch) o.push(b('starch', 'Add starch', S.opts.starch));
     if (P().needsFormol) o.push(b('formol', 'Add neutralised formalin', S.opts.formol));
-    if (e.mode.startsWith('indicator')) o.push(b('meter', 'pH meter', S.opts.meter));
+    if (e.mode.startsWith('indicator') && P().state(0, ctx()).pH != null) o.push(b('meter', 'pH meter', S.opts.meter));   /* only for acid–base titrations */
     $('opts').innerHTML = o.join('');
   }
   function actions() {
@@ -213,7 +213,7 @@
       const r = S.trials;
       if (!r.length) { $('trialsBox').innerHTML = ''; return; }
       const rows = r.map((x, i) => '<tr><td>Trial ' + (i + 1) + '</td><td>' + x[0].toFixed(2) + '</td><td>' + x[1].toFixed(2) + '</td></tr>').join('');
-      const l = r.slice(-2), conc = r.length >= 2 && Math.abs(l[0][0] - l[1][0]) <= 0.101 && Math.abs(l[0][1] - l[1][1]) <= 0.151;
+      const l = r.slice(-2), conc = r.length >= 2 && Math.abs(l[0][0] - l[1][0]) <= 0.101 && Math.abs(l[0][1] - l[1][1]) <= 0.101;
       $('trialsBox').innerHTML = '<h4 class="lbl-sum" style="padding-top:14px">Observation table</h4><table class="data-table"><thead><tr><th>Trial</th><th>V₁ (phenolphthalein) / mL</th><th>V₂ total (methyl orange) / mL</th></tr></thead><tbody>' + rows + '</tbody></table>' +
         (conc ? '<div class="callout ok">Concordant. Mean V₁ = <b>' + ((l[0][0] + l[1][0]) / 2).toFixed(2) + '</b> mL, V₂ = <b>' + ((l[0][1] + l[1][1]) / 2).toFixed(2) + '</b> mL.</div>' : '<div class="callout">Repeat until two trials agree.</div>');
     } else {
@@ -237,16 +237,16 @@
     if (!meas) { $('answerBox').innerHTML = ''; return; }
     const fields = s.report.map((r, i) => '<div class="field"><label for="ans' + i + '">' + esc(r.label) + ' <output>' + esc(r.unit) + '</output></label><input type="number" step="any" id="ans' + i + '" inputmode="decimal" placeholder="your answer"></div>').join('');
     $('answerBox').innerHTML = '<h4 class="lbl-sum" style="padding-top:14px">Your calculation</h4><p class="sub" style="margin:0 0 6px">Calculate from your own readings, then check.</p><div class="answer-form">' + fields + '<button type="button" class="btn-sm primary" id="check">Check</button><button type="button" class="btn-sm" id="worked">Show worked solution</button></div><div id="verdict"></div><div id="workedOut"></div>';
+    let tries = 0, revealed = false; $('worked').hidden = true;
     $('check').onclick = () => {
-      const r = s.solve(meas), out = [];
-      s.report.forEach((rep, i) => {
-        const v = parseFloat($('ans' + i).value);
-        if (!isFinite(v)) { out.push('<div class="callout warn">' + esc(rep.label) + ': enter a number first.</div>'); return; }
-        const tol = rep.tol || TOL[e.mode] || 0.03, err = rep.abs ? Math.abs(v - rep.truth) : (Math.abs(v - rep.truth) / Math.abs(rep.truth)) * 100;
-        const good = rep.abs ? err <= tol : err <= tol * 100;
-        out.push('<div class="callout ' + (good ? 'ok' : 'bad') + '"><b>' + esc(rep.label) + ':</b> you gave ' + v + ', the prepared value is ' + rep.truth.toFixed(rep.dp) + ' ' + esc(rep.unit) + ' (' + (rep.abs ? 'difference ' + err.toFixed(3) + ' V' : 'error ' + err.toFixed(1) + ' %') + '). ' + (good ? 'Within the acceptable range.' : 'Outside the acceptable range. Check your titre, the mole ratio and the units, or use “Show worked solution”.') + '</div>');
-      });
-      $('verdict').innerHTML = out.join('');
+      const vals = s.report.map((rep, i) => parseFloat($('ans' + i).value));
+      if (vals.some((v) => !isFinite(v))) { $('verdict').innerHTML = '<div class="callout warn">Enter every value first.</div>'; return; }
+      tries++;
+      const res = s.report.map((rep, i) => { const tol = rep.tol || TOL[e.mode] || 0.03, err = rep.abs ? Math.abs(vals[i] - rep.truth) : (Math.abs(vals[i] - rep.truth) / Math.abs(rep.truth)) * 100; return { rep, err, good: rep.abs ? err <= tol : err <= tol * 100 }; });
+      revealed = revealed || res.every((x) => x.good) || tries >= 3;
+      $('verdict').innerHTML = res.map((x) => '<div class="callout ' + (x.good ? 'ok' : 'bad') + '"><b>' + esc(x.rep.label) + ':</b> ' + (x.good ? 'within the acceptable range.' : 'outside the acceptable range. Check your titre, the mole ratio and the units.') + (revealed ? ' The prepared value is ' + x.rep.truth.toFixed(x.rep.dp) + (x.rep.unit ? ' ' + esc(x.rep.unit) : '') + (x.rep.abs ? '' : ' (your error ' + x.err.toFixed(1) + ' %)') + '.' : '') + '</div>').join('') +
+        (revealed ? '' : '<div class="callout">' + (3 - tries) + ' more tr' + (3 - tries === 1 ? 'y' : 'ies') + ' before the answer and the worked solution are shown.</div>');
+      if (revealed) $('worked').hidden = false;
     };
     $('worked').onclick = () => { const r = s.solve(meas); $('workedOut').innerHTML = '<div class="work-lines">' + r.lines.map(esc).join('<br>') + '</div>'; };
   }
@@ -266,25 +266,26 @@
     if (pts.length < 8) { m.innerHTML = '<div class="callout warn">Take at least 8 readings first, and go well past the end point.</div>'; return; }
     if (e.mode === 'potentiometric') {
       let best = -1, bi = -1;
-      for (let i = 1; i < pts.length; i++) { const d = (pts[i][1] - pts[i - 1][1]) / (pts[i][0] - pts[i - 1][0]); if (d > best) { best = d; bi = i; } }
+      for (let i = 1; i < pts.length; i++) { const d = Math.abs((pts[i][1] - pts[i - 1][1]) / (pts[i][0] - pts[i - 1][0])); if (d > best) { best = d; bi = i; } }   /* the potential may rise (Fe²⁺/Cr₂O₇²⁻) or fall (Ag⁺/Cl⁻) */
       const veq = (pts[bi][0] + pts[bi - 1][0]) / 2;
       if (best < 0.03) { m.innerHTML = '<div class="callout warn">No sharp jump yet. Keep adding titrant past the end point.</div>'; return; }
       const meas = { veq, eHalf: interp(pts, veq / 2), eEq: interp(pts, veq) };
       if (e.id === 'potent-agcl') { meas.eEq = (pts[bi][1] + pts[bi - 1][1]) / 2; }
       if (isNaN(meas.eHalf)) { m.innerHTML = '<div class="callout warn">Your readings do not cover half the end-point volume. Start again with small steps from the beginning.</div>'; return; }
       S.graded = true; S.analysis = [veq]; S.meas = meas;
-      m.innerHTML = '<div class="callout ok">Largest ΔE/ΔV (' + best.toFixed(2) + ' V per mL) lies between ' + pts[bi - 1][0].toFixed(2) + ' and ' + pts[bi][0].toFixed(2) + ' mL. End point ≈ <b>' + veq.toFixed(2) + ' mL</b>. Smaller steps around it give a sharper value.</div>';
+      m.innerHTML = '<div class="callout ok">Largest |ΔE/ΔV| (' + best.toFixed(2) + ' V per mL) lies between ' + pts[bi - 1][0].toFixed(2) + ' and ' + pts[bi][0].toFixed(2) + ' mL. End point ≈ <b>' + veq.toFixed(2) + ' mL</b>. Smaller steps around it give a sharper value.</div>';
       answerUI(meas); chart(); return;
     }
     const nb = e.id === 'conduct-mix' ? 2 : 1;
     const need = (nb + 1) * 3;
     if (pts.length < need + 3) { m.innerHTML = '<div class="callout warn">Add more readings: you need points on every straight section of the graph.</div>'; return; }
-    const f = T.fitBreaks(pts.map((p) => p[0]), pts.map((p) => p[1]), nb);
+    const V0c = P().cellV || 100, kc = pts.map((p) => (p[1] * (V0c + p[0])) / V0c);   /* dilution correction κ′ = κ (V₀ + v)/V₀ keeps the branches straight */
+    const f = T.fitBreaks(pts.map((p) => p[0]), kc, nb);
     if (!f) { m.innerHTML = '<div class="callout warn">Could not fit straight lines through these readings. Take more points after the end point.</div>'; return; }
     S.graded = true; S.analysis = f.breaks;
     const meas = nb === 2 ? { v1: f.breaks[0], v2: f.breaks[1] } : { v: f.breaks[0] };
     S.meas = meas;
-    m.innerHTML = '<div class="callout ok">Straight-line fits meet at <b>' + f.breaks.map((b) => b.toFixed(2)).join(' mL</b> and <b>') + ' mL</b>. Those are your end points.</div>';
+    m.innerHTML = '<div class="callout ok">After correcting for dilution (κ′ = κ(V₀ + v)/V₀, V₀ = ' + V0c + ' mL), straight-line fits meet at <b>' + f.breaks.map((b) => b.toFixed(2)).join(' mL</b> and <b>') + ' mL</b>. Those are your end points.</div>';
     answerUI(meas); chart();
   }
 

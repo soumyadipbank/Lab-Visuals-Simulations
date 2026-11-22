@@ -18,17 +18,25 @@
     // answer form: report = [{id,label,unit,truth,dp,tol,abs}], work = lines shown by "Show working"
     answer: (report, work) => {
       if (!report) { $('answerBox').innerHTML = ''; return; }
+      let tries = 0, revealed = false;
       $('answerBox').innerHTML = '<h4 class="lbl-sum" style="padding-top:14px">Your result</h4><p class="sub" style="margin:0 0 6px">Work it out from your own readings, then check.</p><div class="answer-form">' +
         report.map((r, i) => '<div class="field"><label for="ans' + i + '">' + esc(r.label) + ' <output>' + esc(r.unit || '') + '</output></label><input type="' + (r.text ? 'text' : 'number') + '" step="any" id="ans' + i + '" inputmode="' + (r.text ? 'text' : 'decimal') + '" placeholder="your answer"></div>').join('') +
-        '<button type="button" class="btn-sm primary" id="check">Check</button>' + (work ? '<button type="button" class="btn-sm" id="worked">Show working</button>' : '') + '</div><div id="verdict"></div><div id="workedOut"></div>';
+        '<button type="button" class="btn-sm primary" id="check">Check</button>' + (work ? '<button type="button" class="btn-sm" id="worked" hidden>Show working</button>' : '') + '</div><div id="verdict"></div><div id="workedOut"></div>';
+      // the true value and the working are shown only after a correct answer or three tries
       $('check').onclick = () => {
-        $('verdict').innerHTML = report.map((r, i) => {
-          const raw = $('ans' + i).value.trim();
-          if (r.text) { const ok = r.accept(raw); return '<div class="callout ' + (ok ? 'ok' : 'bad') + '"><b>' + esc(r.label) + ':</b> ' + (ok ? 'correct.' : 'not quite. The answer is ' + esc(r.truthText) + '.') + '</div>'; }
-          const v = parseFloat(raw); if (!isFinite(v)) return '<div class="callout warn">' + esc(r.label) + ': enter a number first.</div>';
-          const err = r.abs ? Math.abs(v - r.truth) : (Math.abs(v - r.truth) / Math.abs(r.truth)) * 100, ok = r.abs ? err <= r.tol : err <= r.tol * 100;
-          return '<div class="callout ' + (ok ? 'ok' : 'bad') + '"><b>' + esc(r.label) + ':</b> you gave ' + v + ', the true value in this model is ' + r.truth.toFixed(r.dp) + ' ' + esc(r.unit || '') + (r.abs ? '' : ' (error ' + err.toFixed(1) + ' %)') + '. ' + (ok ? 'Within the expected range.' : 'Outside the expected range: check the readings, the formula and the units, or use “Show working”.') + '</div>';
-        }).join('');
+        const raws = report.map((r, i) => $('ans' + i).value.trim());
+        if (raws.some((v, i) => !v || (!report[i].text && !isFinite(parseFloat(v))))) { $('verdict').innerHTML = '<div class="callout warn">Enter every answer first.</div>'; return; }
+        tries++;
+        const res = report.map((r, i) => {
+          if (r.text) return { r, ok: r.accept(raws[i]) };
+          const v = parseFloat(raws[i]), err = r.abs ? Math.abs(v - r.truth) : (Math.abs(v - r.truth) / Math.abs(r.truth)) * 100;
+          return { r, err, ok: r.abs ? err <= r.tol : err <= r.tol * 100 };
+        });
+        revealed = revealed || res.every((x) => x.ok) || tries >= 3;
+        $('verdict').innerHTML = res.map((x) => '<div class="callout ' + (x.ok ? 'ok' : 'bad') + '"><b>' + esc(x.r.label) + ':</b> ' + (x.ok ? 'correct / within the expected range.' : 'not right yet.') +
+          (revealed ? (x.r.text ? ' Answer: ' + esc(x.r.truthText) + '.' : ' The value in this model is ' + x.r.truth.toFixed(x.r.dp) + (x.r.unit ? ' ' + esc(x.r.unit) : '') + (x.r.abs ? '' : ' (your error ' + x.err.toFixed(1) + ' %)') + '.') : '') + '</div>').join('') +
+          (revealed ? '' : '<div class="callout">Check the readings, the formula and the units. ' + (3 - tries) + ' more tr' + (3 - tries === 1 ? 'y' : 'ies') + ' before the answer and the working are shown.</div>');
+        if (revealed && work) $('worked').hidden = false;
       };
       if (work) $('worked').onclick = () => { const lines = typeof work === 'function' ? work() : work; $('workedOut').innerHTML = '<div class="work-lines">' + lines.map(esc).join('<br>') + '</div>'; };
     },
@@ -85,7 +93,7 @@
     api.msg(''); api.chart(); api.answer(null); api.custom(''); $('trialsBox').innerHTML = ''; $('readouts').innerHTML = ''; $('params').innerHTML = ''; $('actions').innerHTML = '';
     $('params').oninput = null; $('actions').onclick = null; S.g = S.p = S.ss = S.o = null;
     $('bench').parentElement.hidden = !!e.noCanvas;
-    $('bench').style.touchAction = '';
+    $('bench').style.touchAction = ''; if ($('benchCap')) $('benchCap').textContent = '';
     if (e.custom) e.custom(api, S);
     else { controlsUI(); actionsUI(); if (e.readouts) api.readouts(e.readouts.call(e, S.sess, S.c, S)); }
     if (window.Theory) Theory.mount(e.id);
@@ -99,7 +107,9 @@
     if (S.anim) { S.anim.t += dt; if (S.anim.dur && S.anim.t > S.anim.dur) S.anim = null; }
     if (S.exp && !S.exp.noCanvas && S.exp.draw) {
       const { w, h, dpr } = size(); g.setTransform(dpr, 0, 0, dpr, 0, 0); PX.draw.bg(g, w, h);
+      PX._cap = '';
       try { S.exp.draw(g, w, h, S.sess, S.c, S); } catch (err) { console.error(err); }
+      const cap = $('benchCap'); if (cap && cap.textContent !== PX._cap) cap.textContent = PX._cap;
     }
     requestAnimationFrame(frame);
   }

@@ -30,6 +30,8 @@
 
   // ------------------------------------------------------------ small drawing kit for the apparatus pictures
   const K = (PX.draw = {});
+  // status text shown as a caption under the drawing (wraps on phones instead of overlapping the apparatus)
+  K.caption = (txt) => { if (txt) PX._cap = (PX._cap ? PX._cap + ' · ' : '') + txt; };
   K.bg = (g, w, h) => { const b = g.createLinearGradient(0, 0, 0, h); b.addColorStop(0, '#22123b'); b.addColorStop(1, '#120a22'); g.fillStyle = b; g.fillRect(0, 0, w, h); };
   K.rgba = (hex, a) => { const r = C.hex2rgb(hex); return 'rgba(' + r[0] + ',' + r[1] + ',' + r[2] + ',' + a + ')'; };
   K.label = (g, w, txt, x, y, size, align) => { g.fillStyle = 'rgba(235,225,250,.85)'; g.font = (size || Math.max(10, w * 0.016)) + 'px Hanken Grotesk, sans-serif'; g.textAlign = align || 'left'; g.fillText(txt, x, y); };

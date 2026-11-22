@@ -1,14 +1,14 @@
 # Lab Visuals: Chemical Reaction Simulator
 
-See what happens when chemicals react: colour changes, precipitates, gases, heat released or absorbed, balanced equations, and a particle-level animation. Built for Class 11 / 12 and Bachelors (BSc / BS) chemistry. The site opens on a level picker with two choices, and each level gets its own lab.
+See what happens when chemicals react: colour changes, precipitates, gases, heat released or absorbed, balanced equations, and a particle-level animation. Built for Grade 11 / 12 and Bachelors (BSc / BS) chemistry. The site opens on a level picker with two choices, and each level gets its own lab.
 
 **Live site:** `https://soumyadipbank.github.io/Lab-Visuals-Simulations/` (after enabling Pages, see below)
 
 ## Pages
 | Page | What it is |
 |---|---|
-| `index.html` | Level gate: Class 11 / 12 or Bachelors (BSc / BS) |
-| `school.html` | Class 11 / 12: guided experiments that open the Reaction Lab pre-loaded, plus simulators (`class11.html` and `class12.html` redirect here) |
+| `index.html` | Level gate: Grade 11 / 12 or Bachelors (BSc / BS) |
+| `school.html` | Grade 11 / 12: guided experiments that open the Reaction Lab pre-loaded, plus simulators (`class11.html` and `class12.html` redirect here) |
 | `bsc.html` | Bachelors: searchable list of practical experiments with the interactive labs |
 | `lab.html` | Free-play Reaction Lab (any chemicals) |
 | `titration.html` | 25 titrations (including two-part and back titrations) with an animated burette (drops form, fall and swirl in): acid-base, KMnO4, K2Cr2O7, iodometric, EDTA, conductometric, potentiometric |
@@ -42,7 +42,7 @@ Merge to `main`, then in the repo go to Settings > Pages > Source: **GitHub Acti
 `js/data.js` ions, solubility, thermodynamic tables. `js/engine.js` rule engine (precipitation, neutralisation, displacement, acid + carbonate, ...) plus an equation balancer. `js/curated.js` hand-written special reactions. `js/sim.js` canvas drawing. `js/app.js` interface.
 
 ## Syllabus note
-The Bachelors experiment list was collected from published undergraduate chemistry practical syllabi. The Class 11 / 12 list follows typical school practicals, not one board's syllabus.
+The Bachelors experiment list was collected from published undergraduate chemistry practical syllabi. The Grade 11 / 12 list follows typical school practicals, not one board's syllabus.
 
 ## Colour model
 Solution colours combine by absorbance (Beer-Lambert), not by averaging RGB: absorbances of dyes add, so blue + yellow gives green, and a colour fading during a reaction follows the concentration of the coloured species. Indicator colours follow the fraction of the indicator in its coloured form (phenolphthalein pKa 9.4, methyl orange pKa 3.46).

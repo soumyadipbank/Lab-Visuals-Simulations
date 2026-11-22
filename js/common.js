@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const LV = {
-    school: { name: 'Class 11 / 12', page: 'school.html' },
+    school: { name: 'Grade 11 / 12', page: 'school.html' },
     bsc: { name: 'Bachelors', page: 'bsc.html' },
   };
   const RANK = { '11': 1, '12': 1, school: 1, bsc: 2 };
@@ -26,7 +26,7 @@
   };
 
   const here = location.pathname.split('/').pop() || 'index.html';
-  const NAV = [['index.html', 'Home'], ['school.html', 'Class 11 / 12'], ['bsc.html', 'Bachelors'], ['lab.html', 'Reaction Lab']];
+  const NAV = [['index.html', 'Home'], ['school.html', 'Grade 11 / 12'], ['bsc.html', 'Bachelors'], ['lab.html', 'Reaction Lab']];
   const navHTML = NAV.map(([h, t]) => '<a href="' + h + '"' + (h === here ? ' aria-current="page" class="active"' : '') + '>' + t + '</a>').join('');
   const header = '<header class="top">' +
     '<a class="brand" href="index.html" aria-label="Lab Visuals home"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9565ff"/><stop offset=".6" stop-color="#ce72f5"/><stop offset="1" stop-color="#fea6d0"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#lg)"/><path d="M26 10h12v4h-3v14l12 20c2 4-1 8-5 8H22c-4 0-7-4-5-8l12-20V14h-3z" fill="#160923"/><path d="M23 42h22l4 7c1 2-.5 4-2.5 4h-25c-2 0-3.500-2-2.500-4z" fill="#ffcb83"/></svg><span>Lab Visuals</span></a>' +

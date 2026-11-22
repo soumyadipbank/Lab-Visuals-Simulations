@@ -51,8 +51,8 @@ const ok = (name, cond) => { if (!cond) { problems++; console.log('PROBLEM: ' + 
 {
   const V0 = 25, CFe = 0.05, CCr = 0.05 / 6;
   const Veq = (CFe * V0) / (6 * CCr);
-  near('Mohr salt: half-equivalence gives E(Fe3+/Fe2+) vs SCE', L.potMohr(Veq / 2, V0, CFe, CCr).E + 0.244, 0.771, 1e-3);
-  near('Mohr salt: potential at equivalence', L.potMohr(Veq, V0, CFe, CCr).E + 0.244, (0.771 + 6 * 1.25) / 7, 1e-3);
+  near('Mohr salt: half-equivalence gives E(Fe3+/Fe2+) vs SCE', L.potMohr(Veq / 2, V0, CFe, CCr).E + 0.244, L.FE_FORMAL, 1e-3);
+  near('Mohr salt: potential at equivalence', L.potMohr(Veq, V0, CFe, CCr).E + 0.244, (L.FE_FORMAL + 6 * 1.25) / 7, 1e-3);
   ok('Mohr salt: sharp jump around the end point', L.potMohr(Veq * 1.01, V0, CFe, CCr).E - L.potMohr(Veq * 0.99, V0, CFe, CCr).E > 0.25);
   const ag = L.potAgCl(25, 25, 0.05, 0.05);
   near('AgCl: [Ag+] at equivalence = sqrt(Ksp)', ag.ag, Math.sqrt(1.8e-10), 1e-8);

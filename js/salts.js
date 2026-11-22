@@ -62,6 +62,7 @@
       Cu: o('Pale blue gelatinous precipitate, insoluble in excess.', { ppt: '#7ab8e8' }), Fe3: o('Reddish-brown precipitate, insoluble in excess.', { ppt: '#9a4a1f' }), Fe2: o('Dirty-green precipitate that turns brown on standing in air.', { ppt: '#6f9a6b' }),
       Zn: o('White precipitate that dissolves in excess NaOH.', { ppt: W }), Al: o('White gelatinous precipitate that dissolves in excess NaOH.', { ppt: W }), Mn: o('White precipitate that turns brown in air.', { ppt: '#efe9e2' }),
       Ni: o('Apple-green precipitate, insoluble in excess.', { ppt: '#7fc66a' }), Co: o('Blue precipitate that turns pink on standing.', { ppt: '#4a63d6' }), Mg: o('White precipitate, insoluble in excess.', { ppt: W }),
+      Ca: o('Slight white precipitate (only from fairly concentrated solution), insoluble in excess.', { ppt: '#f4f4f4' }),
     },
     naohw: { NH4: o('A pungent gas is evolved: it turns moist red litmus blue and gives dense white fumes with HCl.', { gas: 1 }) },
     nh3: {
@@ -107,7 +108,29 @@
     return { cats: ['Cu'], ans: ['SO4'] };
   };
 
-  // observations for a sample and a test id (unattributed list, shuffled by rnd for mixtures)
+  // for mixtures: what each cation's hydroxide does, so that one tube gives one combined observation
+  // [colour, dissolves in excess?, what else is seen]
+  const PPT = {
+    naoh: { Cu: ['pale blue', 0, ''], Fe3: ['reddish-brown', 0, ''], Fe2: ['dirty-green', 0, 'part of it turns brown on standing in air'], Zn: ['white', 1, ''], Al: ['white', 1, ''], Mn: ['white', 0, 'part of it turns brown in air'], Ni: ['apple-green', 0, ''], Co: ['blue', 0, 'part of it turns pink on standing'], Mg: ['white', 0, ''], Ca: ['white', 0, ''] },
+    nh3: { Cu: ['pale blue', 1, 'the solution turns deep blue'], Fe3: ['reddish-brown', 0, ''], Fe2: ['dirty-green', 0, ''], Zn: ['white', 1, ''], Al: ['white', 0, ''], Mn: ['off-white', 0, 'part of it turns brown in air'], Ni: ['green', 1, 'the solution turns blue'], Co: ['blue', 1, 'the solution turns brownish-pink'], Mg: ['white', 0, ''] },
+  };
+  const uniq = (a) => [...new Set(a)];
+  const and = (a) => (a.length < 2 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
+  function mergePpt(test, ions) {
+    const info = ions.map((i) => PPT[test][i]), cols = uniq(info.map((x) => x[0])), stay = info.filter((x) => !x[1]), notes0 = uniq(info.map((x) => x[2]).filter(Boolean)), sol = notes0.filter((x) => x.startsWith('the solution')), notes = notes0.filter((x) => !x.startsWith('the solution')).concat(sol.length ? [sol.find((x) => x.includes('deep')) || sol[0]] : []);   /* one solution colour: the most intense */
+    let t = 'A ' + (cols.length > 1 ? 'mixed ' + and(cols) : cols[0]) + ' precipitate forms. In excess ' + (stay.length === 0 ? 'it dissolves completely' : stay.length === info.length ? 'it does not dissolve' : 'part of it dissolves; a ' + and(uniq(stay.map((x) => x[0]))) + ' residue remains') + '.';
+    if (notes.length) t += ' Also, ' + and(notes) + '.';
+    return t;
+  }
+  // a single colour word for a mixed solution colour
+  function tintWord(hex) {
+    const [r, g, b] = C.hex2rgb(hex).map((v) => v / 255), mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    let h = 0; if (d > 0.02) { if (mx === r) h = ((g - b) / d) % 6; else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4; h *= 60; if (h < 0) h += 360; }
+    const n = h < 20 || h >= 330 ? 'pinkish-red' : h < 50 ? 'yellow-brown' : h < 75 ? 'yellow' : h < 100 ? 'yellowish-green' : h < 150 ? 'green' : h < 185 ? 'bluish-green' : h < 215 ? 'greenish-blue' : h < 250 ? 'blue' : h < 290 ? 'violet' : 'pink';
+    return (mx + mn) / 2 > 0.8 ? 'pale ' + n : n;
+  }
+
+  // observations for a sample and a test id (one combined observation per tube for mixtures)
   S.observe = function (sample, testId, rnd) {
     const ions = sample.cats.concat(sample.ans), tab = S.OBS[testId] || {}, out = [];
     ions.forEach((ion) => {
@@ -116,7 +139,12 @@
       out.push(tab[ion]);
     });
     if (rnd && out.length > 1) for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [out[i], out[j]] = [out[j], out[i]]; }
-    if (testId === 'look' && out.length) { const w = out.map((x) => x.word); return { items: [o(w.length === 1 ? out[0].t : 'Coloured solution (' + w.join(' and ') + ' tints).', { liq: out[0].liq })], tube: { liq: out.reduce((c, x, i) => (i ? C.mix(c, x.liq, 0.5) : x.liq), null) } }; }
+    if (testId === 'look' && out.length) { const liq = out.reduce((c, x, i) => (i ? C.absMix(c, x.liq, 0.5) : x.liq), null); return { items: [o(out.length === 1 ? out[0].t : 'The solution is ' + tintWord(liq) + '.', { liq })], tube: { liq } }; }
+    const resp = sample.cats.filter((i) => tab[i]);
+    if ((testId === 'naoh' || testId === 'nh3') && resp.length > 1) {
+      const tube = {}; out.forEach((x) => { if (x.ppt && !tube.ppt) tube.ppt = x.ppt; if (x.liq && !tube.liq) tube.liq = x.liq; });
+      return { items: [o(mergePpt(testId, resp))].concat(out.filter((x) => !sample.cats.some((c) => tab[c] === x))), tube };
+    }
     if (!out.length) return { items: [o(S.NONE[testId] || 'No visible change.')], tube: {} };
     const tube = {};
     out.forEach((x) => { if (x.ppt && !tube.ppt) tube.ppt = x.ppt; if (x.liq && !tube.liq) tube.liq = x.liq; if (x.gas) tube.gas = 1; if (x.fume && !tube.fume) tube.fume = x.fume; if (x.ring) tube.ring = x.ring; if (x.layer) tube.layer = x.layer; });
