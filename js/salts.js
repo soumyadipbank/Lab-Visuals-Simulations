@@ -88,7 +88,7 @@
   S.compatible = (cat, an) => !(BAD[cat] || []).includes(an);
   S.POOL1 = { cat: ['Na', 'K', 'NH4', 'Ca', 'Cu', 'Fe3', 'Zn', 'Fe2'], an: ['Cl', 'SO4', 'CO3', 'NO3'] };
   S.POOL = { cat: S.CATIONS.map((x) => x[0]), an: S.ANIONS.map((x) => x[0]) };
-  S.LEVELS = { 1: { cat: 1, an: 1, pool: 1, label: 'Simple salt, 2 radicals (Class 11)' }, 2: { cat: 1, an: 1, pool: 2, label: 'Simple salt, wider choice (Class 12)' }, 3: { cat: 0, an: 0, pool: 2, label: 'Mixture of 3 radicals' }, 4: { cat: 2, an: 2, pool: 2, label: 'Mixture of 4 radicals' } };
+  S.LEVELS = { 1: { cat: 1, an: 1, pool: 1, label: 'Simple salt, common ions' }, 2: { cat: 1, an: 1, pool: 2, label: 'Simple salt, wider choice of ions' }, 3: { cat: 0, an: 0, pool: 2, label: 'Mixture of 3 radicals' }, 4: { cat: 2, an: 2, pool: 2, label: 'Mixture of 4 radicals' } };
 
   // rnd: function giving [0,1)
   S.generate = function (n, rnd) {

@@ -22,7 +22,7 @@
     },
   };
 
-  // [title, chemicals, minimum level]: 11 = everyone, 12 = Class 12 and BSc, bsc = BSc only
+  // [title, chemicals, minimum level]: '11' and '12' = everyone (Class 11 / 12), bsc = Bachelors only
   const PRESETS_ALL = [
     ['Silver chloride', ['agno3', 'nacl'], '11'], ['Sulfate test', ['bacl2', 'na2so4'], '11'], ['Neutralisation', ['hcl', 'naoh', 'phph'], '11'],
     ['Zn in CuSO₄', ['zn', 'cuso4h'], '11'], ['Mg in HCl', ['mg', 'hcl'], '11'], ['Na in water', ['na', 'h2o', 'phph'], '11'],

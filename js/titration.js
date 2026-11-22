@@ -7,110 +7,157 @@
   const q = new URLSearchParams(location.search);
   const TOL = { indicator: 0.02, indicator2: 0.03, conductometric: 0.06, potentiometric: 0.04 };
   const cv = $('bench'), g = cv.getContext('2d');
-  const S = { exp: null, sess: null, V: 0, colour: null, shown: null, trials: [], pts: [], opts: {}, recorded: {}, run: 0, flash: 0, drip: 0, t: 0, graded: false };
+  // V = volume asked for, Vd = volume that has left the burette (the reading), Vf = volume that has reached the flask
+  const S = { exp: null, sess: null, V: 0, Vd: 0, Vf: 0, queue: 0, drops: [], blooms: [], ripples: [], bead: 0, emitT: 0, marks: [], shown: null, trials: [], pts: [], opts: {}, recorded: {}, run: 0, t: 0, graded: false, lastRead: '' };
 
   const list = T.forLevel(level);
-  const hexRgb = (h) => C.hex2rgb ? C.hex2rgb(h) : [200, 230, 245];
+  const hexRgb = (h) => C.hex2rgb(h);
   const WATER = '#cfe6f5';
+  const DROP = 0.05;                 // mL per drop
+  const GEO = {};                    // bench geometry, updated every frame
 
+  function clearFlow() { S.V = 0; S.Vd = 0; S.Vf = 0; S.queue = 0; S.drops = []; S.blooms = []; S.ripples = []; S.bead = 0; S.marks = []; S.run = 0; }
   function pick(id) {
     const e = (list.find((x) => x.id === id)) || list[0];
-    S.exp = e; S.sess = e.make(L.rng((Math.random() * 1e9) | 0)); S.V = 0; S.trials = []; S.pts = []; S.recorded = {}; S.graded = false;
+    S.exp = e; S.sess = e.make(L.rng((Math.random() * 1e9) | 0)); clearFlow(); S.trials = []; S.pts = []; S.recorded = {}; S.graded = false;
     S.opts = { ph: e.mode === 'indicator2', mo: false, ind: (e.indicators && e.indicators[0]) || null, heat: false, starch: false, meter: false };
-    S.shown = null; S.colour = null; refresh(true);
+    S.shown = null; refresh(true);
     history.replaceState(null, '', '?level=' + level + '&exp=' + e.id);
   }
   function fresh() { // new trial, same unknown
-    S.V = 0; S.recorded = {}; S.pts = []; S.colour = null; S.shown = null;
+    clearFlow(); S.recorded = {}; S.pts = []; S.shown = null;
     if (S.exp.mode === 'indicator2') { S.opts.ph = true; S.opts.mo = false; }
     refresh(false);
   }
   const ctx = () => ({ ind: S.opts.ind, ph: S.opts.ph, mo: S.opts.mo, starch: S.opts.starch, heated: S.opts.heat });
-  const cur = () => S.sess.state(S.V, ctx());
-  const reading = () => Math.round(S.V / 0.05) * 0.05;
+  const cur = () => S.sess.state(S.Vf, ctx());
+  const reading = () => Math.round(S.Vd / 0.05) * 0.05;
+  const busy = () => S.queue > 1e-9 || S.drops.length > 0 || S.run;
 
   function add(dv) {
-    if (S.V >= 50) return;
-    S.V = Math.min(50, S.V + dv); S.drip = 1;
-    const st = cur();
-    if (st.flash) S.flash = 1;
-    if (S.exp.mode === 'conductometric' || S.exp.mode === 'potentiometric') {
-      const y = S.exp.mode === 'conductometric' ? st.kappa : st.E + (S.sess.noiseV ? L.gauss(Math.random) * S.sess.noiseV : 0);
-      S.pts.push([+S.V.toFixed(3), y]);
-    } else if (S.opts.meter) S.pts.push([+S.V.toFixed(3), st.pH]);
+    const room = 50 - S.V; if (room <= 0) return;
+    dv = Math.min(dv, room); S.V += dv; S.queue += dv; S.marks.push(S.V);
+  }
+  // a reading is logged once all the titrant of one addition has reached the flask
+  function logPoint() {
+    const st = cur(), e = S.exp;
+    if (e.mode === 'conductometric' || e.mode === 'potentiometric') {
+      const y = e.mode === 'conductometric' ? st.kappa : st.E + (S.sess.noiseV ? L.gauss(Math.random) * S.sess.noiseV : 0);
+      S.pts.push([+S.Vf.toFixed(3), y]);
+    } else if (S.opts.meter) S.pts.push([+S.Vf.toFixed(3), st.pH]);
     refresh(false);
+  }
+  const cdist = (a, b) => { if (!a || !b) return a || b ? 99 : 0; const A = hexRgb(a), B = hexRgb(b); return Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]); };
+  // titrant arriving: the spot where it lands is briefly richer in titrant than the bulk, so near the end point
+  // the indicator changes colour there first and the colour swirls away (slowly, the closer you are)
+  function land(vol, x) {
+    const before = cur();
+    S.Vf = Math.min(S.Vd, S.Vf + vol);
+    const bulk = cur(), local = S.sess.state(S.Vf + 1.2, ctx());
+    S.ripples.push({ x, r: 2, a: 1 });
+    let col = null, life = 0.7;
+    if (bulk.flash) { col = bulk.flash.c; life = bulk.flash.slow ? 2.2 : 0.9; }
+    else if (cdist(local.colour, bulk.colour) > 14) { col = local.colour || WATER; const near = 1 - Math.min(1, Math.abs(cdist(local.colour, bulk.colour) - 14) / 200); life = 0.6 + near * 0.9; }
+    if (col && S.blooms.length < 18) S.blooms.push({ x, col, age: 0, life });
+    return before;
+  }
+  function physics(dt) {
+    const G = GEO; if (!G.tipY) return;
+    // hold-to-run: the stopcock is fully open, a steady stream
+    if (S.run && S.V < 50) { const v = Math.min(1.4 * dt, 50 - S.V); S.V += v; S.Vd += v; S.Vf = S.Vd; S.emitT += dt; if (S.emitT > 0.12) { S.emitT = 0; S.ripples.push({ x: G.cx + (Math.random() - 0.5) * 4, r: 2, a: 0.8 }); land(0, G.cx); } }
+    else if (S.queue > 1e-9) {
+      if (S.queue > 0.6) {              // a large addition runs out as a stream, the last few drops fall one by one
+        const v = Math.min(S.queue - 0.3, 3.5 * dt); S.queue -= v; S.Vd += v; S.Vf += v; S.stream = 1; S.emitT += dt;
+        if (S.emitT > 0.1) { S.emitT = 0; S.ripples.push({ x: G.cx, r: 2, a: 0.8 }); land(0, G.cx); }
+      } else {                          // the last part falls drop by drop: a bead swells at the tip and breaks away
+        S.stream = 0;
+        S.bead = Math.min(1, S.bead + dt * (5 + S.queue * 14));   // drops come faster while the stopcock is opened wider
+        if (S.bead >= 1) { const v = Math.min(DROP, S.queue); S.queue -= v; S.Vd += v; S.bead = 0; S.drops.push({ x: G.cx + (Math.random() - 0.5) * 1.5, y: G.tipY + 4, vy: 40, vol: v }); if (S.queue < 1e-9) S.queue = 0; }
+      }
+    } else { S.stream = 0; S.bead = Math.max(0, S.bead - dt * 4); }
+    for (let i = S.drops.length - 1; i >= 0; i--) {
+      const d = S.drops[i]; d.vy += 1700 * dt; d.y += d.vy * dt;
+      if (d.y >= G.surfY) { S.drops.splice(i, 1); land(d.vol, d.x); }
+    }
+    S.ripples.forEach((r) => { r.r += dt * 60; r.a -= dt * 1.6; }); S.ripples = S.ripples.filter((r) => r.a > 0);
+    S.blooms.forEach((b) => (b.age += dt)); S.blooms = S.blooms.filter((b) => b.age < b.life);
+    if (!busy() && S.Vf < S.Vd) S.Vf = S.Vd;
+    while (S.marks.length && S.Vf >= S.marks[0] - 1e-6) { S.marks.shift(); logPoint(); }
+    const rd = reading().toFixed(2); if (rd !== S.lastRead) { S.lastRead = rd; readouts(); }
   }
 
   // ------------------------------------------------------------ rendering of the bench
   function size() { const dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv.clientWidth || 760, h = Math.round(w * 0.6); if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.height = h + 'px'; } return { w, h, dpr }; }
   const rgbStr = (c, a) => { const r = hexRgb(c); return 'rgba(' + r[0] + ',' + r[1] + ',' + r[2] + ',' + (a == null ? 1 : a) + ')'; };
-  function lerpHex(a, b, t) { return C.mix(a, b, t); }
+  let lastT = 0;
   function draw(now) {
     const { w, h, dpr } = size(); g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const dt = 0.016; S.t += dt;
-    // smooth the colour shown in the flask
+    const dt = Math.min(0.05, lastT ? (now - lastT) / 1000 : 0.016); lastT = now; S.t += dt;
+    physics(dt);
+    // the bulk colour follows the flask contents with a short mixing lag (swirling)
     const target = cur().colour || WATER;
-    S.shown = S.shown ? lerpHex(S.shown, target, 0.18) : target;
-    S.flash = Math.max(0, S.flash - dt * 0.9); S.drip = Math.max(0, S.drip - dt * 2.2);
+    S.shown = S.shown ? C.absMix(S.shown, target, Math.min(1, dt * 6)) : target;
     const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#22123b'); bg.addColorStop(1, '#120a22'); g.fillStyle = bg; g.fillRect(0, 0, w, h);
-    const cx = w * 0.5, bx = cx, bTop = h * 0.05, bBot = h * 0.52, bw = Math.max(20, w * 0.045);
+    const cx = w * 0.5, bx = cx, bTop = h * 0.05, bBot = h * 0.5, bw = Math.max(20, w * 0.045);
+    const tcol = S.sess.titrantColour;
     // stand
     g.fillStyle = '#35204f'; g.fillRect(bx + bw * 3.2, bTop, 7, h * 0.88); g.fillRect(bx + bw * 3.2 - w * 0.12, h * 0.93, w * 0.24, 9);
     g.fillRect(bx + bw * 0.7, bTop + h * 0.1, bw * 2.6, 6);
-    // burette tube
-    const tubeTop = bTop, tubeBot = bBot, tubeH = tubeBot - tubeTop;
+    // burette tube with liquid that falls as titrant leaves
+    const tubeTop = bTop, tubeBot = bBot, tubeH = tubeBot - tubeTop, lev = tubeTop + tubeH * (S.Vd / 50);
     g.fillStyle = 'rgba(255,255,255,.09)'; g.fillRect(bx - bw / 2, tubeTop, bw, tubeH);
-    const lvl = 1 - (S.V / 50);   // fraction of tube still filled (0 mL at the top)
-    const liqTop = tubeTop + tubeH * (1 - lvl);
-    g.fillStyle = S.sess.titrantColour ? rgbStr(S.sess.titrantColour, 0.85) : 'rgba(190,225,245,.5)';
-    g.fillRect(bx - bw / 2 + 2, tubeTop + tubeH * (S.V / 50) * 0 + tubeH * (S.V / 50) * 0, bw - 4, 0);
-    g.fillRect(bx - bw / 2 + 2, tubeTop + tubeH * (S.V / 50), bw - 4, tubeH * (1 - S.V / 50));
-    // meniscus
-    g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(bx - bw / 2 + 2, tubeTop + tubeH * (S.V / 50) - 1, bw - 4, 2);
-    // graduations
+    g.fillStyle = tcol ? rgbStr(tcol, 0.85) : 'rgba(190,225,245,.5)';
+    g.fillRect(bx - bw / 2 + 2, lev, bw - 4, tubeBot - lev);
+    g.fillStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.ellipse(bx, lev + 1, bw / 2 - 2, 2.2, 0, 0, Math.PI); g.fill();   // meniscus
     g.strokeStyle = 'rgba(255,255,255,.6)'; g.fillStyle = 'rgba(240,230,255,.85)'; g.font = Math.max(9, w * 0.014) + 'px Hanken Grotesk, sans-serif'; g.textAlign = 'right';
-    for (let v = 0; v <= 50; v += 1) { const y = tubeTop + tubeH * (v / 50), big = v % 10 === 0, mid = v % 5 === 0; g.beginPath(); g.moveTo(bx - bw / 2, y); g.lineTo(bx - bw / 2 - (big ? 12 : mid ? 8 : 4), y); g.stroke(); if (v % 5 === 0) g.fillText(String(v), bx - bw / 2 - 15, y + 3); }
+    for (let v = 0; v <= 50; v += 1) { const y = tubeTop + tubeH * (v / 50), big = v % 10 === 0, mid = v % 5 === 0; g.beginPath(); g.moveTo(bx - bw / 2, y); g.lineTo(bx - bw / 2 - (big ? 12 : mid ? 8 : 4), y); g.stroke(); if (mid) g.fillText(String(v), bx - bw / 2 - 15, y + 3); }
     g.strokeStyle = 'rgba(255,255,255,.45)'; g.lineWidth = 2; g.strokeRect(bx - bw / 2, tubeTop, bw, tubeH); g.lineWidth = 1;
-    // stopcock and tip
-    const tipY = tubeBot + h * 0.07;
+    // stopcock (turns open while titrant flows) and jet
+    const flowing = S.run || S.stream || S.queue > 0, scY = tubeBot + h * 0.03, tipY = tubeBot + h * 0.11;
     g.fillStyle = '#c9b8e6'; g.fillRect(bx - bw * 0.2, tubeBot, bw * 0.4, h * 0.07);
-    g.fillStyle = '#ffcb83'; g.save(); g.translate(bx, tubeBot + h * 0.03); g.rotate(S.run ? 0 : Math.PI / 2); g.fillRect(-bw * 0.9, -3, bw * 1.8, 6); g.restore();
-    g.fillStyle = '#c9b8e6'; g.beginPath(); g.moveTo(bx - bw * 0.2, tipY); g.lineTo(bx + bw * 0.2, tipY); g.lineTo(bx, tipY + h * 0.04); g.fill();
-    // drop / stream
-    const fy = h * 0.8;
-    if (S.run || S.drip > 0) {
-      g.fillStyle = S.sess.titrantColour ? rgbStr(S.sess.titrantColour, 0.9) : 'rgba(200,230,250,.8)';
-      if (S.run) g.fillRect(bx - 1.5, tipY + h * 0.04, 3, fy - tipY - h * 0.1);
-      else { const dy = tipY + h * 0.04 + (1 - S.drip) * (fy - tipY - h * 0.12); g.beginPath(); g.arc(bx, dy, 3.5, 0, 6.283); g.fill(); }
-    }
+    g.fillStyle = '#ffcb83'; g.save(); g.translate(bx, scY); g.rotate(flowing ? (S.run || S.stream ? Math.PI / 2 : Math.PI / 6) : 0); g.fillRect(-bw * 0.9, -3, bw * 1.8, 6); g.restore();   // handle in line with the jet = open
+    g.fillStyle = '#c9b8e6'; g.beginPath(); g.moveTo(bx - bw * 0.2, tubeBot + h * 0.07); g.lineTo(bx + bw * 0.2, tubeBot + h * 0.07); g.lineTo(bx + 2, tipY); g.lineTo(bx - 2, tipY); g.fill();
     // conical flask
-    const fw = w * 0.2, fh = h * 0.3, fcx = bx, top = fy - fh, neckW = fw * 0.3;
-    const liqH = fh * 0.42, sw = Math.sin(S.t * 5) * (S.run ? 3 : 1);
+    const fy = h * 0.92, fw = w * 0.22, fh = h * 0.3, fcx = bx, top = fy - fh, neckW = fw * 0.3, liqH = fh * 0.42;
+    const swirl = S.t * 4, ly = fy - liqH;
+    GEO.cx = bx; GEO.tipY = tipY; GEO.surfY = ly;
+    const dropCol = tcol ? rgbStr(tcol, 0.95) : 'rgba(215,238,252,.9)';
+    // bead hanging at the tip, falling drops, stream
+    if (S.bead > 0.05) { const r = 1.5 + S.bead * 3.2; g.fillStyle = dropCol; g.beginPath(); g.ellipse(bx, tipY + r * 0.9, r * 0.85, r, 0, 0, 6.283); g.fill(); g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.arc(bx - r * 0.3, tipY + r * 0.6, r * 0.25, 0, 6.283); g.fill(); }
+    S.drops.forEach((d) => { const st = Math.min(2.2, 1 + d.vy / 900); g.fillStyle = dropCol; g.beginPath(); g.ellipse(d.x, d.y, 3.2 / Math.sqrt(st), 3.2 * st, 0, 0, 6.283); g.fill(); g.fillStyle = 'rgba(255,255,255,.75)'; g.beginPath(); g.arc(d.x - 1, d.y - 1.5, 0.9, 0, 6.283); g.fill(); });
+    if (S.run || S.stream) { const wob = Math.sin(S.t * 40) * 0.6; g.fillStyle = dropCol; g.fillRect(bx - 1.6 + wob, tipY, 3.2, ly - tipY); }
     const path = () => { g.beginPath(); g.moveTo(fcx - neckW / 2, top); g.lineTo(fcx - neckW / 2, top + fh * 0.32); g.lineTo(fcx - fw / 2, fy); g.lineTo(fcx + fw / 2, fy); g.lineTo(fcx + neckW / 2, top + fh * 0.32); g.lineTo(fcx + neckW / 2, top); };
     g.save(); path(); g.clip();
-    const ly = fy - liqH + sw * 0.4;
     const col = S.shown || WATER;
-    const lg = g.createLinearGradient(0, ly, 0, fy); lg.addColorStop(0, rgbStr(col, 0.92)); lg.addColorStop(1, rgbStr(lerpHex(col, '#000000', 0.25), 0.96));
-    g.fillStyle = lg; g.beginPath(); g.moveTo(fcx - fw, ly); for (let x = -fw; x <= fw; x += 6) g.lineTo(fcx + x, ly + Math.sin(S.t * 5 + x * 0.1) * (S.run ? 2.5 : 0.8)); g.lineTo(fcx + fw, fy + 4); g.lineTo(fcx - fw, fy + 4); g.fill();
-    if (S.flash > 0 && cur().flash) { const r = g.createRadialGradient(fcx, ly + 6, 2, fcx, ly + 6, fw * 0.55); r.addColorStop(0, 'rgba(216,75,196,' + S.flash * 0.95 + ')'); r.addColorStop(1, 'rgba(216,75,196,0)'); g.fillStyle = r; g.fillRect(fcx - fw, ly - 10, fw * 2, liqH + 20); }
-    g.restore();
+    const lg = g.createLinearGradient(0, ly, 0, fy); lg.addColorStop(0, rgbStr(col, 0.9)); lg.addColorStop(1, rgbStr(C.absAdd(col, '#9fb8c8', 0.35), 0.97));
+    g.fillStyle = lg; g.beginPath(); g.moveTo(fcx - fw, ly); for (let x = -fw; x <= fw; x += 6) g.lineTo(fcx + x, ly + Math.sin(swirl + x * 0.09) * 1.2); g.lineTo(fcx + fw, fy + 4); g.lineTo(fcx - fw, fy + 4); g.fill();
+    // local colour where titrant lands, drawn into the swirl
+    S.blooms.forEach((b) => {
+      const k = b.age / b.life, rad = 8 + k * fw * 0.45, ox = Math.sin(swirl * 0.7 + b.x) * k * fw * 0.12, oy = ly + 6 + k * liqH * 0.35;
+      const rg = g.createRadialGradient(b.x + ox, oy, 1, b.x + ox, oy, rad);
+      rg.addColorStop(0, rgbStr(b.col, 0.85 * (1 - k))); rg.addColorStop(1, rgbStr(b.col, 0));
+      g.fillStyle = rg; g.beginPath(); g.ellipse(b.x + ox, oy, rad * 1.3, rad * 0.8, 0, 0, 6.283); g.fill();
+    });
+    // ripples on the surface
+    g.strokeStyle = 'rgba(255,255,255,.6)';
+    S.ripples.forEach((r) => { g.globalAlpha = Math.max(0, r.a); g.beginPath(); g.ellipse(r.x, ly + 1, r.r, r.r * 0.22, 0, 0, 6.283); g.stroke(); });
+    g.globalAlpha = 1; g.restore();
     g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2; path(); g.stroke(); g.lineWidth = 1;
     // heater flame
     if (S.exp.needsHeat) {
-      g.fillStyle = '#3a2b57'; g.fillRect(fcx - fw * 0.7, fy + 2, fw * 1.4, 8);
-      if (S.opts.heat) { for (let i = 0; i < 7; i++) { const fx = fcx - fw * 0.45 + (i / 6) * fw * 0.9, fl = 10 + Math.sin(S.t * 14 + i * 2) * 4; const fg = g.createLinearGradient(0, fy + 2, 0, fy - fl); fg.addColorStop(0, 'rgba(255,170,60,.0)'); fg.addColorStop(1, 'rgba(80,140,255,.8)'); g.fillStyle = 'rgba(70,130,255,.55)'; g.beginPath(); g.ellipse(fx, fy + 2 + 6, 3, fl, 0, 0, 6.283); g.fill(); } }
+      g.fillStyle = '#3a2b57'; g.fillRect(fcx - fw * 0.7, fy + 2, fw * 1.4, 6);
+      if (S.opts.heat) for (let i = 0; i < 7; i++) { const fx2 = fcx - fw * 0.45 + (i / 6) * fw * 0.9, fl = 8 + Math.sin(S.t * 14 + i * 2) * 3; g.fillStyle = 'rgba(70,130,255,.55)'; g.beginPath(); g.ellipse(fx2, fy + 4, 3, fl, 0, 0, 6.283); g.fill(); }
     }
-    // pH meter
+    // meter
     if (S.opts.meter || S.exp.mode === 'potentiometric' || S.exp.mode === 'conductometric') {
       const st = cur(), lab = S.exp.mode === 'conductometric' ? st.kappa.toFixed(2) + ' mS/cm' : S.exp.mode === 'potentiometric' ? (st.E).toFixed(3) + ' V' : 'pH ' + st.pH.toFixed(2);
       g.fillStyle = '#0d0618'; g.strokeStyle = 'rgba(206,114,245,.7)'; const mw = Math.min(w * 0.3, 190), mh = 44, mx = w - mw - 12, my = 12;
-      g.beginPath(); g.roundRect ? g.roundRect(mx, my, mw, mh, 10) : g.rect(mx, my, mw, mh); g.fill(); g.stroke();
+      g.beginPath(); if (g.roundRect) g.roundRect(mx, my, mw, mh, 10); else g.rect(mx, my, mw, mh); g.fill(); g.stroke();
       g.fillStyle = '#7cf0b4'; g.font = '700 ' + Math.max(15, w * 0.026) + 'px ui-monospace, Menlo, monospace'; g.textAlign = 'center'; g.fillText(lab, mx + mw / 2, my + 29);
-      g.strokeStyle = 'rgba(206,114,245,.7)'; g.beginPath(); g.moveTo(mx + 14, my + mh); g.lineTo(fcx + fw * 0.12, top + 8); g.lineTo(fcx + fw * 0.12, fy - 10); g.stroke();
+      g.strokeStyle = 'rgba(206,114,245,.7)'; g.beginPath(); g.moveTo(mx + 14, my + mh); g.lineTo(fcx + fw * 0.14, top + 8); g.lineTo(fcx + fw * 0.14, fy - 10); g.stroke();
     }
-    // label
     g.fillStyle = 'rgba(235,225,250,.8)'; g.textAlign = 'left'; g.font = Math.max(10, w * 0.016) + 'px Hanken Grotesk, sans-serif';
-    g.fillText('Burette: ' + S.sess.titrant, 12, h - 28); g.fillText('Flask: ' + S.sess.flask, 12, h - 10);
+    g.fillText('Burette: ' + S.sess.titrant, 12, 20); g.fillText('Flask: ' + S.sess.flask, 12, 38);
     requestAnimationFrame(draw);
   }
 
@@ -231,7 +278,7 @@
   function refresh(full) {
     if (full) {
       const e = S.exp;
-      $('expTitle').textContent = e.title; $('expSub').textContent = e.short + (e.unis.length ? ' · ' + e.unis.join(', ') + ' syllabus' : '');
+      $('expTitle').textContent = e.title; $('expSub').textContent = e.short;
       $('steps').innerHTML = e.steps.map((s) => '<li>' + esc(s) + '</li>').join('');
       $('expList').querySelectorAll('.exp-btn').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === e.id)));
       actions(); $('msg').innerHTML = ''; $('answerBox').innerHTML = ''; S.analysis = null;
@@ -244,14 +291,14 @@
     $('expCount').textContent = '(' + list.length + ')';
     $('expList').innerHTML = list.map((e) => '<button type="button" class="exp-btn" data-id="' + e.id + '" aria-pressed="false"><b>' + esc(e.title) + '</b><span>' + esc(e.short) + (e.unis.length ? ' · ' + e.unis.join(' ') : '') + '</span></button>').join('');
     const nl = T.EXPS.length - list.length;
-    if (nl > 0) { const n = $('levelNote'); n.hidden = false; n.innerHTML = nl + ' more titrations (iodometry, EDTA, conductometric, potentiometric…) open at the <a href="bsc.html?level=bsc" style="color:var(--pink)">BSc / BS level</a>.'; }
+    if (nl > 0) { const n = $('levelNote'); n.hidden = false; n.innerHTML = nl + ' more titrations (iodometry, EDTA, conductometric, potentiometric…) open at the <a href="bsc.html?level=bsc" style="color:var(--pink)">Bachelors (BSc / BS) level</a>.'; }
     const lk = $('crumbLevel'); const LV = window.LevelInfo && LevelInfo.LV[level]; if (lk && LV) { lk.textContent = LV.name; lk.href = LV.page + '?level=' + level; }
     if (innerWidth < 900) $('expDetails').open = false;
     $('expList').addEventListener('click', (e) => { const b = e.target.closest('.exp-btn'); if (b) { pick(b.dataset.id); if (innerWidth < 900) { $('expDetails').open = false; $('work').scrollIntoView({ behavior: 'smooth' }); } } });
     $('dose').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (b) add(parseFloat(b.dataset.v)); });
-    const hold = $('hold'); let timer = null;
-    const stop = () => { S.run = 0; clearInterval(timer); timer = null; };
-    const go = (ev) => { ev.preventDefault(); if (timer) return; S.run = 1; timer = setInterval(() => add(0.1), 80); };
+    const hold = $('hold');
+    const stop = () => { if (S.run) { S.run = 0; S.marks.push(S.V); } };
+    const go = (ev) => { ev.preventDefault(); S.run = 1; };
     hold.addEventListener('pointerdown', go); ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach((n) => hold.addEventListener(n, stop));
     hold.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); add(0.5); } });
     $('opts').addEventListener('click', (e) => {
@@ -280,6 +327,7 @@
     addEventListener('keydown', (e) => { if (e.target.matches('input, select, textarea')) return; if (e.key === 'd') add(0.05); else if (e.key === 'm') add(0.5); else if (e.key === 'M') add(1); });
     addEventListener('resize', () => chart());
     pick(q.get('exp') || list[0].id);
+    if (q.has('debug')) window.__titr = S;   // used by the automated screenshot tests
     requestAnimationFrame(draw);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

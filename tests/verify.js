@@ -93,7 +93,7 @@ Object.values(C.CH).forEach((c) => {
   expectNo(['cuso4h', 'phph'], 'colourless phenolphthalein must not erase the blue');
   expectNo(['sugar', 'h2o'], 'a sugar solution is colourless');
   expect(['cuso4h', 'nh3'], 'pale blue', 'deep blue');
-  expect(['fecl3', 'kscn'], 'pale yellow', 'deep red');
+  expect(['fecl3', 'kscn'], 'light yellow', 'deep red');
   expect(['starch', 'i2'], 'yellow-brown', 'blue-black');
   expect(['zn', 'cuso4h'], 'blue', 'colourless');
   expect(['kmno4', 'feso4', 'h2so4'], 'purple', 'light yellow');

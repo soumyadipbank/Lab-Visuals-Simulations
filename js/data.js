@@ -145,15 +145,14 @@
 
   // ---------------------------------------------------------------- indicators
   function indColor(id, ph) {
-    if (id === 'phph') {          // phenolphthalein: colourless below 8.2, pink above 10
-      if (ph < 8.2) return null;
-      if (ph > 10) return '#e8208a';
-      return '#f6a6cd';
+    if (id === 'phph') {          // phenolphthalein, pKa about 9.4: colourless below 8.2, faint pink near 8.5, magenta above 10
+      if (ph < 8.0) return null;
+      const f = 1 / (1 + Math.pow(10, 9.4 - ph));
+      return C.absMix('#cfe6f5', '#e0218a', Math.min(1, 0.12 + f * 1.05));
     }
-    if (id === 'mo') {            // methyl orange: red <3.1, yellow >4.4
-      if (ph < 3.1) return '#e53935';
-      if (ph < 4.4) return '#fb8c00';
-      return '#f6c726';
+    if (id === 'mo') {            // methyl orange, pKa 3.46: red below 3.1, orange at the transition, yellow above 4.4
+      const f = 1 / (1 + Math.pow(10, 3.46 - ph));
+      return C.absMix('#e53935', '#f6c726', f);
     }
     // universal indicator
     const stops = [[1, '#e53935'], [3, '#ef6c35'], [4, '#fb9a2b'], [5, '#f9c22e'], [6, '#d9d62c'], [7, '#5fb957'], [8, '#2faa8d'], [9, '#2f7fd0'], [11, '#4c4fc9'], [13, '#7b2fb0']];
@@ -286,4 +285,14 @@
   function rgb2hex(r) { return '#' + r.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join(''); }
   C.mix = function (a, b, t) { const A = hex2rgb(a), B = hex2rgb(b); return rgb2hex(A.map((v, i) => v + (B[i] - v) * t)); };
   C.hex2rgb = hex2rgb; C.rgb2hex = rgb2hex;
+  // Coloured solutions combine subtractively: each dye absorbs part of the light, and absorbances add
+  // (Beer-Lambert). Working in absorbance (-log10 of transmitted light per channel) instead of plain RGB
+  // makes blue + yellow give green (not grey) and keeps a fading colour vivid until the dye is nearly gone.
+  const absOf = (hex) => hex2rgb(hex).map((v) => -Math.log10(Math.max(3, v) / 255));
+  const fromAbs = (a) => rgb2hex(a.map((x) => 255 * Math.pow(10, -x)));
+  C.absOf = absOf; C.fromAbs = fromAbs;
+  // concentration-weighted interpolation: what you see when species a turns into species b
+  C.absMix = function (a, b, t) { t = Math.max(0, Math.min(1, t)); const A = absOf(a), B = absOf(b); return fromAbs(A.map((v, i) => v * (1 - t) + B[i] * t)); };
+  // add a dye of strength s (1 = the dye colour itself) to a base solution; ref is the colour of the solvent
+  C.absAdd = function (base, dye, s, ref) { const A = absOf(base), D = absOf(dye), R = absOf(ref || '#cfe6f5'); return fromAbs(A.map((v, i) => v + s * (D[i] - R[i]))); };
 })();

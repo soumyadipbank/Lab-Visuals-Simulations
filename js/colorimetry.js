@@ -3,13 +3,13 @@
   'use strict';
   const C = globalThis.Chem, L = C.Lab, $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const level = (window.LevelInfo && LevelInfo.level) || 'bsc', rank = { '11': 1, '12': 2, bsc: 3 };
+  const level = (window.LevelInfo && LevelInfo.level) || 'bsc', rank = { '11': 1, '12': 1, school: 1, bsc: 2 };
   const q = new URLSearchParams(location.search);
   const cv = $('bench'), g = cv.getContext('2d');
   const STOCK = 1.0e-3, FLASK = 50;
   const EXPS = [
-    { id: 'kmno4', level: '12', sp: 'KMnO4', title: 'Beer’s law with KMnO₄', short: 'Calibration line and an unknown', unis: ['CU', 'WBSU', 'BU'], hint: 'purple, absorbs green light', unk: [0.5e-4, 1.6e-4] },
-    { id: 'k2cr2o7', level: 'bsc', sp: 'K2Cr2O7', title: 'Beer’s law with K₂Cr₂O₇', short: 'A different λmax and a different ε', unis: ['WBSU', 'BU'], hint: 'orange, absorbs blue and violet light', unk: [0.5e-4, 1.6e-4] },
+    { id: 'kmno4', level: '12', sp: 'KMnO4', title: 'Beer’s law with KMnO₄', short: 'Calibration line and an unknown', unis: [], hint: 'purple, absorbs green light', unk: [0.5e-4, 1.6e-4] },
+    { id: 'k2cr2o7', level: 'bsc', sp: 'K2Cr2O7', title: 'Beer’s law with K₂Cr₂O₇', short: 'A different λmax and a different ε', unis: [], hint: 'orange, absorbs blue and violet light', unk: [0.5e-4, 1.6e-4] },
   ];
   const list = EXPS.filter((e) => rank[level] >= rank[e.level]);
   const S = { exp: null, lam: 400, rows: [], unk: null, unkC: 0, scan: null, analysis: null, cur: { label: 'blank', c: 0 }, shownA: 0 };
@@ -22,7 +22,7 @@
     S.exp = list.find((x) => x.id === id) || list[0]; const e = S.exp;
     S.rows = []; S.analysis = null; S.scan = null; S.lam = 400; S.cur = { label: 'blank', c: 0 };
     S.unkC = Math.round((e.unk[0] + Math.random() * (e.unk[1] - e.unk[0])) / 1e-6) * 1e-6;
-    $('expTitle').textContent = e.title; $('expSub').textContent = e.short + ' · ' + e.unis.join(', ') + ' syllabus';
+    $('expTitle').textContent = e.title; $('expSub').textContent = e.short;
     $('steps').innerHTML = STEPS.map((s) => '<li>' + esc(s) + '</li>').join('');
     $('expList').querySelectorAll('.exp-btn').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === e.id)));
     $('chartBox').hidden = true; $('answerBox').innerHTML = ''; $('msg').innerHTML = '';
@@ -92,7 +92,7 @@
   function init() {
     $('expCount').textContent = '(' + list.length + ')';
     $('expList').innerHTML = list.map((e) => '<button type="button" class="exp-btn" data-id="' + e.id + '" aria-pressed="false"><b>' + e.title + '</b><span>' + e.short + ' · ' + e.unis.join(' ') + '</span></button>').join('');
-    const nl = EXPS.length - list.length; if (nl > 0) { const n = $('levelNote'); n.hidden = false; n.innerHTML = nl + ' more experiment opens at the <a href="bsc.html?level=bsc" style="color:var(--pink)">BSc / BS level</a>.'; }
+    const nl = EXPS.length - list.length; if (nl > 0) { const n = $('levelNote'); n.hidden = false; n.innerHTML = nl + ' more experiment opens at the <a href="bsc.html?level=bsc" style="color:var(--pink)">Bachelors (BSc / BS) level</a>.'; }
     const LV = window.LevelInfo && LevelInfo.LV[level], lk = $('crumbLevel'); if (lk && LV) { lk.textContent = LV.name; lk.href = LV.page + '?level=' + level; }
     if (innerWidth < 900) $('expDetails').open = false;
     $('expList').addEventListener('click', (ev) => { const b = ev.target.closest('.exp-btn'); if (b) { pick(b.dataset.id); if (innerWidth < 900) { $('expDetails').open = false; $('work').scrollIntoView({ behavior: 'smooth' }); } } });
