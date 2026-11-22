@@ -105,7 +105,10 @@ body:not(.ready) .hero .reveal { opacity: 0; }
 .main-col { display: grid; gap: 20px; min-width: 0; }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; min-width: 0; backdrop-filter: blur(18px); box-shadow: 0 20px 70px rgba(10, 2, 24, .55), inset 0 1px 0 rgba(255, 255, 255, .06); position: relative; }
 .panel::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; background: linear-gradient(140deg, rgba(206, 114, 245, .5), transparent 35%, transparent 70%, rgba(254, 166, 208, .3)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; opacity: .7; }
-.picker { position: sticky; top: 76px; max-height: calc(100vh - 92px); display: flex; flex-direction: column; gap: 12px; overflow: auto; }
+.picker { position: sticky; top: 76px; max-height: calc(100vh - 92px); display: flex; flex-direction: column; gap: 12px; overflow-x: hidden; overflow-y: auto; }
+/* the gradient outline (::before) would scroll with the content of this scrolling panel and cut across the list: use a plain border instead */
+.picker::before { display: none; }
+.picker { border-color: rgba(206, 114, 245, .32); }
 .picker > * { flex: none; }
 .picker > .chem-grid { max-height: 340px; }
 .panel h3 { font: 400 1.7rem var(--serif); display: flex; align-items: center; gap: 12px; }
