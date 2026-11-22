@@ -173,7 +173,8 @@ details:not([open]) > .lbl-sum::before { content: "▸ "; }
 
 /* ---------- theme switch ---------- */
 .theme-btn { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 12px; border: 1px solid var(--line); background: var(--panel-2); color: var(--amber); cursor: pointer; transition: border-color .2s, transform .2s; }
-.theme-btn:hover { border-color: var(--magenta); transform: rotate(-12deg); }
+@media (hover: hover) { .theme-btn:hover { border-color: var(--magenta); transform: rotate(-12deg); } }   /* phones keep :hover after a tap */
+.theme-btn:active { transform: scale(.92); }
 .theme-btn svg { width: 19px; height: 19px; }
 .theme-btn .i-moon { display: none; }
 :root[data-theme="light"] .theme-btn { color: #5b2fd0; }
@@ -196,10 +197,10 @@ details:not([open]) > .lbl-sum::before { content: "▸ "; }
   --warn: #9a5800; --warn-soft: rgba(214, 140, 20, .12);
   --bad: #c0264f; --bad-soft: rgba(192, 38, 79, .09);
   --field: #ffffff;
-  color-scheme: light;
+  color-scheme: only light;   /* 'only': phone browsers (Chrome / Samsung Internet auto-dark) must not re-darken the light theme */
 }
 :root[data-theme="light"] body { background-image: radial-gradient(1200px 700px at 85% -10%, rgba(149, 101, 255, .14), transparent 60%), radial-gradient(900px 600px at -10% 40%, rgba(254, 166, 208, .16), transparent 60%); }
-:root[data-theme="light"] body::after { opacity: .035; mix-blend-mode: multiply; }
+:root[data-theme="light"] body::after { display: none; }   /* no film grain: it greys the white background, worst on phone screens */
 :root[data-theme="light"] ::selection { background: rgba(138, 47, 192, .22); }
 :root[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(110, 60, 180, .3); }
 :root[data-theme="light"] #loader { background: var(--bg); }

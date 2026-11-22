@@ -55,7 +55,7 @@
   }
   let lt = false;   // light theme: normal blending and softer glows (additive light vanishes on a white page)
   function glow(x, y, r, color, a) {
-    if (lt) a *= 0.5;
+    if (lt) a *= LITE ? 0.3 : 0.5;   // phones: the orb sits behind the text, so keep it faint
     const g = ctx.createRadialGradient(x, y, 0, x, y, r);
     g.addColorStop(0, hexA(color, a)); g.addColorStop(1, hexA(color, 0));
     ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
