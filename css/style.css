@@ -108,7 +108,7 @@ body:not(.ready) .hero .reveal { opacity: 0; }
 .picker { position: sticky; top: 76px; max-height: calc(100vh - 92px); display: flex; flex-direction: column; gap: 12px; overflow-x: hidden; overflow-y: auto; }
 /* the gradient outline (::before) would scroll with the content of this scrolling panel and cut across the list: use a plain border instead */
 .picker::before { display: none; }
-.picker { border-color: rgba(206, 114, 245, .32); }
+.picker { border-color: rgba(206, 114, 245, .32); backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--panel-solid); }   /* a blurred see-through background on a scrolling panel can leave line artefacts in Chrome */
 .picker > * { flex: none; }
 .picker > .chem-grid { max-height: 340px; }
 .panel h3 { font: 400 1.7rem var(--serif); display: flex; align-items: center; gap: 12px; }
@@ -296,7 +296,7 @@ details.deep[open] summary { margin-bottom: 12px; }
 
 /* ================= v3: interaction and polish ================= */
 #progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 120; transform-origin: 0 50%; transform: scaleX(0); background: var(--grad); box-shadow: 0 0 14px rgba(206, 114, 245, .8); }
-#cursorGlow { position: fixed; left: -230px; top: -230px; width: 460px; height: 460px; border-radius: 50%; pointer-events: none; z-index: 85; opacity: 0; transition: opacity .4s; background: radial-gradient(circle, rgba(206, 114, 245, .2), rgba(149, 101, 255, .08) 45%, transparent 70%); mix-blend-mode: screen; will-change: transform; }
+#cursorGlow { position: fixed; left: -230px; top: -230px; width: 460px; height: 460px; border-radius: 50%; pointer-events: none; z-index: 85; opacity: 0; transition: opacity .4s; background: radial-gradient(circle, rgba(206, 114, 245, .12), rgba(149, 101, 255, .05) 45%, rgba(149, 101, 255, 0) 70%); will-change: transform; }   /* no blend mode: with 'screen' over blurred panels Chrome can draw the square edges of this layer as lines */
 #cursorGlow.on { opacity: 1; }
 @media (hover: none) { #cursorGlow { display: none; } }
 
