@@ -146,7 +146,7 @@
   // ---------------------------------------------------------------- indicators
   function indColor(id, ph) {
     if (id === 'phph') {          // phenolphthalein, pKa about 9.4: colourless below 8.2, faint pink near 8.5, magenta above 10
-      if (ph < 8.0) return null;
+      if (ph < 8.2) return null;
       const f = 1 / (1 + Math.pow(10, 9.4 - ph));
       return C.absMix('#cfe6f5', '#e0218a', Math.min(1, 0.12 + f * 1.05));
     }

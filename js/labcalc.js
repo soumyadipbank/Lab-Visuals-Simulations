@@ -78,8 +78,9 @@
   // ------------------------------------------------------------ potentiometry
   const E_SCE = 0.244;
   // Fe(II) titrated with K2Cr2O7; returns the measured cell potential against a saturated calomel electrode
+  L.FE_FORMAL = 0.68;   // E°′(Fe³⁺/Fe²⁺) in 1 M H2SO4 (sulfate complexes Fe³⁺); E° itself is 0.771 V
   L.potMohr = function (Vt, V0, CFe, CCr) {
-    const E1 = 0.771, E2 = 1.25;                           // Fe3+/Fe2+ and effective Cr2O7(2-)/Cr3+ couples
+    const E1 = L.FE_FORMAL, E2 = 1.25;                     // formal Fe3+/Fe2+ potential in 1 M H2SO4; effective Cr2O7(2-)/Cr3+ couple
     const Veq = (CFe * V0) / (6 * CCr);
     let E;
     if (Vt <= 1e-9) E = E1 + 0.0592 * Math.log10(1e-4 / 1);

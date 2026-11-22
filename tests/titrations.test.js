@@ -33,10 +33,16 @@ for (const e of T.EXPS) {
 // fitBreaks recovers two breaks of a V-shaped conductometric curve
 {
   const s = T.byId['conduct-mix'].make(L.rng(5)), xs = [], ys = [];
-  for (let v = 0; v <= 44; v += 1) { xs.push(v); ys.push(s.curve(v)); }
+  for (let v = 0; v <= 44; v += 1) { xs.push(v); ys.push((s.curve(v) * (100 + v)) / 100); }   // dilution-corrected, as in the page
   const f = T.fitBreaks(xs, ys, 2), veq = s.veq;
-  ok('fitBreaks', f && Math.abs(f.breaks[0] - veq[0]) < 2 && Math.abs(f.breaks[1] - veq[1]) < 2);
+  ok('fitBreaks', f && Math.abs(f.breaks[0] - veq[0]) / veq[0] < 0.03 && Math.abs(f.breaks[1] - veq[1]) / veq[1] < 0.03);
   if (f) console.log('conduct breaks', f.breaks.map((x) => x.toFixed(2)), 'true', veq.map((x) => x.toFixed(2)));
+}
+// potentiometric end point found from the largest |dE/dV| (the Ag electrode potential falls)
+for (const id of ['potent-mohr', 'potent-agcl']) {
+  const s = T.byId[id].make(L.rng(3)), pts = []; for (let v = 0.5; v <= s.vmax; v += 0.5) pts.push([v, s.curve(v)]);
+  let best = -1, bi = -1; for (let i = 1; i < pts.length; i++) { const d = Math.abs((pts[i][1] - pts[i - 1][1]) / 0.5); if (d > best) { best = d; bi = i; } }
+  const ve = (pts[bi][0] + pts[bi - 1][0]) / 2; ok(id + ' end point from |dE/dV| (' + ve + ' vs ' + s.veq.toFixed(2) + ')', Math.abs(ve - s.veq) <= 0.5 && best > 0.03);
 }
 console.log(problems ? problems + ' problem(s)' : 'Titration tests passed.');
 process.exit(problems ? 1 : 0);

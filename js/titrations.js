@@ -14,7 +14,7 @@
   // colour of excess permanganate: one drop (about 1.5e-5 M in the flask) is a faint but clear pink
   const pink = (excessM) => { const s = Math.min(1.2, Math.pow(Math.max(0, excessM) / 4e-4, 0.6)); return s > 0.05 ? dye('#9b1fa8', s) : null; };
 
-  const ABSTEPS = (extra) => ['Rinse the burette with the titrant and fill it. Note the initial reading.', 'Pipette the aliquot into a conical flask and add the indicator.'].concat(extra);
+  const ABSTEPS = (extra, second) => ['Rinse the burette with the titrant and fill it. Note the initial reading.', second || 'Pipette the aliquot into a conical flask and add the indicator.'].concat(extra);
   const REPEAT = 'Repeat until two titres agree within 0.1 mL (concordant), then use their mean.';
 
   // ---------------------------------------------------------------- acid-base, indicator
@@ -100,7 +100,7 @@
   // ---------------------------------------------------------------- redox
   const mn = (id, level, title, short, unis, flaskTxt, kind) => def({
     id, level, mode: 'indicator', title, short, unis, indicators: [], needsHeat: kind === 'oxalic',
-    steps: ABSTEPS([kind === 'oxalic' ? 'Add dilute H₂SO₄ to the oxalic acid and heat to 60–70 °C (use the Heat switch). Do not add indicator: KMnO₄ is its own indicator.' : 'Add dilute H₂SO₄ to the flask. No external indicator is needed: KMnO₄ is its own indicator.', 'Add KMnO₄ slowly. Each drop is decolourised, at first slowly. The end point is the first faint pink that lasts about 30 seconds.', REPEAT]),
+    steps: ABSTEPS([kind === 'oxalic' ? 'Add dilute H₂SO₄ to the oxalic acid and heat to 60–70 °C (use the Heat switch). In the cold the reaction is so slow that the pink lingers and gives a false, early end point.' : 'Add dilute H₂SO₄ to the flask. No external indicator is needed: KMnO₄ is its own indicator.', 'Add KMnO₄ slowly. Each drop is decolourised, at first slowly. The end point is the first faint pink that lasts about 30 seconds.', REPEAT], 'Pipette the aliquot into a conical flask. No indicator is needed: KMnO₄ is its own indicator.'),
     make(rnd) {
       let V0, C0, Cm, veq, rep, solve, titrantLabel, flaskLabel;
       if (kind === 'oxalic') {
@@ -126,6 +126,8 @@
           const x = Vt / veq;
           if (x < 1) {
             const tint = kind === 'mohr' ? mixc(dye('#b9dbb0', 0.35), dye('#e6c66c', 0.4), x) : null;   // pale green Fe2+ turns pale yellow Fe3+
+            // cold oxalic acid reacts very slowly: the pink lingers long before the true end point (a false end point)
+            if (kind === 'oxalic' && !(ctx && ctx.heated) && Vt > 0.3) return { colour: pink((cm * Math.min(Vt, 1.5) * 0.6) / (V0 + Vt + 20)), flash: { c: '#d84bc4', slow: true } };
             return { colour: tint, flash: Vt > 0 ? { c: '#d84bc4', slow: ctx && !ctx.heated && kind === 'oxalic' && Vt < 2 } : null };
           }
           const exc = (cm * (Vt - veq)) / (V0 + Vt + 20);
@@ -142,7 +144,7 @@
 
   def({
     id: 'fe-dichromate', level: 'bsc', mode: 'indicator', title: 'Fe(II) with K₂Cr₂O₇', short: 'Internal indicator: diphenylamine', unis: [], indicators: [],
-    steps: ABSTEPS(['The flask holds 25.0 mL of Fe²⁺ solution (unknown) with dilute H₂SO₄, H₃PO₄ and diphenylamine indicator.', 'Add K₂Cr₂O₇ until the green turns to a sharp blue-violet.', REPEAT]),
+    steps: ABSTEPS(['The flask holds 25.0 mL of Fe²⁺ solution (unknown) with dilute H₂SO₄, H₃PO₄ and diphenylamine indicator.', 'Add K₂Cr₂O₇ until the green turns to a sharp blue-violet.', REPEAT], 'Pipette the aliquot into a conical flask.'),
     make(rnd) {
       const C0 = rnd4(L.between(rnd, 0.04, 0.09, 0.0025)), V0 = 25, Cd = 0.016667, veq = (C0 * V0) / (6 * Cd);
       return {
@@ -162,7 +164,7 @@
 
   def({
     id: 'iodo-cu', level: 'bsc', mode: 'indicator', title: 'Iodometric estimation of Cu(II)', short: 'Na₂S₂O₃ against liberated iodine, starch', unis: [], indicators: [], needsStarch: true,
-    steps: ABSTEPS(['The flask holds 25.0 mL of Cu²⁺ solution (unknown) treated with excess KI: brown iodine forms and white CuI precipitates (2Cu²⁺ + 4I⁻ → 2CuI + I₂).', 'Titrate with 0.1000 M Na₂S₂O₃ until the brown fades to pale yellow.', 'Add starch (blue-black) and continue drop by drop until the blue just disappears.', REPEAT]),
+    steps: ABSTEPS(['The flask holds 25.0 mL of Cu²⁺ solution (unknown) treated with excess KI: brown iodine forms and white CuI precipitates (2Cu²⁺ + 4I⁻ → 2CuI + I₂).', 'Titrate with 0.1000 M Na₂S₂O₃ until the brown fades to pale yellow.', 'Add starch (blue-black) and continue drop by drop until the blue just disappears. Near the end add about 1 g KSCN: it converts CuI to CuSCN and releases iodine adsorbed on the precipitate, giving a sharper end point.', REPEAT], 'Pipette the aliquot into a conical flask. Do not add starch yet: it is added near the end point.'),
     make(rnd) {
       const C0 = rnd4(L.between(rnd, 0.04, 0.09, 0.0025)), V0 = 25, Ct = 0.1, veq = (C0 * V0) / Ct;
       return {
@@ -182,7 +184,7 @@
 
   def({
     id: 'edta-hardness', level: 'bsc', mode: 'indicator', title: 'Total hardness of water (EDTA)', short: 'Eriochrome Black T, pH 10 buffer', unis: [], indicators: [],
-    steps: ABSTEPS(['The flask holds 50.0 mL of the water sample with NH₃/NH₄Cl buffer (pH 10) and a few drops of Eriochrome Black T: wine red (Ca²⁺/Mg²⁺–EBT complex).', 'Titrate with 0.01000 M EDTA until the colour changes sharply from wine red through purple to pure blue.', REPEAT]),
+    steps: ABSTEPS(['The flask holds 50.0 mL of the water sample with NH₃/NH₄Cl buffer (pH 10) and a few drops of Eriochrome Black T: wine red (Ca²⁺/Mg²⁺–EBT complex).', 'Titrate with 0.01000 M EDTA until the colour changes sharply from wine red through purple to pure blue.', REPEAT], 'Pipette the aliquot into a conical flask.'),
     make(rnd) {
       const H = Math.round(L.between(rnd, 80, 400, 5)), V0 = 50, Ce = 0.01;
       const vEq = ((H / 100.09) * (V0 / 1000)) / Ce;   // mL: (mmol/L × L) / (mmol/mL)
@@ -233,15 +235,15 @@
   // ---------------------------------------------------------------- potentiometric
   def({
     id: 'potent-mohr', level: 'bsc', mode: 'potentiometric', title: 'Potentiometric: Mohr’s salt vs K₂Cr₂O₇', short: 'End point and E° of Fe³⁺/Fe²⁺', unis: [],
-    steps: ['Pipette 25.0 mL of Fe²⁺ solution (unknown) into the beaker with dilute H₂SO₄. Dip in the platinum electrode and a calomel reference (SCE, E = +0.244 V).', 'Add 0.01667 M K₂Cr₂O₇ in steps; the cell potential is recorded each time. Use smaller steps near the end point.', 'Plot E against V and ΔE/ΔV against V. The end point is where ΔE/ΔV is greatest.', 'At half the end-point volume the Fe²⁺ : Fe³⁺ ratio is 1 : 1, so E(SHE) = E(measured) + 0.244 V is E° of the Fe³⁺/Fe²⁺ couple.'],
+    steps: ['Pipette 25.0 mL of Fe²⁺ solution (unknown) into the beaker with dilute H₂SO₄. Dip in the platinum electrode and a calomel reference (SCE, E = +0.244 V).', 'Add 0.01667 M K₂Cr₂O₇ in steps; the cell potential is recorded each time. Use smaller steps near the end point.', 'Plot E against V and ΔE/ΔV against V. The end point is where ΔE/ΔV is greatest.', 'At half the end-point volume the Fe²⁺ : Fe³⁺ ratio is 1 : 1, so E(SHE) = E(measured) + 0.244 V is the formal potential E°′ of the Fe³⁺/Fe²⁺ couple in this medium (about 0.68 V in 1 M H₂SO₄; the standard potential E° = 0.771 V applies only at unit activities, without sulfate complexing).'],
     make(rnd) {
       const C0 = rnd4(L.between(rnd, 0.04, 0.09, 0.0025)), V0 = 25, Cd = 0.016667, veq = (C0 * V0) / (6 * Cd);
       return {
         aliquot: V0, titrant: '0.01667 M K₂Cr₂O₇ (standard)', flask: '25.0 mL Fe²⁺ (unknown) + H₂SO₄', titrantColour: '#f28c28', veq, vmax: 40, noiseV: 0.001,
-        state: (Vt) => ({ E: L.potMohr(Vt, V0, C0, Cd).E, colour: mixc('#cfe6f5', '#b9dbb0', Math.max(0, 1 - Vt / veq) * 0.6) }),
+        state: (Vt) => ({ E: L.potMohr(Vt, V0, C0, Cd).E, colour: Vt < veq ? dye('#5f9a5f', 0.08 + 0.5 * (Vt / veq)) : C.absAdd(dye('#5f9a5f', 0.58), '#f28c28', Math.min(0.8, (Vt - veq) * 0.25)) }),   /* green Cr³⁺ builds up; excess dichromate adds orange */
         curve: (V) => L.potMohr(V, V0, C0, Cd).E, yLabel: 'E vs SCE / V',
-        report: [{ id: 'e0', label: 'E° of Fe³⁺/Fe²⁺ (vs SHE)', unit: 'V', truth: 0.771, dp: 3, tol: 0.02, abs: true }, { id: 'c', label: 'Concentration of Fe²⁺', unit: 'M', truth: C0, dp: 4 }],
-        solve: (m) => { const e0 = m.eHalf + 0.244, x = (6 * Cd * m.veq) / V0; return { values: { e0, c: x }, lines: [`End point V = ${m.veq.toFixed(2)} mL (maximum ΔE/ΔV)`, `E(SCE) at V/2 = ${m.eHalf.toFixed(3)} V → E° = ${m.eHalf.toFixed(3)} + 0.244 = ${e0.toFixed(3)} V (SHE)`, `M(Fe²⁺) = 6 × 0.016667 × ${m.veq.toFixed(2)} / ${V0} = ${x.toFixed(4)} M`] }; },
+        report: [{ id: 'e0', label: 'Formal potential E°′ of Fe³⁺/Fe²⁺ in this medium (vs SHE)', unit: 'V', truth: L.FE_FORMAL, dp: 3, tol: 0.02, abs: true }, { id: 'c', label: 'Concentration of Fe²⁺', unit: 'M', truth: C0, dp: 4 }],
+        solve: (m) => { const e0 = m.eHalf + 0.244, x = (6 * Cd * m.veq) / V0; return { values: { e0, c: x }, lines: [`End point V = ${m.veq.toFixed(2)} mL (maximum ΔE/ΔV)`, `E(SCE) at V/2 = ${m.eHalf.toFixed(3)} V → E°′ = ${m.eHalf.toFixed(3)} + 0.244 = ${e0.toFixed(3)} V (SHE)`, `M(Fe²⁺) = 6 × 0.016667 × ${m.veq.toFixed(2)} / ${V0} = ${x.toFixed(4)} M`] }; },
       };
     },
   });
@@ -264,6 +266,7 @@
   // ================================================================ more volumetric practicals (multi-part experiments)
   // shared colour models
   const permState = (Vt, veq, cm, V0, ctx, needHeat, tint) => {        // KMnO4 titrant: decolourised until the end point, then pink
+    if (Vt < veq && needHeat && !(ctx && ctx.heated) && Vt > 0.3) return { colour: pink((cm * Math.min(Vt, 1.5) * 0.6) / (V0 + Vt + 20)), flash: { c: '#d84bc4', slow: true } };   /* cold: false end point */
     if (Vt < veq) return { colour: tint ? tint(Vt / veq) : null, flash: Vt > 0 ? { c: '#d84bc4', slow: needHeat && !(ctx && ctx.heated) && Vt < 2 } : null };
     return { colour: pink((cm * (Vt - veq)) / (V0 + Vt + 20)), flash: null };
   };
@@ -354,7 +357,7 @@
     make(rnd) {
       const W = Number(L.between(rnd, 0.48, 0.52, 0.0001).toFixed(4)), pc = Number(L.between(rnd, 58, 72, 0.1).toFixed(1)), Ct = 0.05;
       const nAli = (W * pc / 100 / 63.55) / 4, vA = (nAli * 1000) / Ct;
-      this.steps = [`${W.toFixed(4)} g of brass turnings were dissolved in 1 : 1 HNO₃, boiled to expel nitrogen oxides, neutralised with Na₂CO₃ until a faint precipitate, cleared with acetic acid and made up to 100.0 mL.`, 'Pipette 25.0 mL, add excess KI (zinc does not react). Titrate the liberated iodine with 0.0500 M Na₂S₂O₃.', ...STARCH_STEPS, REPEAT];
+      this.steps = [`${W.toFixed(4)} g of brass turnings were dissolved in 1 : 1 HNO₃, boiled to expel nitrogen oxides, neutralised with Na₂CO₃ until a faint precipitate, cleared with acetic acid and made up to 100.0 mL.`, 'Pipette 25.0 mL, add excess KI (zinc does not react). Titrate the liberated iodine with 0.0500 M Na₂S₂O₃.', ...STARCH_STEPS, 'Near the end point add about 1 g KSCN to release iodine adsorbed on the CuI.', REPEAT];
       return {
         aliquot: 25, titrant: '0.0500 M Na₂S₂O₃ (standard)', flask: `25.0 mL of brass solution (${W.toFixed(4)} g in 100 mL) + excess KI`, titrantColour: null, veq: vA, vmax: 45,
         state: (Vt, ctx) => iodState(1 - Vt / vA, ctx, '#efe6cf'),
@@ -366,7 +369,7 @@
 
   def({
     id: 'winkler', level: 'bsc', mode: 'indicator', title: 'Dissolved oxygen in water (Winkler)', short: 'Iodometric estimation of O₂', indicators: [], needsStarch: true,
-    steps: ['A 300 mL BOD bottle was filled with the water without trapping air. 2 mL MnSO₄ and 2 mL alkaline KI–azide were added under the surface: the O₂ oxidises Mn(OH)₂ to a brown MnO(OH)₂ precipitate (oxygen is “fixed”).', 'After settling, 2 mL conc. H₂SO₄ dissolves the precipitate; Mn(III/IV) oxidises iodide to iodine, an amount equivalent to the oxygen.', 'Titrate 200 mL with 0.0250 M Na₂S₂O₃.', ...STARCH_STEPS, REPEAT],
+    steps: ['A 300 mL BOD bottle was filled with the water without trapping air. 2 mL MnSO₄ and 2 mL alkaline KI–azide were added under the surface: the O₂ oxidises Mn(OH)₂ to a brown MnO(OH)₂ precipitate (oxygen is “fixed”).', 'After settling, 2 mL conc. H₂SO₄ dissolves the precipitate; Mn(III/IV) oxidises iodide to iodine, an amount equivalent to the oxygen.', 'Titrate 200 mL with 0.0250 M Na₂S₂O₃. (Strictly, 200 mL titrated contains the oxygen of 200 × 300/(300 − 4) = 202.7 mL of sample, because 4 mL of reagents displaced sample from the bottle; this 1.4 % correction is ignored here, as in many routine procedures.)', ...STARCH_STEPS, REPEAT],
     make(rnd) {
       const DO = Number(L.between(rnd, 5.5, 9.0, 0.05).toFixed(2)), Ct = 0.025, V0 = 200, vA = (DO * V0) / (Ct * 8000);
       return {
@@ -418,14 +421,14 @@
 
   def({
     id: 'glycine', level: 'bsc', mode: 'indicator', title: 'Glycine by formol titration (Sørensen)', short: 'Quantitative organic estimation', indicators: [],
-    steps: ['Pipette 25.0 mL glycine solution and add phenolphthalein. Glycine exists as the zwitterion ⁺H₃N–CH₂–COO⁻; its –NH₃⁺ group (pK 9.6) is too weak an acid for a sharp end point.', 'Add 10 mL of formalin that was neutralised beforehand to faint pink (use the button). Formaldehyde converts –NH₂ to –N(CH₂OH)₂, so the nitrogen holds its proton far less firmly (the pK drops to about 6.5). The proton becomes titratable.', 'Titrate with 0.1000 M NaOH to a permanent faint pink. Try it once without formalin to see why it is needed. ' + REPEAT],
+    steps: ['Pipette 25.0 mL glycine solution and add phenolphthalein. Glycine exists as the zwitterion ⁺H₃N–CH₂–COO⁻; its –NH₃⁺ group (pK 9.6) is too weak an acid for a sharp end point.', 'Add 10 mL of formalin that was neutralised beforehand to faint pink (use the button). Formaldehyde converts –NH₂ to –N(CH₂OH)₂, so the nitrogen holds its proton far less firmly (the pK drops to about 6.5). The proton becomes titratable.', 'Titrate with 0.1000 M NaOH to a distinct, permanent pink (pH ≈ 9). Try it once without formalin to see why it is needed. ' + REPEAT],
     make(rnd) {
       const c = rnd4(L.between(rnd, 0.04, 0.08, 0.001)), V0 = 25, Cb = 0.1, vA = (c * V0) / Cb, tt = { kind: 'base', C: Cb };
       const withF = { V0: V0 + 10, fams: [{ C: (c * V0) / (V0 + 10), pK: [6.5], lam: [0, 30] }] }, noF = { V0, fams: [{ C: c, pK: [9.6], lam: [0, 30] }] };
       return {
         aliquot: V0, titrant: '0.1000 M NaOH (standard)', flask: '25.0 mL glycine solution + phenolphthalein', titrantColour: null, veq: vA, vmax: 40, needsFormol: true,
         state: (Vt, ctx) => { const r = L.acidBase(ctx && ctx.formol ? withF : noF, tt, Vt); return { pH: r.pH, colour: C.indColor('phph', r.pH) }; },
-        report: [{ id: 'g', label: 'Glycine', unit: 'g/L', truth: c * 75.07, dp: 2, tol: 0.03 }],
+        report: [{ id: 'g', label: 'Glycine', unit: 'g/L', truth: c * 75.07, dp: 2, tol: 0.05 }],
         solve: (m) => { const x = (Cb * m.t) / V0; return { values: { g: x * 75.07 }, lines: ['⁺H₃N–CH₂–COO⁻ + 2HCHO → (HOCH₂)₂N–CH₂–COO⁻ + H⁺;  H⁺ + OH⁻ → H₂O (1 : 1)', `glycine = 0.1000 × ${m.t.toFixed(2)} / 25.0 = ${x.toFixed(4)} M`, `= ${x.toFixed(4)} × 75.07 = ${(x * 75.07).toFixed(2)} g/L`] }; },
       };
     },
