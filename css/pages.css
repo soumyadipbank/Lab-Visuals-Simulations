@@ -168,3 +168,5 @@ details:not([open]) > .lbl-sum::before { content: "▸ "; }
 
 .bench-cap { margin: 6px 2px 0; font-size: .86rem; color: var(--muted); min-height: 1.2em; }
 .bench-cap:empty { display: none; }
+
+.syl-row .go-arrow { color: var(--pink); font-weight: 700; }
