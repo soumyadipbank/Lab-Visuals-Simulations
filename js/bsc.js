@@ -6,11 +6,7 @@
   const st = { status: 'all', area: 'all', q: '' };
 
   function stats() {
-    const total = S.EXPERIMENTS.length, live = S.LIVE;
-    document.getElementById('stats').innerHTML =
-      '<div><b>' + total + '</b><span>practical experiments listed</span></div>' +
-      '<div><b>' + live + '</b><span>interactive now</span></div>' +
-      '<div><b>' + (total - live) + '</b><span>planned</span></div>';
+    document.getElementById('stats').innerHTML = '<div><b>' + S.EXPERIMENTS.length + '</b><span>total reactions</span></div>';
   }
 
   function filters() {

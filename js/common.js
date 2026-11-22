@@ -39,6 +39,7 @@
     '<aside class="contact" aria-labelledby="contactH"><div><h4 id="contactH">Spotted an error or have a suggestion?</h4><p>Mistakes, missing experiments or ideas: I read every message.</p></div>' +
     '<a class="btn-glow" id="mailBtn" href="mailto:soumyadipbank1@gmail.com?subject=Lab%20Visuals%20feedback&amp;body=Hi%20Soumyadip%2C%0A%0A%28Describe%20the%20error%20or%20suggestion.%20If%20it%20is%20about%20an%20experiment%2C%20mention%20which%20page%20and%20what%20you%20did.%29%0A">✉ Write to me</a></aside>' +
     '<p class="credit">Made by <strong>Soumyadip</strong></p>' +
+    '<p class="insta"><a id="instaLink" href="https://www.instagram.com/soumyadipbank/" target="_blank" rel="noopener" aria-label="Soumyadip on Instagram (@soumyadipbank)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/></svg>@soumyadipbank</a></p>' +
     '<p class="small"><a href="https://github.com/soumyadipbank/Lab-Visuals-Simulations">Source on GitHub</a> · MIT licence</p>' +
     '<p class="disclaimer"><b>Lab Visuals</b> is a teaching model, not a substitute for a real laboratory. Values are textbook-approximate and simulated measurements include random error on purpose. Never repeat hazardous experiments (alkali metals, thermite, concentrated acids, lead and chromium salts) without a teacher, a fume cupboard and eye protection.</p></footer>';
 
@@ -50,6 +51,8 @@
     const f = document.getElementById('siteFooter');
     if (f) f.outerHTML = footer;
     if (!document.getElementById('progress')) document.body.insertAdjacentHTML('afterbegin', prog);
+    const ig = document.getElementById('instaLink');
+    if (ig && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) ig.removeAttribute('target');   // phones: let instagram.com open the Instagram app
     const btn = document.getElementById('menuBtn'), nav = document.getElementById('mainNav');
     if (btn && nav) {
       btn.addEventListener('click', () => { const o = nav.classList.toggle('open'); btn.setAttribute('aria-expanded', String(o)); });
