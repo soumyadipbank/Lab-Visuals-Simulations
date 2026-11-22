@@ -213,7 +213,7 @@
     else {
       const T = Math.abs(res.dT).toFixed(1);
       const exo = res.dh < -1, endo = res.dh > 1;
-      parts.push(['Heat', '<div class="v">' + (exo ? '🔥 Exothermic: heat released' : endo ? '❄ Endothermic: heat absorbed' : 'About thermoneutral') + '</div><div class="s">ΔH = ' + num(res.dh) + ' kJ' + (exo ? ' → warms by about ' + T + ' °C' : endo ? ' → cools by about ' + T + ' °C' : '') + '<br><i>(0.05 mol in 100 mL, illustrative)</i></div>']);
+      parts.push(['Heat', '<div class="v">' + (exo ? '🔥 Exothermic: heat released' : endo ? '❄ Endothermic: heat absorbed' : 'About thermoneutral') + '</div><div class="s">ΔH = ' + num(res.dh) + ' kJ' + (exo ? ' → warms by about ' + T + ' °C' : endo ? ' → cools by about ' + T + ' °C' : '') + '<br><i>(0.05 mol reacting in 100 mL: 50 mL of each 1 M solution)</i></div>']);
     }
     // pH
     const ph = sim.ph1;
