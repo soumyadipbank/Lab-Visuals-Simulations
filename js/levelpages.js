@@ -1,15 +1,15 @@
-/* Lab Visuals: Class 11 and Class 12 hub pages. Each card opens the Reaction Lab with the chemicals pre-selected,
+/* Lab Visuals: the Class 11 / 12 hub page. Each card opens the Reaction Lab with the chemicals pre-selected,
    or one of the simulators. The lists follow typical school practicals, not one specific board's syllabus. */
 (function () {
   'use strict';
   const lab = (lv, ids) => 'lab.html?level=' + lv + '&mix=' + ids.join(',');
-  const sim = (lv, page, q) => page + '?level=' + lv + (q ? '&' + q : '');
+  const sim = (page, q) => page + '?level=school' + (q ? '&' + q : '');
 
   const DATA = {
-    '11': {
-      title: 'Class <em>11</em> lab',
-      lead: 'Start with what chemicals actually do: neutralise, precipitate, fizz, displace and change temperature. Pick a card to set up the experiment, then press Mix.',
-      next: { label: 'Ready for more? Class 12 adds redox, complex ions and rates.', href: 'class12.html?level=12' },
+    school: {
+      title: 'Class <em>11 / 12</em> lab',
+      lead: 'From what chemicals actually do (neutralise, precipitate, fizz, displace, heat up) to redox, complex ions, rates and real titrations. Pick a card to set up the experiment, then press Mix, or open a simulator.',
+      next: { label: 'Heading to university? The Bachelors (BSc / BS) lab has the full practical course.', href: 'bsc.html?level=bsc' },
       sections: [
         { h: 'Acids, bases and indicators', sub: 'Colour tells you the pH. Try the “which is in excess?” buttons under the equation.', items: [
           { t: 'Neutralisation with phenolphthalein', d: 'HCl + NaOH. The mixture is colourless at the exact end point and turns pink only with a little excess base.', tag: 'Acid–base', mix: ['hcl', 'naoh', 'phph'] },
@@ -38,25 +38,12 @@
         { h: 'Heat in chemistry', sub: 'Some reactions release heat (exothermic) and some absorb it (endothermic).', items: [
           { t: 'Cold pack', d: 'NH₄NO₃ dissolving in water absorbs heat: the thermometer falls.', tag: 'Endothermic', mix: ['nh4no3', 'h2o'] },
           { t: 'Hot pack', d: 'CaCl₂ dissolving in water releases heat.', tag: 'Exothermic', mix: ['cacl2', 'h2o'] },
-          { t: 'Measure the heat of neutralisation', d: 'Use a calorimeter, take temperature readings and calculate ΔH.', tag: 'Calorimetry', href: sim('11', 'calorimetry.html', 'exp=neutral') },
+          { t: 'Measure the heat of neutralisation', d: 'Use a calorimeter, take temperature readings and calculate ΔH.', tag: 'Calorimetry', href: sim('calorimetry.html', 'exp=neutral') },
         ] },
-        { h: 'Measure and identify', sub: 'Your first quantitative and analytical experiments.', items: [
-          { t: 'Your first titration: HCl vs NaOH', d: 'Use the burette, pick an indicator, find the end point and calculate the strength.', tag: 'Titration', href: sim('11', 'titration.html', 'exp=hcl-naoh') },
-          { t: 'Standardise NaOH with oxalic acid', d: 'The classic school titration with phenolphthalein.', tag: 'Titration', href: sim('11', 'titration.html', 'exp=naoh-oxalic') },
-          { t: 'Identify an unknown salt', d: 'Test with reagents and work out which cation and anion it contains.', tag: 'Salt analysis', href: sim('11', 'salt-analysis.html', 'n=1') },
-        ] },
-      ],
-    },
-    '12': {
-      title: 'Class <em>12</em> lab',
-      lead: 'Redox titrations, complex ions, equilibria and your first look at reaction rates. Each card opens a ready-made experiment.',
-      next: { label: 'Heading to university? BSc / BS opens the full practical lab.', href: 'bsc.html?level=bsc' },
-      sections: [
         { h: 'Redox', sub: 'Electron transfer, shown by colour.', items: [
           { t: 'Permanganate + iron(II)', d: 'Purple MnO₄⁻ is decolourised by Fe²⁺ in acid.', tag: 'Redox', mix: ['kmno4', 'feso4', 'h2so4'] },
           { t: 'Dichromate + iron(II)', d: 'Orange Cr₂O₇²⁻ turns green as Cr³⁺ forms.', tag: 'Redox', mix: ['k2cr2o7', 'feso4', 'h2so4'] },
           { t: 'Starch–iodine', d: 'H₂O₂ oxidises iodide to iodine; starch turns blue-black.', tag: 'Redox', mix: ['h2o2', 'ki', 'h2so4', 'starch'] },
-          { t: 'Displacement and the activity series', d: 'Zinc, iron and copper compared in copper sulfate and silver nitrate.', tag: 'Electrochemistry', mix: ['cu', 'agno3'] },
         ] },
         { h: 'Complex ions and equilibria', sub: 'Colours change when ligands bind and when equilibria shift.', items: [
           { t: 'Copper(II) and ammonia', d: 'Pale blue precipitate, then an inky deep-blue complex.', tag: 'Complexes', mix: ['cuso4h', 'nh3'] },
@@ -66,18 +53,19 @@
         ] },
         { h: 'Catalysis and rates', sub: 'How fast, and what controls it.', items: [
           { t: 'Elephant toothpaste', d: 'MnO₂ catalyses H₂O₂ decomposition. The catalyst is not used up.', tag: 'Catalysis', mix: ['h2o2', 'mno2'] },
-          { t: 'The iodine clock: H₂O₂ + KI', d: 'Time how long the blue colour takes and see how concentration and temperature change the rate.', tag: 'Kinetics', href: sim('12', 'kinetics.html', 'exp=clock') },
+          { t: 'The iodine clock: H₂O₂ + KI', d: 'Time how long the blue colour takes and see how concentration and temperature change the rate.', tag: 'Kinetics', href: sim('kinetics.html', 'exp=clock') },
           { t: 'Rusting (time-lapse)', d: 'Iron, water and oxygen: slow electrochemical corrosion.', tag: 'Electrochemistry', mix: ['fe', 'h2o', 'o2'] },
         ] },
-        { h: 'Titrations', sub: 'Quantitative analysis with real end points.', items: [
-          { t: 'Standardise NaOH with oxalic acid', d: 'Phenolphthalein end point.', tag: 'Acid–base', href: sim('12', 'titration.html', 'exp=naoh-oxalic') },
-          { t: 'Acetic acid in vinegar', d: 'A weak acid against a strong base.', tag: 'Acid–base', href: sim('12', 'titration.html', 'exp=vinegar') },
-          { t: 'Standardise KMnO₄ with oxalic acid', d: 'KMnO₄ is its own indicator.', tag: 'Redox', href: sim('12', 'titration.html', 'exp=kmno4-oxalic') },
-          { t: 'Iron(II) in Mohr’s salt with KMnO₄', d: 'Estimate the Fe²⁺ concentration.', tag: 'Redox', href: sim('12', 'titration.html', 'exp=mohr-kmno4') },
+        { h: 'Titrations', sub: 'Watch the titrant drip from the burette, find the end point, and calculate.', items: [
+          { t: 'Your first titration: HCl vs NaOH', d: 'Pick an indicator, add drop by drop near the end point, and calculate the strength.', tag: 'Acid–base', href: sim('titration.html', 'exp=hcl-naoh') },
+          { t: 'Standardise NaOH with oxalic acid', d: 'The classic titration with phenolphthalein.', tag: 'Acid–base', href: sim('titration.html', 'exp=naoh-oxalic') },
+          { t: 'Acetic acid in vinegar', d: 'A weak acid against a strong base.', tag: 'Acid–base', href: sim('titration.html', 'exp=vinegar') },
+          { t: 'Standardise KMnO₄ with oxalic acid', d: 'KMnO₄ is its own indicator.', tag: 'Redox', href: sim('titration.html', 'exp=kmno4-oxalic') },
+          { t: 'Iron(II) in Mohr’s salt with KMnO₄', d: 'Estimate the Fe²⁺ concentration.', tag: 'Redox', href: sim('titration.html', 'exp=mohr-kmno4') },
         ] },
-        { h: 'Thermochemistry and analysis', sub: '', items: [
-          { t: 'Heat of neutralisation', d: 'Strong acid with strong base in a calorimeter.', tag: 'Calorimetry', href: sim('12', 'calorimetry.html', 'exp=neutral') },
-          { t: 'Salt analysis: two radicals', d: 'Identify an unknown salt mixture from reagent tests.', tag: 'Salt analysis', href: sim('12', 'salt-analysis.html', 'n=2') },
+        { h: 'Analysis', sub: 'Identify and measure.', items: [
+          { t: 'Identify an unknown salt', d: 'Test with reagents and work out which cation and anion it contains.', tag: 'Salt analysis', href: sim('salt-analysis.html', 'n=1') },
+          { t: 'Beer’s law with KMnO₄', d: 'Measure absorbance, draw a calibration line and find an unknown concentration.', tag: 'Colorimetry', href: sim('colorimetry.html', 'exp=kmno4') },
         ] },
       ],
     },
@@ -86,11 +74,11 @@
   function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
   function render() {
-    const lv = document.body.dataset.level;
+    const lv = 'school';
     const d = DATA[lv];
     if (!d) return;
     const root = document.getElementById('levelRoot');
-    let h = '<div class="wrap"><section class="page-head"><p class="crumbs"><a href="index.html">Home</a> / Class ' + lv + '</p><h1>' + d.title + '</h1><p class="lead">' + d.lead + '</p>' +
+    let h = '<div class="wrap"><section class="page-head"><p class="crumbs"><a href="index.html">Home</a> / Class 11 / 12</p><h1>' + d.title + '</h1><p class="lead">' + d.lead + '</p>' +
       '<div class="btn-row" style="margin-top:18px"><a class="btn-glow" href="' + lab(lv, []).replace('&mix=', '') + '">Open the free-play Reaction Lab</a>' +
       '<a class="btn-ghost" href="index.html" style="text-decoration:none;display:inline-block">Change level</a></div></section>';
     d.sections.forEach((s) => {

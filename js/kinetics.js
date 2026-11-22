@@ -3,21 +3,21 @@
   'use strict';
   const C = globalThis.Chem, L = C.Lab, $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const level = (window.LevelInfo && LevelInfo.level) || 'bsc', rank = { '11': 1, '12': 2, bsc: 3 };
+  const level = (window.LevelInfo && LevelInfo.level) || 'bsc', rank = { '11': 1, '12': 1, school: 1, bsc: 2 };
   const q = new URLSearchParams(location.search);
   const cv = $('bench'), g = cv.getContext('2d');
   const noise = (sd) => L.gauss(Math.random) * sd;
 
   const EXPS = [
     {
-      id: 'clock', level: '12', title: 'Iodine clock: H₂O₂ + KI', short: 'Orders, rate constant and activation energy', unis: ['CU', 'BU'],
+      id: 'clock', level: '12', title: 'Iodine clock: H₂O₂ + KI', short: 'Orders, rate constant and activation energy', unis: [],
       steps: ['H₂O₂ + 2I⁻ + 2H⁺ → I₂ + 2H₂O is slow. Thiosulfate (fixed at 0.0020 M) removes each I₂ as it forms, so no colour appears until all the thiosulfate is used up. Then the starch turns blue-black.', 'The time t to the sudden blue colour is inversely proportional to the initial rate: rate = [S₂O₃²⁻] / (2t).', 'Vary [H₂O₂] alone, then [KI] alone, then temperature alone. Take at least 6 runs.', 'Press “Fit my runs”: the page fits ln(rate) = ln k + m ln[H₂O₂] + n ln[I⁻] − E<sub>a</sub>/RT to all your runs together. The orders m, n and E<sub>a</sub> come out of it.'],
       params: [{ id: 'hp', label: '[H₂O₂]', min: 0.02, max: 0.1, step: 0.01, val: 0.05, unit: 'M', dp: 2 }, { id: 'ki', label: '[KI]', min: 0.02, max: 0.1, step: 0.01, val: 0.05, unit: 'M', dp: 2 }, { id: 'T', label: 'Temperature', min: 10, max: 50, step: 5, val: 25, unit: '°C', dp: 0 }],
       type: 'clock',
       report: () => [{ id: 'm', label: 'Order in H₂O₂', unit: '', truth: 1, dp: 0, abs: true, tol: 0.2 }, { id: 'n', label: 'Order in I⁻', unit: '', truth: 1, dp: 0, abs: true, tol: 0.2 }, { id: 'ea', label: 'Activation energy', unit: 'kJ/mol', truth: L.CLOCK.Ea / 1000, dp: 0, tol: 0.12 }],
     },
     {
-      id: 'h2o2', level: 'bsc', title: 'H₂O₂ decomposition (KI or FeCl₃)', short: 'First-order rate constant by KMnO₄ titration', unis: ['CU', 'WBSU', 'BU'],
+      id: 'h2o2', level: 'bsc', title: 'H₂O₂ decomposition (KI or FeCl₃)', short: 'First-order rate constant by KMnO₄ titration', unis: [],
       steps: ['A catalyst (KI or FeCl₃) decomposes H₂O₂: 2H₂O₂ → 2H₂O + O₂. Oxygen bubbles off faster when the reaction is faster.', 'Press Start, advance the clock, and take a 5 mL sample at each time. Each sample is quenched and titrated with 0.02 M KMnO₄ (the titre is proportional to the H₂O₂ left).', 'Plot ln(titre) against time. For a first-order reaction this is a straight line with slope −k.'],
       type: 'adv', unit: 'min', steps_t: [1, 5, 10], tmax: 90, col: 't / min', vcol: 'KMnO₄ titre / mL',
       selects: [{ id: 'cat', label: 'Catalyst', opts: [['KI', 'KI'], ['FeCl3', 'FeCl₃']] }],
@@ -30,7 +30,7 @@
       solve: (a) => ({ values: { k: a.meas.k }, lines: a.lines }),
     },
     {
-      id: 'ester', level: 'bsc', title: 'Methyl acetate hydrolysis (acid catalysed)', short: 'Pseudo-first-order rate constant', unis: ['CU', 'WBSU', 'BU'],
+      id: 'ester', level: 'bsc', title: 'Methyl acetate hydrolysis (acid catalysed)', short: 'Pseudo-first-order rate constant', unis: [],
       steps: ['CH₃COOCH₃ + H₂O → CH₃COOH + CH₃OH, catalysed by 0.45 M HCl. Water is in huge excess, so the rate depends only on the ester (pseudo-first-order).', 'At each time withdraw 5 mL, quench in ice and titrate with 0.2000 M NaOH (phenolphthalein). The titre V<sub>t</sub> grows as acetic acid forms.', 'Take V₀ at t = 0. For V<sub>∞</sub> warm the flask to 60 °C for 30 minutes (use the button) so the reaction goes to completion.', 'k = (2.303 / t) log [(V<sub>∞</sub> − V₀) / (V<sub>∞</sub> − V<sub>t</sub>)]. Or plot ln(V<sub>∞</sub> − V<sub>t</sub>) against t.'],
       type: 'adv', unit: 'min', steps_t: [5, 10, 20], tmax: 180, col: 't / min', vcol: 'NaOH titre V<sub>t</sub> / mL', extra: true,
       params: [{ id: 'T', label: 'Temperature', min: 25, max: 45, step: 5, val: 35, unit: '°C', dp: 0 }],
@@ -49,7 +49,7 @@
       solve: (a) => ({ values: { k: a.meas.k }, lines: a.lines }),
     },
     {
-      id: 'sapon', level: 'bsc', title: 'Saponification of ethyl acetate (conductometric)', short: 'Second-order rate constant', unis: ['WBSU', 'BU'],
+      id: 'sapon', level: 'bsc', title: 'Saponification of ethyl acetate (conductometric)', short: 'Second-order rate constant', unis: [],
       steps: ['CH₃COOEt + NaOH → CH₃COONa + EtOH, with equal starting concentrations a. Fast OH⁻ ions are replaced by slower acetate ions, so the conductivity falls.', 'Take κ₀ at t = 0 (just after mixing), then readings at intervals. κ∞ is calculated: a × (λ<sub>Na</sub> + λ<sub>OAc</sub>).', 'The fraction reacted is f = (κ₀ − κ<sub>t</sub>) / (κ₀ − κ∞). For second-order kinetics f / (1 − f) = k a t. Plot it against t: the slope is k a.'],
       type: 'adv', unit: 's', steps_t: [15, 30, 60], tmax: 1200, col: 't / s', vcol: 'κ / mS cm⁻¹',
       params: [{ id: 'a', label: 'Initial concentration a', min: 0.02, max: 0.06, step: 0.01, val: 0.04, unit: 'M', dp: 2 }, { id: 'T', label: 'Temperature', min: 20, max: 40, step: 5, val: 25, unit: '°C', dp: 0 }],
@@ -75,7 +75,7 @@
     const e = list.find((x) => x.id === id) || list[0]; S.exp = e;
     S.p = {}; (e.params || []).forEach((p) => (S.p[p.id] = p.val)); (e.selects || []).forEach((s) => (S.p[s.id] = s.opts[0][0]));
     S.rows = []; S.model = null; S.t = 0; S.vinf = null; S.clock = null; S.analysis = null; S.runs = [];
-    $('expTitle').textContent = e.title; $('expSub').textContent = e.short + (e.unis.length ? ' · ' + e.unis.join(', ') + ' syllabus' : '');
+    $('expTitle').textContent = e.title; $('expSub').textContent = e.short;
     $('steps').innerHTML = e.steps.map((s) => '<li>' + s + '</li>').join('');
     $('expList').querySelectorAll('.exp-btn').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === e.id)));
     $('msg').innerHTML = ''; $('answerBox').innerHTML = ''; $('chartBox').hidden = true;
@@ -199,7 +199,7 @@
   function init() {
     $('expCount').textContent = '(' + list.length + ')';
     $('expList').innerHTML = list.map((e) => '<button type="button" class="exp-btn" data-id="' + e.id + '" aria-pressed="false"><b>' + e.title + '</b><span>' + e.short + (e.unis.length ? ' · ' + e.unis.join(' ') : '') + '</span></button>').join('');
-    const nl = EXPS.length - list.length; if (nl > 0) { const n = $('levelNote'); n.hidden = false; n.innerHTML = nl + ' more kinetics experiments (ester hydrolysis, H₂O₂ decomposition, saponification) open at the <a href="bsc.html?level=bsc" style="color:var(--pink)">BSc / BS level</a>.'; }
+    const nl = EXPS.length - list.length; if (nl > 0) { const n = $('levelNote'); n.hidden = false; n.innerHTML = nl + ' more kinetics experiments (ester hydrolysis, H₂O₂ decomposition, saponification) open at the <a href="bsc.html?level=bsc" style="color:var(--pink)">Bachelors (BSc / BS) level</a>.'; }
     const LV = window.LevelInfo && LevelInfo.LV[level], lk = $('crumbLevel'); if (lk && LV) { lk.textContent = LV.name; lk.href = LV.page + '?level=' + level; }
     if (innerWidth < 900) $('expDetails').open = false;
     $('expList').addEventListener('click', (ev) => { const b = ev.target.closest('.exp-btn'); if (b) { pick(b.dataset.id); if (innerWidth < 900) { $('expDetails').open = false; $('work').scrollIntoView({ behavior: 'smooth' }); } } });

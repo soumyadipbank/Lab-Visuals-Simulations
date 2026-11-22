@@ -272,7 +272,7 @@
     else if (h < 165) n = 'green';
     else if (h < 200) n = 'turquoise';
     else if (h < 260) n = 'blue';
-    else if (h < 295) n = 'purple';
+    else if (h < 305) n = 'purple';
     else n = 'pink';
     if (/brown/.test(n) && n !== 'yellow-brown') return n;
     if (l > 0.84) return 'very pale ' + n;

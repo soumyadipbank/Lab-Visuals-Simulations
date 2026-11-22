@@ -3,17 +3,17 @@
   'use strict';
   const C = globalThis.Chem, L = C.Lab, $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const level = (window.LevelInfo && LevelInfo.level) || 'bsc', rank = { '11': 1, '12': 2, bsc: 3 };
+  const level = (window.LevelInfo && LevelInfo.level) || 'bsc', rank = { '11': 1, '12': 1, school: 1, bsc: 2 };
   const q = new URLSearchParams(location.search);
   const cv = $('bench'), g = cv.getContext('2d');
   const CP = 4.18, TM = 120;   // J/(g K), mixing time in s
 
   const EXPS = [
-    { id: 'neutral', level: '11', title: 'Heat of neutralisation: HCl + NaOH', short: 'Strong acid with strong base', unis: ['CU', 'WBSU'], kind: 'neut', sys: { acid: '1.0 M HCl', base: '1.0 M NaOH' }, dH: -57.3, n: 0.05, m: 100,
+    { id: 'neutral', level: '11', title: 'Heat of neutralisation: HCl + NaOH', short: 'Strong acid with strong base', unis: [], kind: 'neut', sys: { acid: '1.0 M HCl', base: '1.0 M NaOH' }, dH: -57.3, n: 0.05, m: 100,
       steps: ['The calorimeter holds 50.0 mL of 1.0 M HCl. A second beaker holds 50.0 mL of 1.0 M NaOH at the same temperature.', 'Read the temperature every 30 s for 2 minutes. At t = 120 s press “Mix”. Keep stirring and read every 30 s until 15 minutes.', 'Plot T against t. Extend the pre-mixing line and the cooling line after mixing back to t = 120 s. The gap is the corrected ΔT.', 'ΔH = −(m c + W c) ΔT / n, with m = 100 g, c = 4.18 J g⁻¹ K⁻¹, W = water equivalent of the calorimeter, n = 0.0500 mol of water formed.'] },
-    { id: 'weak', level: 'bsc', title: 'Heat of neutralisation: CH₃COOH + NaOH', short: 'Weak acid: part of the heat goes into ionisation', unis: ['WBSU', 'BU'], kind: 'neut', sys: { acid: '1.0 M CH₃COOH', base: '1.0 M NaOH' }, dH: -55.2, n: 0.05, m: 100,
+    { id: 'weak', level: 'bsc', title: 'Heat of neutralisation: CH₃COOH + NaOH', short: 'Weak acid: part of the heat goes into ionisation', unis: [], kind: 'neut', sys: { acid: '1.0 M CH₃COOH', base: '1.0 M NaOH' }, dH: -55.2, n: 0.05, m: 100,
       steps: ['Same procedure as for HCl, but with 1.0 M acetic acid. Acetic acid is only partly ionised, so some energy is used to ionise it.', 'Find ΔH, then compare with the strong acid value (about −57 kJ/mol). The difference is the enthalpy of ionisation of acetic acid.'] },
-    { id: 'solution', level: 'bsc', title: 'Heat of solution (choose a salt)', short: 'Dissolving can absorb or release heat', unis: ['CU', 'WBSU', 'BU'], kind: 'sol', n: 0, m: 0,
+    { id: 'solution', level: 'bsc', title: 'Heat of solution (choose a salt)', short: 'Dissolving can absorb or release heat', unis: [], kind: 'sol', n: 0, m: 0,
       salts: [['NH4NO3', 'NH₄NO₃ (5.00 g)', 25.7, 5.0, 80.04], ['KNO3', 'KNO₃ (5.00 g)', 34.9, 5.0, 101.1], ['NaOH', 'NaOH (2.00 g)', -44.5, 2.0, 40.0], ['CaCl2', 'anhydrous CaCl₂ (3.00 g)', -81.3, 3.0, 110.98]],
       steps: ['The calorimeter holds 100.0 mL of water. Weigh the solid and keep it ready.', 'Read the temperature for 2 minutes, then at t = 120 s add the solid and stir. Read every 30 s to 15 minutes.', 'Extrapolate the cooling line back to t = 120 s as before. ΔH of solution = −(m c + W c) ΔT / n (a positive answer means the solution cooled).'] },
   ];
@@ -33,7 +33,7 @@
 
   function pick(id) {
     S.exp = list.find((x) => x.id === id) || list[0]; S.salt = 0; S.rows = []; S.t = 0; S.mixed = false; S.analysis = null; setup();
-    const e = S.exp; $('expTitle').textContent = e.title; $('expSub').textContent = e.short + (e.unis.length ? ' · ' + e.unis.join(', ') + ' syllabus' : '');
+    const e = S.exp; $('expTitle').textContent = e.title; $('expSub').textContent = e.short;
     $('steps').innerHTML = e.steps.map((s) => '<li>' + esc(s) + '</li>').join('');
     $('expList').querySelectorAll('.exp-btn').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === e.id)));
     $('chartBox').hidden = true; $('answerBox').innerHTML = ''; $('msg').innerHTML = '';
@@ -106,7 +106,7 @@
   function init() {
     $('expCount').textContent = '(' + list.length + ')';
     $('expList').innerHTML = list.map((e) => '<button type="button" class="exp-btn" data-id="' + e.id + '" aria-pressed="false"><b>' + e.title + '</b><span>' + e.short + (e.unis.length ? ' · ' + e.unis.join(' ') : '') + '</span></button>').join('');
-    const nl = EXPS.length - list.length; if (nl > 0) { const n = $('levelNote'); n.hidden = false; n.innerHTML = nl + ' more calorimetry experiments open at the <a href="bsc.html?level=bsc" style="color:var(--pink)">BSc / BS level</a>.'; }
+    const nl = EXPS.length - list.length; if (nl > 0) { const n = $('levelNote'); n.hidden = false; n.innerHTML = nl + ' more calorimetry experiments open at the <a href="bsc.html?level=bsc" style="color:var(--pink)">Bachelors (BSc / BS) level</a>.'; }
     const LV = window.LevelInfo && LevelInfo.LV[level], lk = $('crumbLevel'); if (lk && LV) { lk.textContent = LV.name; lk.href = LV.page + '?level=' + level; }
     if (innerWidth < 900) $('expDetails').open = false;
     $('expList').addEventListener('click', (ev) => { const b = ev.target.closest('.exp-btn'); if (b) { pick(b.dataset.id); if (innerWidth < 900) { $('expDetails').open = false; $('work').scrollIntoView({ behavior: 'smooth' }); } } });

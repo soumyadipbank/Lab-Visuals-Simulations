@@ -5,7 +5,7 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const level = (window.LevelInfo && LevelInfo.level) || 'bsc';
   const q = new URLSearchParams(location.search);
-  const allowed = level === '11' ? [1] : level === '12' ? [1, 2] : [1, 2, 3, 4];
+  const allowed = level === 'bsc' ? [1, 2, 3, 4] : [1, 2];
   const cv = $('bench'), g = cv.getContext('2d');
   const S = { n: 1, sample: null, log: [], cur: null, curT: 0, tt: 0, done: false };
 
@@ -93,7 +93,7 @@
   }
 
   function init() {
-    let n = parseInt(q.get('n'), 10); if (!allowed.includes(n)) n = allowed[allowed.length > 1 && level === 'bsc' ? 2 : 0]; if (level === '12' && !q.get('n')) n = 2; S.n = n;
+    let n = parseInt(q.get('n'), 10); if (!allowed.includes(n)) n = level === 'bsc' ? 3 : 1; S.n = n;
     $('lvl').innerHTML = allowed.map((k) => '<option value="' + k + '"' + (k === n ? ' selected' : '') + '>' + SA.LEVELS[k].label + '</option>').join('');
     $('lvl').onchange = (e) => { S.n = +e.target.value; newSample(); };
     const LV = window.LevelInfo && LevelInfo.LV[level], lk = $('crumbLevel'); if (lk && LV) { lk.textContent = LV.name; lk.href = LV.page + '?level=' + level; }

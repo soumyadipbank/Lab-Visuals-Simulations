@@ -615,7 +615,7 @@
     liquidColorNow() {
       const p = this.p;
       let c = this.c0;
-      if (this.res.reacts !== false || this.indActive) c = C.mix(this.c0, this.c1, smooth(p * 1.25));
+      if (this.res.reacts !== false || this.indActive) c = C.absMix(this.c0, this.c1, smooth(p * 1.25));
       return c;
     }
 

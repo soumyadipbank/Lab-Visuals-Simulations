@@ -5,12 +5,14 @@
   'use strict';
   const C = globalThis.Chem, L = C.Lab;
   const WATER = '#cfe6f5';
-  const mixc = (a, b, t) => C.mix(a, b, Math.max(0, Math.min(1, t)));
+  const mixc = (a, b, t) => C.absMix(a, b, t);           // concentration-weighted (Beer-Lambert) colour change
+  const dye = (col, s) => C.absAdd(WATER, col, Math.max(0, s));
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const rnd4 = (x) => Number(x.toFixed(4));
   const T = (C.Titr = { EXPS: [], byId: {} });
   const def = (d) => { T.EXPS.push(d); T.byId[d.id] = d; };
-  const pink = (excessM) => { const t = 1 - Math.exp(-excessM / 1.2e-5); return t > 0.03 ? mixc(WATER, '#d84bc4', t) : null; };
+  // colour of excess permanganate: one drop (about 1.5e-5 M in the flask) is a faint but clear pink
+  const pink = (excessM) => { const s = Math.min(1.2, Math.pow(Math.max(0, excessM) / 4e-4, 0.6)); return s > 0.05 ? dye('#9b1fa8', s) : null; };
 
   const ABSTEPS = (extra) => ['Rinse the burette with the titrant and fill it. Note the initial reading.', 'Pipette the aliquot into a conical flask and add the indicator.'].concat(extra);
   const REPEAT = 'Repeat until two titres agree within 0.1 mL (concordant), then use their mean.';
@@ -33,7 +35,7 @@
   });
 
   def({
-    id: 'naoh-oxalic', level: '11', mode: 'indicator', title: 'Standardise NaOH with oxalic acid', short: 'Primary standard against an unknown base', unis: ['CU'], indicators: ['phph'],
+    id: 'naoh-oxalic', level: '11', mode: 'indicator', title: 'Standardise NaOH with oxalic acid', short: 'Primary standard against an unknown base', unis: [], indicators: ['phph'],
     steps: ABSTEPS(['The flask holds 20.0 mL of standard 0.0500 M oxalic acid. The burette holds NaOH of unknown strength.', 'Titrate until one drop turns the solution permanently faint pink (phenolphthalein).', REPEAT]),
     make(rnd) {
       const Cn = rnd4(L.between(rnd, 0.08, 0.12, 0.0025)), V0 = 20, Co = 0.05;
@@ -49,7 +51,7 @@
   });
 
   def({
-    id: 'vinegar', level: '11', mode: 'indicator', title: 'Acetic acid in vinegar', short: 'Weak acid vs strong base', unis: ['CU'], indicators: ['phph'],
+    id: 'vinegar', level: '11', mode: 'indicator', title: 'Acetic acid in vinegar', short: 'Weak acid vs strong base', unis: [], indicators: ['phph'],
     steps: ABSTEPS(['The vinegar was diluted 10-fold: 10.0 mL made up to 100 mL. The flask holds 25.0 mL of this.', 'The burette holds standard 0.1000 M NaOH. Titrate to the first permanent faint pink.', REPEAT]),
     make(rnd) {
       const orig = rnd4(L.between(rnd, 0.7, 1.05, 0.01)), V0 = 25, Cb = 0.1, Cd = orig / 10;
@@ -70,7 +72,7 @@
     steps: ['Pipette 25.0 mL of the mixture into the flask and add phenolphthalein (pink).', 'Titrate with standard 0.1000 M HCl until the pink just disappears: first end point (V₁).', 'Add methyl orange (yellow) and continue until it turns orange: second end point (V₂, total volume from the start).', REPEAT],
     make: mk,
   });
-  twoEnd('carb-bicarb', 'Na₂CO₃ and NaHCO₃ in a mixture', 'Two indicators, two end points', ['CU', 'WBSU', 'BU'], function (rnd) {
+  twoEnd('carb-bicarb', 'Na₂CO₃ and NaHCO₃ in a mixture', 'Two indicators, two end points', [], function (rnd) {
     const c1 = rnd4(L.between(rnd, 0.02, 0.05, 0.0025)), c2 = rnd4(L.between(rnd, 0.02, 0.05, 0.0025)), V0 = 25, Ca = 0.1;
     const fl = { V0, Na0: 2 * c1 + c2, fams: [{ C: c1 + c2, ...L.FAM.carbonate }] }, tt = { kind: 'acid', C: Ca };
     const v1 = (c1 * V0) / Ca, v2 = v1 + ((c1 + c2) * V0) / Ca;
@@ -82,7 +84,7 @@
       solve: (m) => { const a = (Ca * m.t1) / V0, b = (Ca * (m.t2 - 2 * m.t1)) / V0; return { values: { c1: a, c2: b }, lines: ['First end point (phenolphthalein): CO₃²⁻ + H⁺ → HCO₃⁻', 'Second end point (methyl orange): HCO₃⁻ + H⁺ → H₂CO₃', `Na₂CO₃ = 0.1000 × ${m.t1.toFixed(2)} / ${V0} = ${a.toFixed(4)} M`, `NaHCO₃ = 0.1000 × (${m.t2.toFixed(2)} − 2 × ${m.t1.toFixed(2)}) / ${V0} = ${b.toFixed(4)} M`] }; },
     };
   });
-  twoEnd('naoh-carb', 'NaOH and Na₂CO₃ in a mixture', 'Two end points with HCl', ['WBSU'], function (rnd) {
+  twoEnd('naoh-carb', 'NaOH and Na₂CO₃ in a mixture', 'Two end points with HCl', [], function (rnd) {
     const c1 = rnd4(L.between(rnd, 0.02, 0.05, 0.0025)), c2 = rnd4(L.between(rnd, 0.02, 0.04, 0.0025)), V0 = 25, Ca = 0.1;
     const fl = { V0, Na0: c1 + 2 * c2, fams: [{ C: c2, ...L.FAM.carbonate }] }, tt = { kind: 'acid', C: Ca };
     const v1 = ((c1 + c2) * V0) / Ca, v2 = v1 + (c2 * V0) / Ca;
@@ -123,7 +125,7 @@
         state: (Vt, ctx) => {
           const x = Vt / veq;
           if (x < 1) {
-            const tint = kind === 'mohr' ? mixc(WATER, '#e6c66c', 0.5 * x) : null;
+            const tint = kind === 'mohr' ? mixc(dye('#b9dbb0', 0.35), dye('#e6c66c', 0.4), x) : null;   // pale green Fe2+ turns pale yellow Fe3+
             return { colour: tint, flash: Vt > 0 ? { c: '#d84bc4', slow: ctx && !ctx.heated && kind === 'oxalic' && Vt < 2 } : null };
           }
           const exc = (cm * (Vt - veq)) / (V0 + Vt + 20);
@@ -134,12 +136,12 @@
       };
     },
   });
-  mn('kmno4-oxalic', '12', 'Standardise KMnO₄ with oxalic acid', 'Self-indicating redox titration', ['CU', 'BU'], '', 'oxalic');
-  mn('mohr-kmno4', '12', 'Fe(II) in Mohr’s salt with KMnO₄', 'Estimate Fe²⁺ with a standard oxidant', ['CU', 'WBSU', 'BU'], '', 'mohr');
-  mn('h2o2-kmno4', 'bsc', 'Strength of a H₂O₂ sample', 'Hydrogen peroxide with KMnO₄', ['BU'], '', 'h2o2');
+  mn('kmno4-oxalic', '12', 'Standardise KMnO₄ with oxalic acid', 'Self-indicating redox titration', [], '', 'oxalic');
+  mn('mohr-kmno4', '12', 'Fe(II) in Mohr’s salt with KMnO₄', 'Estimate Fe²⁺ with a standard oxidant', [], '', 'mohr');
+  mn('h2o2-kmno4', 'bsc', 'Strength of a H₂O₂ sample', 'Hydrogen peroxide with KMnO₄', [], '', 'h2o2');
 
   def({
-    id: 'fe-dichromate', level: 'bsc', mode: 'indicator', title: 'Fe(II) with K₂Cr₂O₇', short: 'Internal indicator: diphenylamine', unis: ['WBSU', 'BU'], indicators: [],
+    id: 'fe-dichromate', level: 'bsc', mode: 'indicator', title: 'Fe(II) with K₂Cr₂O₇', short: 'Internal indicator: diphenylamine', unis: [], indicators: [],
     steps: ABSTEPS(['The flask holds 25.0 mL of Fe²⁺ solution (unknown) with dilute H₂SO₄, H₃PO₄ and diphenylamine indicator.', 'Add K₂Cr₂O₇ until the green turns to a sharp blue-violet.', REPEAT]),
     make(rnd) {
       const C0 = rnd4(L.between(rnd, 0.04, 0.09, 0.0025)), V0 = 25, Cd = 0.016667, veq = (C0 * V0) / (6 * Cd);
@@ -147,9 +149,9 @@
         aliquot: V0, titrant: '0.01667 M K₂Cr₂O₇ (standard, 0.1 N)', flask: '25.0 mL Fe²⁺ (unknown) + acids + diphenylamine', titrantColour: '#f28c28', veq, vmax: 40,
         state: (Vt) => {
           const x = Vt / veq;
-          if (x < 1) return { colour: mixc('#cfe6f5', '#5f9a5f', 0.15 + 0.7 * x), flash: null };
+          if (x < 1) return { colour: dye('#5f9a5f', 0.12 + 0.55 * x), flash: null };          // green Cr3+ builds up
           const t = clamp((Vt - veq) / 0.15, 0, 1);
-          return { colour: mixc('#6d4aa0', '#3b1a78', t * 0.7), flash: null };
+          return { colour: C.absAdd(dye('#5f9a5f', 0.67), '#4b2c9a', 0.35 + 0.65 * t), flash: null };   // oxidised diphenylamine: violet-blue
         },
         curve: null, yLabel: '',
         report: [{ id: 'c', label: 'Concentration of Fe²⁺', unit: 'M', truth: C0, dp: 4 }],
@@ -159,7 +161,7 @@
   });
 
   def({
-    id: 'iodo-cu', level: 'bsc', mode: 'indicator', title: 'Iodometric estimation of Cu(II)', short: 'Na₂S₂O₃ against liberated iodine, starch', unis: ['WBSU', 'BU'], indicators: [], needsStarch: true,
+    id: 'iodo-cu', level: 'bsc', mode: 'indicator', title: 'Iodometric estimation of Cu(II)', short: 'Na₂S₂O₃ against liberated iodine, starch', unis: [], indicators: [], needsStarch: true,
     steps: ABSTEPS(['The flask holds 25.0 mL of Cu²⁺ solution (unknown) treated with excess KI: brown iodine forms and white CuI precipitates (2Cu²⁺ + 4I⁻ → 2CuI + I₂).', 'Titrate with 0.1000 M Na₂S₂O₃ until the brown fades to pale yellow.', 'Add starch (blue-black) and continue drop by drop until the blue just disappears.', REPEAT]),
     make(rnd) {
       const C0 = rnd4(L.between(rnd, 0.04, 0.09, 0.0025)), V0 = 25, Ct = 0.1, veq = (C0 * V0) / Ct;
@@ -167,8 +169,9 @@
         aliquot: V0, titrant: '0.1000 M Na₂S₂O₃ (standard)', flask: '25.0 mL Cu²⁺ (unknown) + excess KI', titrantColour: null, veq, vmax: 40,
         state: (Vt, ctx) => {
           const f = Math.max(0, 1 - Vt / veq);
-          if (ctx && ctx.starch) return { colour: f > 0.004 ? mixc('#efe6cf', '#0f1238', Math.min(1, f * 4)) : '#efe6cf', flash: null };
-          return { colour: mixc('#f1e8cc', '#7a3d12', f), flash: null };
+          // white CuI suspension; brown I3- fades to straw yellow; starch-iodine is blue-black until the last trace of I2 is gone
+          if (ctx && ctx.starch) return { colour: f > 0.002 ? C.absAdd('#efe6cf', '#0f1238', Math.min(1.3, f * 9), '#efe6cf') : '#efe6cf', flash: null };
+          return { colour: C.absAdd('#efe6cf', '#7a3d12', Math.min(1.1, f * 1.1), '#efe6cf'), flash: null };
         },
         curve: null, yLabel: '',
         report: [{ id: 'c', label: 'Concentration of Cu²⁺', unit: 'M', truth: C0, dp: 4 }, { id: 'g', label: 'Copper (63.55 g/mol)', unit: 'g/L', truth: C0 * 63.55, dp: 3 }],
@@ -178,14 +181,15 @@
   });
 
   def({
-    id: 'edta-hardness', level: 'bsc', mode: 'indicator', title: 'Total hardness of water (EDTA)', short: 'Eriochrome Black T, pH 10 buffer', unis: ['CU', 'WBSU', 'BU'], indicators: [],
+    id: 'edta-hardness', level: 'bsc', mode: 'indicator', title: 'Total hardness of water (EDTA)', short: 'Eriochrome Black T, pH 10 buffer', unis: [], indicators: [],
     steps: ABSTEPS(['The flask holds 50.0 mL of the water sample with NH₃/NH₄Cl buffer (pH 10) and a few drops of Eriochrome Black T: wine red (Ca²⁺/Mg²⁺–EBT complex).', 'Titrate with 0.01000 M EDTA until the colour changes sharply from wine red through purple to pure blue.', REPEAT]),
     make(rnd) {
       const H = Math.round(L.between(rnd, 80, 400, 5)), V0 = 50, Ce = 0.01;
       const vEq = ((H / 100.09) * (V0 / 1000)) / Ce;   // mL: (mmol/L × L) / (mmol/mL)
       return {
         aliquot: V0, titrant: '0.01000 M EDTA (standard)', flask: '50.0 mL water sample + buffer + EBT', titrantColour: null, veq: vEq, vmax: 40,
-        state: (Vt) => { const f = Math.max(0, 1 - Vt / vEq), t = clamp(f / 0.07, 0, 1); return { colour: f < 0.003 ? '#2f6fd6' : mixc('#2f6fd6', '#a3192b', Math.pow(t, 0.6)), flash: null }; },
+        // fraction of the indicator still bound to Ca2+/Mg2+ falls sharply in the last few percent: wine red -> purple -> blue
+        state: (Vt) => { const f = Math.max(0, 1 - Vt / vEq), t = clamp(f / 0.04, 0, 1); return { colour: mixc('#3f78d8', '#9b1f4a', Math.pow(t, 0.5)), flash: null }; },
         curve: null, yLabel: '',
         report: [{ id: 'h', label: 'Total hardness', unit: 'mg/L as CaCO₃', truth: H, dp: 0 }],
         solve: (m) => { const x = (m.t * Ce * 100.09 * 1000) / V0; return { values: { h: x }, lines: ['EDTA binds Ca²⁺ and Mg²⁺ 1 : 1', 'mmol EDTA = mmol (Ca²⁺ + Mg²⁺) in 50.0 mL', `Hardness = ${m.t.toFixed(2)} × 0.01000 × 100.09 × 1000 / 50.0`, `= ${x.toFixed(0)} mg/L as CaCO₃`] }; },
@@ -195,7 +199,7 @@
 
   // ---------------------------------------------------------------- conductometric
   def({
-    id: 'conduct-mix', level: 'bsc', mode: 'conductometric', title: 'Conductometric: HCl + CH₃COOH vs NaOH', short: 'Strong + weak acid mixture, two breaks', unis: ['CU', 'WBSU'],
+    id: 'conduct-mix', level: 'bsc', mode: 'conductometric', title: 'Conductometric: HCl + CH₃COOH vs NaOH', short: 'Strong + weak acid mixture, two breaks', unis: [],
     steps: ['Pipette 25.0 mL of the acid mixture into the cell and add distilled water to 100 mL.', 'Add 0.1000 M NaOH in small steps. After each addition the cell reading is recorded automatically.', 'Plot conductivity against volume. The lines meet at two end points: strong acid first, then the weak acid.', 'Use the analysis button to fit the straight lines and read both end points.'],
     make(rnd) {
       const c1 = rnd4(L.between(rnd, 0.03, 0.07, 0.0025)), c2 = rnd4(L.between(rnd, 0.03, 0.07, 0.0025)), V0 = 100, Cb = 0.1, al = 25;
@@ -211,7 +215,7 @@
     },
   });
   def({
-    id: 'conduct-weak', level: 'bsc', mode: 'conductometric', title: 'Conductometric: CH₃COOH vs NaOH', short: 'Weak acid, strong base', unis: ['WBSU', 'BU'],
+    id: 'conduct-weak', level: 'bsc', mode: 'conductometric', title: 'Conductometric: CH₃COOH vs NaOH', short: 'Weak acid, strong base', unis: [],
     steps: ['Pipette 25.0 mL of acetic acid solution (unknown) into the cell and add water to 100 mL.', 'Add 0.1000 M NaOH in steps; readings are recorded automatically.', 'The conductivity rises slowly (acetate ions form), then steeply once excess NaOH is present.', 'Analyse: the two lines meet at the end point.'],
     make(rnd) {
       const c = rnd4(L.between(rnd, 0.04, 0.1, 0.0025)), V0 = 100, Cb = 0.1, al = 25, f = al / V0;
@@ -228,7 +232,7 @@
 
   // ---------------------------------------------------------------- potentiometric
   def({
-    id: 'potent-mohr', level: 'bsc', mode: 'potentiometric', title: 'Potentiometric: Mohr’s salt vs K₂Cr₂O₇', short: 'End point and E° of Fe³⁺/Fe²⁺', unis: ['CU', 'WBSU', 'BU'],
+    id: 'potent-mohr', level: 'bsc', mode: 'potentiometric', title: 'Potentiometric: Mohr’s salt vs K₂Cr₂O₇', short: 'End point and E° of Fe³⁺/Fe²⁺', unis: [],
     steps: ['Pipette 25.0 mL of Fe²⁺ solution (unknown) into the beaker with dilute H₂SO₄. Dip in the platinum electrode and a calomel reference (SCE, E = +0.244 V).', 'Add 0.01667 M K₂Cr₂O₇ in steps; the cell potential is recorded each time. Use smaller steps near the end point.', 'Plot E against V and ΔE/ΔV against V. The end point is where ΔE/ΔV is greatest.', 'At half the end-point volume the Fe²⁺ : Fe³⁺ ratio is 1 : 1, so E(SHE) = E(measured) + 0.244 V is E° of the Fe³⁺/Fe²⁺ couple.'],
     make(rnd) {
       const C0 = rnd4(L.between(rnd, 0.04, 0.09, 0.0025)), V0 = 25, Cd = 0.016667, veq = (C0 * V0) / (6 * Cd);
@@ -242,7 +246,7 @@
     },
   });
   def({
-    id: 'potent-agcl', level: 'bsc', mode: 'potentiometric', title: 'Potentiometric: AgNO₃ vs KCl', short: 'Concentration of Ag⁺ and K_sp of AgCl', unis: ['CU', 'WBSU'],
+    id: 'potent-agcl', level: 'bsc', mode: 'potentiometric', title: 'Potentiometric: AgNO₃ vs KCl', short: 'Concentration of Ag⁺ and K_sp of AgCl', unis: [],
     steps: ['Pipette 25.0 mL of AgNO₃ solution (unknown) into the beaker. Dip in a silver electrode and a calomel reference (SCE, +0.244 V).', 'Add 0.05000 M KCl in steps; the cell potential is recorded each time. Use small steps near the end point.', 'The end point is where ΔE/ΔV is greatest. At the end point [Ag⁺] = [Cl⁻] = √K_sp.', 'E(Ag) = E° + 0.0592 log [Ag⁺], with E°(Ag⁺/Ag) = +0.799 V (SHE).'],
     make(rnd) {
       const C0 = rnd4(L.between(rnd, 0.02, 0.06, 0.0025)), V0 = 25, Ck = 0.05, veq = (C0 * V0) / Ck;
@@ -256,7 +260,8 @@
     },
   });
 
-  T.forLevel = (lv) => T.EXPS.filter((e) => ({ '11': 1, '12': 2, bsc: 3 }[lv] >= ({ '11': 1, '12': 2, bsc: 3 }[e.level])));
+  const RANK = { '11': 1, '12': 1, school: 1, bsc: 2 };
+  T.forLevel = (lv) => T.EXPS.filter((e) => (RANK[lv] || 2) >= RANK[e.level]);
 
   // ---------------------------------------------------------------- analysis helpers shared with the page
   // piecewise-linear fit with n breaks (n+1 segments); returns break positions as line intersections

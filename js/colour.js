@@ -10,7 +10,7 @@
 
   // how strongly each colour tints water (extinction): permanganate and complexes are intense,
   // 0.1 M copper(II) or iron(II) are only pale
-  const K = { '#2f7fd8': 0.8, '#d9a13a': 0.9, '#b9dbb0': 1.0, '#9b1fa8': 1.8, '#f28c28': 1.5, '#c58a2a': 1.4, '#ece9dc': 0.35 };
+  const K = { '#2f7fd8': 0.6, '#d9a13a': 0.7, '#b9dbb0': 0.7, '#9b1fa8': 1.8, '#f28c28': 1.5, '#c58a2a': 1.4, '#ece9dc': 0.35 };
   const kOf = (hex) => K[(hex || '').toLowerCase()] || 1;
   const ionHex = new Set(Object.values(ION).map((i) => i.col).filter(Boolean).map((h) => h.toLowerCase()));
   const chroma = (hex) => { const [r, g, b] = C.hex2rgb(hex); return (Math.max(r, g, b) - Math.min(r, g, b)) / 255 + 0.05; };
@@ -30,24 +30,25 @@
     const liq = ids.filter((i) => isLiquid(i, res));
     const total = liq.reduce((a, i) => a + vol(i), 0);
 
-    // colour of the starting mixture: the strongest dye dominates, dilution is by volume
-    let t0 = 0, wr = 0, wg = 0, wb = 0, ws = 0;
+    // colour of the starting mixture: absorbances of the dyes add (Beer-Lambert), each diluted by volume
+    let tot = 0;
+    const dyes = [];
     liq.forEach((i) => {
       const col = CH[i].color;
       if (!col) return;
-      const conc = vol(i) / total, k = kOf(col);
-      t0 += conc * k;
-      const w = conc * k * chroma(col), rgb = C.hex2rgb(col);
-      wr += rgb[0] * w; wg += rgb[1] * w; wb += rgb[2] * w; ws += w;
+      const s = (vol(i) / total) * kOf(col);
+      tot += s; dyes.push([col, s]);
     });
-    let c0 = ws ? C.mix(WATER, C.rgb2hex([wr / ws, wg / ws, wb / ws]), Math.min(1, t0)) : WATER;
+    const scale = tot > 1.2 ? 1.2 / tot : 1;
+    let c0 = WATER;
+    dyes.forEach(([col, s]) => { c0 = C.absAdd(c0, col, Math.min(1, s * scale)); });
 
     // colour after the reaction
     const concRef = total ? 1 / total : 1;  // one reagent volume diluted into the beaker
     let c1;
     if (fx.liq1 === undefined) c1 = c0;
     else if (fx.liq1 === null) c1 = WATER;
-    else if (ionHex.has(fx.liq1.toLowerCase())) c1 = C.mix(WATER, fx.liq1, Math.min(1, kOf(fx.liq1) * concRef));  // an ion colour: dilute it like the reagents
+    else if (ionHex.has(fx.liq1.toLowerCase())) c1 = C.absMix(WATER, fx.liq1, Math.min(1, kOf(fx.liq1) * concRef));  // an ion colour: dilute it like the reagents
     else c1 = fx.liq1;                                                                                              // a hand-set colour is shown as given
 
     // indicator drops tint the liquid; a colourless indicator form must not erase the colour that is already there
@@ -57,7 +58,7 @@
       indActive = true;
       const id0 = C.indColor(ind, ph0 == null ? 7 : ph0), id1 = C.indColor(ind, ph1 == null ? 7 : ph1);
       indColor1 = id1;
-      const tint = (base, dye) => (dye ? (dist(base, WATER) < 30 ? C.mix(base, dye, 0.85) : C.mix(base, dye, 0.55)) : base);
+      const tint = (base, dye) => (dye ? C.absAdd(base, dye, dist(base, WATER) < 30 ? 0.9 : 0.6) : base);
       c0 = tint(c0, id0);
       c1 = tint(c1, id1);
     }
