@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reaction Lab · Lab Visuals</title>
+  <meta name="description" content="Mix up to four chemicals and watch colour changes, precipitates, gases, heat, balanced equations and particles.">
+  <meta name="theme-color" content="#160923">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23160923'/%3E%3Cpath d='M26 10h12v4h-3v14l12 20c2 4-1 8-5 8H22c-4 0-7-4-5-8l12-20V14h-3z' fill='%23ce72f5'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div id="siteHeader"></div>
+  <main id="top">
+    <div class="wrap">
+      <section class="page-head">
+        <p class="crumbs"><a href="index.html">Home</a> / Reaction Lab</p>
+        <h1>Reaction <em>Lab</em></h1>
+        <p class="lead">Pick up to four chemicals and press Mix. See the colour, precipitate, gas and heat, then switch to the particle view to see why. Every combination is simulated, including “no reaction”.</p>
+      </section>
+    </div>
+    <section class="lab" id="lab" style="padding-top:20px">
+      <div class="layout">
+        <section class="panel picker reveal" aria-labelledby="pickH">
+          <h3 id="pickH"><span class="step">01</span> Choose <small id="selCount">0 of 4</small></h3>
+          <div class="tray" id="tray" aria-live="polite"></div>
+
+          <details class="quick" open>
+            <summary>Quick experiments</summary>
+            <div class="presets" id="presets"></div>
+            <button type="button" class="ghost" id="surpriseBtn">✦ Surprise me</button>
+          </details>
+
+          <label class="search"><span class="sr">Search chemicals</span>
+            <input type="search" id="search" placeholder="Search: Cu, NaOH, silver…" autocomplete="off">
+          </label>
+          <div class="chips" id="groupChips" role="group" aria-label="Filter by type"></div>
+          <div class="chem-grid" id="chemGrid"></div>
+          <p class="fine">Acids, bases and salts are about 0.1&nbsp;M solutions unless marked solid or concentrated.</p>
+        </section>
+
+        <div class="main-col">
+          <section class="panel stage reveal" id="stage" aria-labelledby="stageH">
+            <div class="stage-head">
+              <h3 id="stageH"><span class="step">02</span> Observe</h3>
+              <div class="seg" role="group" aria-label="Choose view">
+                <button type="button" data-view="beaker" aria-pressed="true">Beaker</button>
+                <button type="button" data-view="micro" aria-pressed="false">Particles</button>
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="beaker" role="img" aria-label="Animated chemistry bench showing the reaction"></canvas>
+              <div class="stage-msg" id="stageMsg"></div>
+            </div>
+            <div class="mlegend" id="mLegend" aria-live="polite"></div>
+            <div class="controls">
+              <button type="button" class="primary" id="mixBtn">▶ Mix</button>
+              <button type="button" id="resetBtn">↺ Reset</button>
+              <label class="range"><span>Speed</span><input type="range" id="speed" min="0.25" max="3" step="0.25" value="1"><output id="speedOut">1×</output></label>
+              <label class="range grow"><span>Timeline</span><input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Scrub through the reaction"></label>
+            </div>
+            <p class="hint"><span>Drag a chemical onto the beaker</span><span>Click the liquid to stir</span><span><kbd>Space</kbd> mix</span><span><kbd>R</kbd> reset</span><span><kbd>P</kbd> particles</span></p>
+            <div class="readouts">
+              <div class="rd"><span>Temperature</span><b id="rdTemp">25.0 °C</b></div>
+              <div class="rd"><span>Heat</span><b id="rdHeat">–</b></div>
+              <div class="rd"><span>ΔH</span><b id="rdDH">–</b></div>
+              <div class="rd"><span>Progress</span><b id="rdProg">0%</b></div>
+            </div>
+            <div class="charts">
+              <figure><figcaption>Temperature over time</figcaption><div class="cv"><canvas id="temp" role="img" aria-label="Graph of temperature against time"></canvas></div></figure>
+              <figure><figcaption>Energy profile</figcaption><div class="cv"><canvas id="energy" role="img" aria-label="Energy profile diagram"></canvas></div></figure>
+            </div>
+            <label class="toggle"><input type="checkbox" id="predictMode"> <span><b>Predict first.</b> Hide the answer until you have mixed, then check how well you called it.</span></label>
+          </section>
+
+          <section class="panel results reveal" id="results" aria-live="polite" aria-labelledby="resH">
+            <h3 id="resH" class="sr">Results</h3>
+            <div id="resBody"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="mobile-bar" id="mobileBar" role="region" aria-label="Quick controls">
+    <span id="mobileBarText">0 chemicals ready</span>
+    <button type="button" id="mobileBarBtn">▶ Mix</button>
+  </div>
+
+  <div id="siteFooter"></div>
+
+  <script src="js/common.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/curated.js"></script>
+  <script src="js/colour.js"></script>
+  <script src="js/sim.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/hero.js"></script>
+  <script src="js/fx.js"></script>
+</body>
+</html>

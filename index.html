@@ -3,166 +3,86 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lab Visuals · Watch chemistry happen</title>
-  <meta name="description" content="Mix any compounds and watch the colour, the heat, the gas and the particles. A premium interactive chemistry simulator with balanced equations and real thermodynamic data.">
+  <title>Lab Visuals · Choose your lab</title>
+  <meta name="description" content="A virtual chemistry lab for Class 11, Class 12 and BSc students: reactions, titrations, kinetics, calorimetry, colorimetry and salt analysis, mapped to the practical syllabi of Calcutta, Burdwan and West Bengal State University.">
   <meta name="theme-color" content="#160923">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23160923'/%3E%3Cpath d='M26 10h12v4h-3v14l12 20c2 4-1 8-5 8H22c-4 0-7-4-5-8l12-20V14h-3z' fill='%23ce72f5'/%3E%3Cpath d='M23 42h22l4 7c1 2-.5 4-2.5 4h-25c-2 0-3.500-2-2.500-4z' fill='%23fea6d0'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
 </head>
 <body>
-  <div id="progress" aria-hidden="true"></div>
-  <div id="cursorGlow" aria-hidden="true"></div>
   <div id="loader" aria-hidden="true">
     <div class="ld-rays"></div>
     <div class="ld-core"></div>
     <div class="ld-text">Lab Visuals</div>
   </div>
-  <a class="skip" href="#lab">Skip to the lab</a>
-
-  <header class="top">
-    <a class="brand" href="#top" aria-label="Lab Visuals home">
-      <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9565ff"/><stop offset=".6" stop-color="#ce72f5"/><stop offset="1" stop-color="#fea6d0"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#lg)"/><path d="M26 10h12v4h-3v14l12 20c2 4-1 8-5 8H22c-4 0-7-4-5-8l12-20V14h-3z" fill="#160923"/><path d="M23 42h22l4 7c1 2-.5 4-2.5 4h-25c-2 0-3.500-2-2.500-4z" fill="#ffcb83"/></svg>
-      <span>Lab Visuals</span>
-    </a>
-    <nav class="nav" aria-label="Sections">
-      <a href="#lab">The Lab</a>
-      <a href="#how">How it works</a>
-      <a class="pill" href="#lab" id="navCta">Start experimenting</a>
-    </nav>
-  </header>
+  <a class="skip" href="#levels">Skip to level choice</a>
+  <div id="siteHeader"></div>
 
   <main id="top">
-    <!-- ================= HERO ================= -->
-    <section class="hero" aria-labelledby="heroH">
+    <section class="hero gate-hero" aria-labelledby="heroH">
       <canvas id="heroCanvas" aria-hidden="true"></canvas>
       <div class="hero-inner">
-        <p class="eyebrow reveal">Interactive chemistry simulator</p>
-        <h1 id="heroH" class="reveal">Watch chemistry <em>happen.</em></h1>
-        <p class="lead reveal">Pick any compounds. See the colour shift, the precipitate fall, the gas rise and the heat flow, down to the ions that cause it all.</p>
-        <div class="cta reveal">
-          <a class="btn-glow" href="#lab" id="heroStart">Start experimenting</a>
-          <button type="button" class="btn-ghost" id="heroRandom">Try a classic reaction</button>
+        <p class="eyebrow reveal">A virtual chemistry lab</p>
+        <h1 id="heroH" class="reveal">Which lab are you <em>stepping into?</em></h1>
+        <p class="lead reveal">Choose your level. Class 11 and 12 start with the essential reactions. BSc / BS opens the university practicals: titrations, kinetics, calorimetry, colorimetry and salt analysis, mapped to the Calcutta, Burdwan and West Bengal State University syllabi.</p>
+
+        <div class="levels" id="levels">
+          <a class="level-card reveal" href="class11.html?level=11" data-level="11">
+            <span class="tag-big">11</span>
+            <h2>Class 11</h2>
+            <p>Foundations: see what chemicals really do.</p>
+            <ul><li>Acids, bases and indicators</li><li>Precipitation and gas tests</li><li>Metal reactivity, heat changes</li><li>A first titration</li></ul>
+            <span class="go">Enter the Class 11 lab</span>
+          </a>
+          <a class="level-card reveal" href="class12.html?level=12" data-level="12">
+            <span class="tag-big">12</span>
+            <h2>Class 12</h2>
+            <p>Redox, complexes and the first look at rates.</p>
+            <ul><li>KMnO₄ and dichromate redox</li><li>Complex ions and equilibria</li><li>Titrations with real end points</li><li>The H₂O₂ + KI clock reaction</li></ul>
+            <span class="go">Enter the Class 12 lab</span>
+          </a>
+          <a class="level-card reveal" href="bsc.html?level=bsc" data-level="bsc">
+            <span class="tag-big">BSc</span>
+            <h2>BSc / BS</h2>
+            <p>University practicals, step by step.</p>
+            <ul><li>15 titrations, incl. conductometric and potentiometric</li><li>Kinetics: order, rate constant, E<sub>a</sub></li><li>Calorimetry, Beer’s law, salt analysis</li><li>Every experiment mapped to the syllabi</li></ul>
+            <span class="go">Enter the BSc lab</span>
+          </a>
         </div>
-        <ul class="stats reveal" aria-label="What is inside">
-          <li><b data-count="59">59</b><span>chemicals</span></li>
-          <li><b data-count="340" data-suffix="+">340+</b><span>reacting pairs</span></li>
-          <li><b>ΔH</b><span>real enthalpy data</span></li>
-        </ul>
+        <a class="skip-link reveal" href="lab.html">Or skip ahead to the free-play Reaction Lab →</a>
       </div>
-      <a class="scroll-cue" href="#lab" aria-label="Scroll to the lab"><span></span></a>
+      <a class="scroll-cue" href="#how" aria-label="Scroll down"><span></span></a>
     </section>
 
-    <!-- ================= LAB ================= -->
-    <section class="lab" id="lab">
+    <section class="lab" id="how">
       <div class="section-head reveal">
-        <p class="eyebrow">The lab</p>
-        <h2>Build an experiment in seconds</h2>
-        <p class="sub">Choose up to four chemicals, press Mix, then switch between the beaker and the particles to see what really happens.</p>
-      </div>
-
-      <div class="layout">
-        <section class="panel picker reveal" aria-labelledby="pickH">
-          <h3 id="pickH"><span class="step">01</span> Choose <small id="selCount">0 of 4</small></h3>
-          <div class="tray" id="tray" aria-live="polite"></div>
-
-          <details class="quick" open>
-            <summary>Quick experiments</summary>
-            <div class="presets" id="presets"></div>
-            <button type="button" class="ghost" id="surpriseBtn">✦ Surprise me</button>
-          </details>
-
-          <label class="search"><span class="sr">Search chemicals</span>
-            <input type="search" id="search" placeholder="Search: Cu, NaOH, silver…" autocomplete="off">
-          </label>
-          <div class="chips" id="groupChips" role="group" aria-label="Filter by type"></div>
-          <div class="chem-grid" id="chemGrid"></div>
-          <p class="fine">Acids, bases and salts are about 0.1&nbsp;M solutions unless marked solid or concentrated.</p>
-        </section>
-
-        <div class="main-col">
-          <section class="panel stage reveal" id="stage" aria-labelledby="stageH">
-            <div class="stage-head">
-              <h3 id="stageH"><span class="step">02</span> Observe</h3>
-              <div class="seg" role="group" aria-label="Choose view">
-                <button type="button" data-view="beaker" aria-pressed="true">Beaker</button>
-                <button type="button" data-view="micro" aria-pressed="false">Particles</button>
-              </div>
-            </div>
-            <div class="canvas-wrap">
-              <canvas id="beaker" role="img" aria-label="Animated chemistry bench showing the reaction"></canvas>
-              <div class="stage-msg" id="stageMsg"></div>
-            </div>
-            <div class="mlegend" id="mLegend" aria-live="polite"></div>
-            <div class="controls">
-              <button type="button" class="primary" id="mixBtn">▶ Mix</button>
-              <button type="button" id="resetBtn">↺ Reset</button>
-              <label class="range"><span>Speed</span><input type="range" id="speed" min="0.25" max="3" step="0.25" value="1"><output id="speedOut">1×</output></label>
-              <label class="range grow"><span>Timeline</span><input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Scrub through the reaction"></label>
-            </div>
-            <p class="hint"><span>Drag a chemical onto the beaker</span><span>Click the liquid to stir</span><span><kbd>Space</kbd> mix</span><span><kbd>R</kbd> reset</span><span><kbd>P</kbd> particles</span></p>
-            <div class="readouts">
-              <div class="rd"><span>Temperature</span><b id="rdTemp">25.0 °C</b></div>
-              <div class="rd"><span>Heat</span><b id="rdHeat">–</b></div>
-              <div class="rd"><span>ΔH</span><b id="rdDH">–</b></div>
-              <div class="rd"><span>Progress</span><b id="rdProg">0%</b></div>
-            </div>
-            <div class="charts">
-              <figure><figcaption>Temperature over time</figcaption><div class="cv"><canvas id="temp" role="img" aria-label="Graph of temperature against time"></canvas></div></figure>
-              <figure><figcaption>Energy profile</figcaption><div class="cv"><canvas id="energy" role="img" aria-label="Energy profile diagram"></canvas></div></figure>
-            </div>
-            <label class="toggle"><input type="checkbox" id="predictMode"> <span><b>Predict first.</b> Hide the answer until you have mixed, then check how well you called it.</span></label>
-          </section>
-
-          <section class="panel results reveal" id="results" aria-live="polite" aria-labelledby="resH">
-            <h3 id="resH" class="sr">Results</h3>
-            <div id="resBody"></div>
-          </section>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= HOW ================= -->
-    <section class="how" id="how">
-      <div class="section-head reveal">
-        <p class="eyebrow">How it works</p>
-        <h2>From ions to insight</h2>
+        <p class="eyebrow">Built from real syllabi</p>
+        <h2>Practice what your lab asks of you</h2>
+        <p class="sub">The experiment list was read directly from the official practical syllabi of three West Bengal universities, so what you rehearse here is what your lab course actually contains.</p>
       </div>
       <div class="cards3">
-        <article class="feat reveal"><span class="num">01</span><h4>A real reaction engine</h4><p>Solubility rules, the reactivity series, acid–base logic and redox rules decide what happens, so any combination works, including "no reaction" and the reason why.</p></article>
-        <article class="feat reveal"><span class="num">02</span><h4>Thermodynamics, not guesses</h4><p>Enthalpy changes come from Hess's law using standard enthalpies of formation. E° and Ksp values show up in the deeper explanation.</p></article>
-        <article class="feat reveal"><span class="num">03</span><h4>See the invisible</h4><p>Particle view shows ions colliding, solids forming and spectator ions standing by. Balanced molecular, ionic and net ionic equations are generated live.</p></article>
+        <article class="feat reveal"><span class="num">01</span><h4>Measure like a chemist</h4><p>Read the burette, spot the end point, record trials, calculate the strength, then see how close you were. Simulated readings carry random error, as in a real lab.</p></article>
+        <article class="feat reveal"><span class="num">02</span><h4>Find orders and energies</h4><p>Run the H₂O₂ + KI clock at different concentrations and temperatures, then fit the order and the activation energy from your own data.</p></article>
+        <article class="feat reveal"><span class="num">03</span><h4>See the invisible</h4><p>Switch to the particle view to watch ions collide, solids form and spectator ions stand by. Balanced equations are generated live with ΔH from Hess’s law.</p></article>
       </div>
+      <p class="note-box" style="max-width:900px;margin:26px auto 0"><b>Honest note:</b> this is a rehearsal tool. It cannot teach hand skills such as pipetting, reading a real meniscus or filtering, and the numbers are textbook-approximate. Always follow your own lab manual and your teacher.</p>
     </section>
   </main>
 
-  <div class="mobile-bar" id="mobileBar" role="region" aria-label="Quick controls">
-    <span id="mobileBarText">0 chemicals ready</span>
-    <button type="button" id="mobileBarBtn">▶ Mix</button>
-  </div>
+  <div id="siteFooter"></div>
 
-  <footer class="foot">
-    <p><b>Lab Visuals</b> is a teaching model, not a substitute for a real laboratory. Temperature changes assume 0.05&nbsp;mol in 100&nbsp;mL, so they are illustrative. Never repeat hazardous experiments (alkali metals, thermite, concentrated acids, lead and chromium salts) without a teacher, a fume cupboard and eye protection.</p>
-    <aside class="contact" aria-labelledby="contactH">
-      <div>
-        <h4 id="contactH">Spotted an error or have a suggestion?</h4>
-        <p>Chemistry mistakes, missing reactions, ideas for new features: I read every message.</p>
-      </div>
-      <a class="btn-glow" id="mailBtn" href="mailto:soumyadipbank1@gmail.com?subject=Lab%20Visuals%20feedback&amp;body=Hi%20Soumyadip%2C%0A%0A%28Describe%20the%20error%20or%20suggestion.%20If%20it%20is%20about%20a%20reaction%2C%20mention%20which%20chemicals%20you%20mixed.%29%0A">✉ Write to me</a>
-    </aside>
-    <p class="credit">Made by <strong>Soumyadip</strong></p>
-    <p class="small"><a href="https://github.com/soumyadipbank/Lab-Visuals-Simulations">Source on GitHub</a> · MIT licence</p>
-  </footer>
-
-  <script src="js/data.js"></script>
-  <script src="js/engine.js"></script>
-  <script src="js/curated.js"></script>
-  <script src="js/colour.js"></script>
-  <script src="js/sim.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/common.js"></script>
   <script src="js/hero.js"></script>
   <script src="js/fx.js"></script>
+  <script>
+    // remember the chosen level (the link also carries ?level=)
+    document.querySelectorAll('.level-card').forEach(function (a) {
+      a.addEventListener('click', function () { if (window.LevelInfo) LevelInfo.set(a.dataset.level); });
+    });
+  </script>
 </body>
 </html>
