@@ -111,13 +111,14 @@
   L.ESTER = { kH25: 1.1e-4, Ea: 68000 };
   L.esterK = (cH, TC) => L.arrhenius(L.ESTER.kH25, L.ESTER.Ea, TC) * cH;     // s^-1
   // H2O2 decomposition catalysed by I- or Fe3+ (first order); k per M of catalyst at 25 C in min^-1
-  L.H2O2 = { KI: { k25: 2.0, Ea: 50000 }, FeCl3: { k25: 0.4, Ea: 45000 } };
+  // with I⁻ the rate-determining step is the clock reaction's H2O2 + I⁻ step: 2 H2O2 lost per slow step, so k = 2 k1 (k1 = 0.0115 M^-1 s^-1 = 0.69 M^-1 min^-1)
+  L.H2O2 = { KI: { k25: 2 * 0.0115 * 60, Ea: 56000 }, FeCl3: { k25: 0.4, Ea: 45000 } };
   L.h2o2K = (cat, cCat, TC) => L.arrhenius(L.H2O2[cat].k25, L.H2O2[cat].Ea, TC) * cCat; // min^-1
-  // ethyl acetate + NaOH, second order, k = 0.11 M^-1 s^-1 at 25 C
   // persulfate-iodide: rate = k [S2O8 2-][I-], k about 0.011 M^-1 s^-1 at 25 C (it rises with ionic strength), Ea about 52 kJ/mol
   L.PERSULF = { k25: 0.011, Ea: 52000 };
   // sucrose inversion: k = k' [H+], k' about 0.0165 M^-1 min^-1 at 25 C, Ea about 108 kJ/mol
   L.SUCROSE = { k25: 0.0165, Ea: 108000 };
+  // ethyl acetate + NaOH, second order, k = 0.11 M^-1 s^-1 at 25 C
   L.SAPON = { k25: 0.11, Ea: 47000, lamNa: 50.1, lamOH: 198.6, lamOAc: 40.9 };
   L.saponK = (TC) => L.arrhenius(L.SAPON.k25, L.SAPON.Ea, TC);
   L.saponKappa = function (a, k, tSec) {                   // equimolar a (M) after mixing

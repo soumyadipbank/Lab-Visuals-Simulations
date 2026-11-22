@@ -21,9 +21,10 @@
   const S = { exp: null, salt: 0, W: 12, model: null, t: 0, rows: [], mixed: false, analysis: null, tt: 0 };
 
   function setup() {
-    const e = S.exp, W = Math.round((8 + Math.random() * 8) * 10) / 10; S.W = W;
+    const e = S.exp; if (S.W == null) S.W = Math.round((8 + Math.random() * 8) * 10) / 10;   // the calorimeter (and its W) stays the same when only the solid changes
     let dH = e.dH, n = e.n, m = e.m;
     if (e.kind === 'sol') { const s = e.salts[S.salt]; dH = s[2]; n = s[3] / s[4]; m = 100 + s[3]; }
+    dH *= 1 + L.gauss(Math.random) * 0.015;   // this sample's own value, near the literature value
     const dT = (-dH * n * 1000) / (m * CP + S.W * CP);
     S.model = { dH, n, m, dT, T0: 24.6 + Math.round(Math.random() * 8) / 10, kLoss: 0.0007 + Math.random() * 0.0005 };
     S.model.curve = L.calorimeter(S.model.T0, dT, 12, S.model.kLoss, S.model.T0 - 0.0, 1200, 1);
@@ -32,7 +33,7 @@
   const reading = (t) => Math.round((tempAt(t) + L.gauss(Math.random) * 0.03) * 10) / 10;
 
   function pick(id) {
-    S.exp = list.find((x) => x.id === id) || list[0]; S.salt = 0; S.rows = []; S.t = 0; S.mixed = false; S.analysis = null; setup();
+    S.exp = list.find((x) => x.id === id) || list[0]; S.salt = 0; S.rows = []; S.t = 0; S.mixed = false; S.analysis = null; S.W = null; setup();
     const e = S.exp; $('expTitle').textContent = e.title; $('expSub').textContent = e.short;
     $('steps').innerHTML = e.steps.map((s) => '<li>' + esc(s) + '</li>').join('');
     $('expList').querySelectorAll('.exp-btn').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === e.id)));
@@ -46,14 +47,14 @@
   function render() {
     const e = S.exp;
     $('readouts').innerHTML = '<div class="big-read"><span>Time</span><b>' + S.t + ' s</b></div><div class="big-read"><span>Thermometer</span><b>' + (S.rows.length ? S.rows[S.rows.length - 1].T.toFixed(1) : tempReadout()) + ' °C</b></div><div class="big-read"><span>Readings</span><b>' + S.rows.length + '</b></div>';
-    const done = S.t >= 900;
+    const done = S.t > 900;
     $('actions').innerHTML = '<button type="button" class="btn-sm primary" id="read"' + (done ? ' disabled' : '') + '>Read thermometer (+30 s)</button>' + (S.mixed ? '' : '<button type="button" class="btn-sm" id="mix"' + (S.t < TM ? ' disabled title="Take readings until t = 120 s first"' : '') + '>' + (e.kind === 'sol' ? 'Add the solid now' : 'Mix now') + '</button>') + '<button type="button" class="btn-sm" id="auto">Auto-run to 15 min</button><button type="button" class="btn-sm" id="analyse">Plot and extrapolate</button><button type="button" class="btn-sm" id="again">Start again</button>';
     const r = S.rows;
     $('trialsBox').innerHTML = r.length ? '<h4 class="lbl-sum" style="padding-top:14px">Observation table</h4><div style="max-height:220px;overflow:auto"><table class="data-table"><thead><tr><th>t / s</th><th>T / °C</th></tr></thead><tbody>' + r.map((x) => '<tr><td>' + x.t + '</td><td>' + x.T.toFixed(1) + '</td></tr>').join('') + '</tbody></table></div>' : '';
   }
   const tempReadout = () => (S.model ? S.model.T0.toFixed(1) : '—');
   function step() {
-    if (S.t >= 900) return;
+    if (S.t > 900) return;
     if (S.t >= TM && !S.mixed) { $('msg').innerHTML = '<div class="callout warn">You passed t = 120 s without mixing. Press “Mix now”: the temperature changes only after mixing.</div>'; return; }
     S.rows.push({ t: S.t, T: reading(S.t) }); S.t += 30; $('msg').innerHTML = '';
   }
@@ -63,19 +64,22 @@
     const f1 = L.linreg(pre.map((x) => x.t), pre.map((x) => x.T)), f2 = L.linreg(post.map((x) => x.t), post.map((x) => x.T));
     const Ta = f1.m * TM + f1.b, Tb = f2.m * TM + f2.b, dT = Tb - Ta, M = S.model, e = S.exp;
     const kJ = (-(M.m * CP + S.W * CP) * dT) / (M.n * 1000);
-    const raw = r.length ? (Math.max(...r.map((x) => x.T)) - Math.min(...pre.map((x) => x.T))) : 0;
-    S.analysis = { dT, kJ, lines: [`T before mixing, extrapolated to 120 s = ${Ta.toFixed(2)} °C`, `T after mixing, cooling line extrapolated back to 120 s = ${Tb.toFixed(2)} °C`, `corrected ΔT = ${dT.toFixed(2)} K (the highest reading alone would give ${raw.toFixed(2)} K, which is too small because heat was already being lost)`, `heat = (${M.m} × 4.18 + ${S.W.toFixed(1)} × 4.18) × ${dT.toFixed(2)} = ${((M.m * CP + S.W * CP) * Math.abs(dT)).toFixed(0)} J`, `n = ${M.n.toFixed(4)} mol → ΔH = ${kJ.toFixed(1)} kJ/mol`] };
-    m.innerHTML = '<div class="callout ok">Corrected ΔT = <b>' + dT.toFixed(2) + ' K</b>. Now calculate ΔH yourself and check it.</div>';
+    const ext = dT >= 0 ? Math.max(...r.map((x) => x.T)) : Math.min(...r.map((x) => x.T)), raw = Math.abs(ext - Ta);
+    S.analysis = { dT, kJ, lines: [`T before mixing, extrapolated to 120 s = ${Ta.toFixed(2)} °C`, `T after mixing, cooling line extrapolated back to 120 s = ${Tb.toFixed(2)} °C`, `corrected ΔT = ${dT.toFixed(2)} K (the ${dT >= 0 ? 'highest' : 'lowest'} reading alone would give ${raw.toFixed(2)} K, which is too small because heat was already being exchanged with the surroundings)`, `heat ${dT >= 0 ? 'released' : 'absorbed'} = (${M.m} × 4.18 + ${S.W.toFixed(1)} × 4.18) × ${Math.abs(dT).toFixed(2)} = ${((M.m * CP + S.W * CP) * Math.abs(dT)).toFixed(0)} J`, `n = ${M.n.toFixed(4)} mol → ΔH = ${dT >= 0 ? '−' : '+'}${Math.abs(kJ).toFixed(1)} kJ/mol (${dT >= 0 ? 'temperature rose: exothermic' : 'temperature fell: endothermic'})`] };
+    const eq = (f) => 'T = ' + f.m.toFixed(5).replace('-', '−') + ' t ' + (f.b < 0 ? '− ' : '+ ') + Math.abs(f.b).toFixed(2);
+    m.innerHTML = '<div class="callout ok">Best straight lines (green) through your readings:<br>before mixing: <b>' + eq(f1) + '</b><br>after mixing (from 210 s): <b>' + eq(f2) + '</b><br>Put t = 120 s into both lines; the difference is the corrected ΔT. Then calculate ΔH.</div>';
     $('chartBox').hidden = false; $('chartTitle').textContent = 'Temperature against time';
     Chart.draw($('chart'), { series: [{ pts: r.map((x) => [x.t, x.T]), color: '#ce72f5', dots: true, line: true }, { pts: [[0, f1.b], [TM, Ta]], color: '#7cf0b4', line: true }, { pts: [[TM, Tb], [900, f2.m * 900 + f2.b]], color: '#7cf0b4', line: true }], xmin: 0, xmax: 900, xLabel: 't / s', yLabel: 'T / °C', vlines: [{ x: TM, label: 'mixing', color: '#ffcb83' }] });
     const truth = M.dH;
-    $('answerBox').innerHTML = '<h4 class="lbl-sum" style="padding-top:14px">Your result</h4><div class="answer-form"><div class="field"><label for="ans0">ΔH <output>kJ/mol</output></label><input type="number" step="any" id="ans0" inputmode="decimal" placeholder="with sign"></div><button type="button" class="btn-sm primary" id="check">Check</button><button type="button" class="btn-sm" id="worked">Show working</button></div><div id="verdict"></div><div id="workedOut"></div>';
+    let tries = 0, revealed = false;
+    $('answerBox').innerHTML = '<h4 class="lbl-sum" style="padding-top:14px">Your result</h4><div class="answer-form"><div class="field"><label for="ans0">ΔH <output>kJ/mol</output></label><input type="number" step="any" id="ans0" inputmode="decimal" placeholder="with sign"></div><button type="button" class="btn-sm primary" id="check">Check</button><button type="button" class="btn-sm" id="worked" hidden>Show working</button></div><div id="verdict"></div><div id="workedOut"></div>';
     $('check').onclick = () => {
       const v = parseFloat($('ans0').value), vd = $('verdict'); if (!isFinite(v)) { vd.innerHTML = '<div class="callout warn">Enter a number first.</div>'; return; }
-      const err = (Math.abs(v - truth) / Math.abs(truth)) * 100;
-      let msg = (e.kind === 'sol' ? '' : '') + 'you gave ' + v + ', the value in this model is ' + truth.toFixed(1) + ' kJ/mol (error ' + err.toFixed(1) + ' %). ';
-      if (err <= 6) msg += 'Good, within the expected scatter.'; else if (Math.sign(v) !== Math.sign(truth)) msg += 'The sign is wrong: ' + (truth < 0 ? 'the temperature rose, so heat was released and ΔH is negative.' : 'the temperature fell, so heat was absorbed and ΔH is positive.'); else msg += 'Check ΔT (did you extrapolate?), the total mass and the number of moles.';
-      vd.innerHTML = '<div class="callout ' + (err <= 6 ? 'ok' : 'bad') + '">' + msg + '</div>';
+      tries++; const err = (Math.abs(v - truth) / Math.abs(truth)) * 100, ok = err <= 6; revealed = revealed || ok || tries >= 3;
+      let msg = ok ? 'Within the expected range.' : Math.sign(v) !== Math.sign(truth) ? 'The sign is wrong: ' + (truth < 0 ? 'the temperature rose, so heat was released and ΔH is negative.' : 'the temperature fell, so heat was absorbed and ΔH is positive.') : 'Outside the expected range. Check ΔT (did you extrapolate both lines to 120 s?), the total mass, the water equivalent and the number of moles.';
+      if (revealed) msg += ' The value for this sample is ' + truth.toFixed(1) + ' kJ/mol (your error ' + err.toFixed(1) + ' %).'; else msg += ' (' + (3 - tries) + ' more tr' + (3 - tries === 1 ? 'y' : 'ies') + ' before the answer is shown.)';
+      vd.innerHTML = '<div class="callout ' + (ok ? 'ok' : 'bad') + '">' + msg + '</div>';
+      if (revealed) $('worked').hidden = false;
     };
     $('worked').onclick = () => { $('workedOut').innerHTML = '<div class="work-lines">' + S.analysis.lines.map(esc).join('<br>') + '</div>'; };
   }
@@ -115,7 +119,7 @@
       const b = ev.target.closest('button'); if (!b || b.disabled) return;
       if (b.id === 'read') { step(); render(); }
       else if (b.id === 'mix') { S.mixed = true; render(); $('msg').innerHTML = '<div class="callout">Mixed. Keep taking readings.</div>'; }
-      else if (b.id === 'auto') { if (S.t < TM) { while (S.t < TM) step(); } S.mixed = true; while (S.t < 900) step(); render(); }
+      else if (b.id === 'auto') { if (S.t < TM) { while (S.t < TM) step(); } S.mixed = true; while (S.t <= 900) step(); render(); }
       else if (b.id === 'analyse') analyse();
       else if (b.id === 'again') pick(S.exp.id);
     });
