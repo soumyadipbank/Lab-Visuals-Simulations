@@ -116,13 +116,13 @@
     readouts: (s) => [['Your liquid', LIQ[s.target].name], ['Reference', 'water']],
     draw(g, w, h, s, c, S) {
       const x = w * 0.45, top = h * 0.08, bot = h * 0.9, col = c.liq === 'water' ? '#cfe6f5' : c.liq.startsWith('gly') ? '#e8eef2' : '#dfe9f0';
-      g.strokeStyle = 'rgba(255,255,255,.65)'; g.lineWidth = 3;
+      g.strokeStyle = TH.line(.65); g.lineWidth = 3;
       g.beginPath(); g.moveTo(x, top); g.lineTo(x, h * 0.36 - h * 0.065); g.stroke();                  // upper tube
       const bw2 = Math.max(10, h * 0.05), bh2 = h * 0.065;
       g.beginPath(); g.ellipse(x, h * 0.36, bw2, bh2, 0, 0, 6.283); g.stroke();                         // bulb between the marks
       g.beginPath(); g.moveTo(x, h * 0.36 + h * 0.065); g.lineTo(x, h * 0.7); g.stroke();              // capillary
       g.beginPath(); g.moveTo(x, h * 0.7); g.quadraticCurveTo(x, bot, x + w * 0.08, bot); g.quadraticCurveTo(x + w * 0.16, bot, x + w * 0.16, h * 0.7); g.lineTo(x + w * 0.16, top + 20); g.stroke(); g.lineWidth = 1;
-      g.fillStyle = 'rgba(255,203,131,.9)'; g.fillRect(x - bw2 - 8, h * 0.36 - bh2 - 2, 2 * bw2 + 16, 2); g.fillRect(x - bw2 - 8, h * 0.36 + bh2 + 1, 2 * bw2 + 16, 2);
+      g.fillStyle = TH.light ? 'rgba(196,110,0,.9)' : 'rgba(255,203,131,.9)'; g.fillRect(x - bw2 - 8, h * 0.36 - bh2 - 2, 2 * bw2 + 16, 2); g.fillRect(x - bw2 - 8, h * 0.36 + bh2 + 1, 2 * bw2 + 16, 2);
       const a = S.anim && S.anim.kind === 'flow' ? Math.min(1, S.anim.t / 2.5) : 1;
       const lvl = h * 0.36 - bh2 - 2 + a * (2 * bh2 + 3);
       g.fillStyle = K.rgba(col, 0.85); g.beginPath(); g.ellipse(x, h * 0.36, bw2 - 2, bh2 - 2, 0, 0, 6.283); g.save(); g.clip(); g.fillRect(x - bw2, lvl, 2 * bw2, h); g.restore();
@@ -154,10 +154,10 @@
     report: (s, a) => [{ id: 'g', label: 'Surface tension of ' + ST[s.target].name, unit: 'mN m⁻¹', truth: gamma(s.target, a && a.meas ? a.meas.T : 25), dp: 1, tol: 0.05 }],
     readouts: (s) => [['Your liquid', ST[s.target].name], ['Reference', 'water']],
     draw(g, w, h, s, c, S) {
-      const x = w * 0.45; g.strokeStyle = 'rgba(255,255,255,.65)'; g.lineWidth = 3;
+      const x = w * 0.45; g.strokeStyle = TH.line(.65); g.lineWidth = 3;
       const ew = Math.max(12, h * 0.07), eh = h * 0.12; g.beginPath(); g.moveTo(x, h * 0.05); g.lineTo(x, h * 0.32 - eh); g.stroke(); g.beginPath(); g.ellipse(x, h * 0.32, ew, eh, 0, 0, 6.283); g.stroke(); g.beginPath(); g.moveTo(x, h * 0.32 + eh); g.lineTo(x, h * 0.62); g.stroke(); g.lineWidth = 1;
-      g.fillStyle = 'rgba(255,203,131,.9)'; g.fillRect(x - ew - 8, h * 0.32 - eh - 6, 2 * ew + 16, 2); g.fillRect(x - ew - 8, h * 0.32 + eh + 4, 2 * ew + 16, 2);   /* upper and lower marks */
-      g.fillStyle = '#c9b8e6'; g.fillRect(x - 9, h * 0.62, 18, 6);
+      g.fillStyle = TH.light ? 'rgba(196,110,0,.9)' : 'rgba(255,203,131,.9)'; g.fillRect(x - ew - 8, h * 0.32 - eh - 6, 2 * ew + 16, 2); g.fillRect(x - ew - 8, h * 0.32 + eh + 4, 2 * ew + 16, 2);   /* upper and lower marks */
+      g.fillStyle = TH.metal; g.fillRect(x - 9, h * 0.62, 18, 6);
       const an = S.anim && S.anim.kind === 'drops' ? S.anim : null, f = an ? Math.min(1, an.t / 3) : 0;
       g.fillStyle = K.rgba('#cfe6f5', 0.85); g.beginPath(); g.ellipse(x, h * 0.32, ew - 2, eh - 2, 0, 0, 6.283); g.save(); g.clip(); g.fillRect(x - ew, h * 0.32 - eh + f * 2 * eh, 2 * ew, h); g.restore();
       if (an) { const ph = (an.t * 6) % 1, r = 3 + ph * 5; g.beginPath(); g.ellipse(x, h * 0.68 + r, r * 0.9, r, 0, 0, 6.283); g.fill(); if (ph > 0.6) { g.beginPath(); g.arc(x, h * 0.68 + 12 + (ph - 0.6) * h * 0.6, 4, 0, 6.283); g.fill(); } }
@@ -302,7 +302,7 @@
       g.save(); g.translate(x + wob, 0);
       g.beginPath(); g.moveTo(-12, top); g.lineTo(-12, top + 20); g.quadraticCurveTo(-w * 0.12, h * 0.3, -w * 0.08, h * 0.62); g.lineTo(-6, h * 0.78); g.lineTo(6, h * 0.78); g.lineTo(w * 0.08, h * 0.62); g.quadraticCurveTo(w * 0.12, h * 0.3, 12, top + 20); g.lineTo(12, top); g.closePath();
       g.save(); g.clip(); g.fillStyle = K.rgba(+c.cu ? '#2b4fd1' : '#d6e9f6', 0.85); g.fillRect(-w, h * 0.3, 2 * w, h * 0.22); g.fillStyle = K.rgba('#eef0f6', 0.9); g.fillRect(-w, h * 0.52, 2 * w, h); g.restore();
-      g.strokeStyle = 'rgba(255,255,255,.65)'; g.lineWidth = 2; g.stroke(); g.lineWidth = 1; g.fillStyle = '#c9b8e6'; g.fillRect(-3, h * 0.78, 6, h * 0.12); g.restore();
+      g.strokeStyle = TH.line(.65); g.lineWidth = 2; g.stroke(); g.lineWidth = 1; g.fillStyle = TH.metal; g.fillRect(-3, h * 0.78, 6, h * 0.12); g.restore();
       K.label(g, w, 'aqueous (top)', x + w * 0.14, h * 0.42); K.label(g, w, 'CHCl₃ (bottom)', x + w * 0.14, h * 0.6);
       K.caption('Upper layer: water' + (+c.cu ? ' with deep-blue [Cu(NH₃)₄]²⁺' : '') + '. Lower layer: chloroform (denser, 1.48 g/mL).');
     },

@@ -46,7 +46,9 @@
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
+  let lt = false;   // light theme: normal blending and softer glows (additive light vanishes on a white page)
   function glow(x, y, r, color, a) {
+    if (lt) a *= 0.5;
     const g = ctx.createRadialGradient(x, y, 0, x, y, r);
     g.addColorStop(0, hexA(color, a)); g.addColorStop(1, hexA(color, 0));
     ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
@@ -56,6 +58,7 @@
   function frame(ms) {
     if (!running) return;
     const t = ms / 1000;
+    lt = !!(window.TH && TH.light);
     mouse.x += (mouse.tx - mouse.x) * 0.05; mouse.y += (mouse.ty - mouse.y) * 0.05;
     ctx.clearRect(0, 0, W, H);
     ctx.globalCompositeOperation = 'source-over';
@@ -64,7 +67,7 @@
     pulse *= 0.94;
     const R = Math.min(W, H) * (narrow ? 0.13 : 0.2) * (1 + 0.16 * pulse);
 
-    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalCompositeOperation = lt ? 'source-over' : 'lighter';
     // drifting colour fields
     glow(W * (0.2 + 0.06 * Math.sin(t * 0.21)), H * (0.75 + 0.05 * Math.cos(t * 0.17)), Math.max(W, H) * 0.5, '#5d3b9b', 0.55);
     glow(cx + Math.sin(t * 0.3) * 40, cy + Math.cos(t * 0.26) * 30, Math.max(W, H) * 0.55, '#9565ff', 0.32);
@@ -76,7 +79,7 @@
     for (let i = 0; i < NR; i++) {
       const a = (i / NR) * 6.283 + t * 0.04, len = R * (3.2 + 1.2 * Math.sin(t * 0.7 + i * 1.7));
       const g = ctx.createLinearGradient(cx, cy, cx + Math.cos(a) * len, cy + Math.sin(a) * len);
-      g.addColorStop(0, 'rgba(246,232,255,.22)'); g.addColorStop(1, 'rgba(206,114,245,0)');
+      g.addColorStop(0, lt ? 'rgba(149,101,255,.2)' : 'rgba(246,232,255,.22)'); g.addColorStop(1, 'rgba(206,114,245,0)');
       ctx.strokeStyle = g; ctx.lineWidth = 1 + (i % 3);
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * len, cy + Math.sin(a) * len); ctx.stroke();
     }
@@ -117,7 +120,7 @@
       ctx.beginPath(); ctx.arc(x, y, b.r, 0, 6.283); ctx.fill(); ctx.stroke();
     });
     // sparks from the cursor
-    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalCompositeOperation = lt ? 'source-over' : 'lighter';
     for (let i = sparks.length - 1; i >= 0; i--) {
       const s = sparks[i];
       s.x += s.vx; s.y += s.vy; s.vx *= 0.96; s.vy *= 0.96; s.vy += 0.012; s.life -= 0.016;
@@ -131,7 +134,7 @@
     tags.forEach((g) => {
       g.y -= g.v * 0.016; if (g.y < -0.05) { g.y = 1.05; g.x = Math.random(); }
       const a = 0.1 + 0.1 * Math.sin(t * 0.6 + g.ph);
-      ctx.fillStyle = 'rgba(246,232,255,' + a + ')'; ctx.font = 'italic 400 ' + g.s + 'px "Instrument Serif", Georgia, serif';
+      ctx.fillStyle = lt ? 'rgba(80,40,140,' + (a * 1.4) + ')' : 'rgba(246,232,255,' + a + ')'; ctx.font = 'italic 400 ' + g.s + 'px "Instrument Serif", Georgia, serif';
       ctx.fillText(g.t, g.x * W, g.y * H);
     });
     if (!reduce) requestAnimationFrame(frame);
@@ -165,5 +168,6 @@
       if (!v) { visible = false; running = false; }
     }).observe(cv.parentElement);
   }
-  if (reduce) frame(1500); else start();
+  if (reduce) { running = true; frame(1500); } else start();   // reduced motion: one still frame
+  window.addEventListener('lv-theme', () => { if (reduce) frame(1500); });
 })();

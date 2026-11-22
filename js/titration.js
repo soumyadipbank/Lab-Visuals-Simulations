@@ -100,26 +100,26 @@
     // the bulk colour follows the flask contents with a short mixing lag (swirling)
     const target = cur().colour || WATER;
     S.shown = S.shown ? C.absMix(S.shown, target, Math.min(1, dt * 6)) : target;
-    const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#22123b'); bg.addColorStop(1, '#120a22'); g.fillStyle = bg; g.fillRect(0, 0, w, h);
+    TH.bg(g, w, h);
     const cx = w * 0.5, bx = cx, bTop = h * 0.05, bBot = h * 0.5, bw = Math.max(20, w * 0.045);
     const tcol = P().titrantColour;
     // stand
-    g.fillStyle = '#35204f'; g.fillRect(bx + bw * 3.2, bTop, 7, h * 0.88); g.fillRect(bx + bw * 3.2 - w * 0.12, h * 0.93, w * 0.24, 9);
+    g.fillStyle = TH.stand; g.fillRect(bx + bw * 3.2, bTop, 7, h * 0.88); g.fillRect(bx + bw * 3.2 - w * 0.12, h * 0.93, w * 0.24, 9);
     g.fillRect(bx + bw * 0.7, bTop + h * 0.1, bw * 2.6, 6);
     // burette tube with liquid that falls as titrant leaves
     const tubeTop = bTop, tubeBot = bBot, tubeH = tubeBot - tubeTop, lev = tubeTop + tubeH * (S.Vd / 50);
-    g.fillStyle = 'rgba(255,255,255,.09)'; g.fillRect(bx - bw / 2, tubeTop, bw, tubeH);
+    g.fillStyle = TH.tint(.09); g.fillRect(bx - bw / 2, tubeTop, bw, tubeH);
     g.fillStyle = tcol ? rgbStr(tcol, 0.85) : 'rgba(190,225,245,.5)';
     g.fillRect(bx - bw / 2 + 2, lev, bw - 4, tubeBot - lev);
     g.fillStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.ellipse(bx, lev + 1, bw / 2 - 2, 2.2, 0, 0, Math.PI); g.fill();   // meniscus
-    g.strokeStyle = 'rgba(255,255,255,.6)'; g.fillStyle = 'rgba(240,230,255,.85)'; g.font = Math.max(9, w * 0.014) + 'px Hanken Grotesk, sans-serif'; g.textAlign = 'right';
+    g.strokeStyle = TH.line(.6); g.fillStyle = TH.text(.85); g.font = Math.max(9, w * 0.014) + 'px Hanken Grotesk, sans-serif'; g.textAlign = 'right';
     for (let v = 0; v <= 50; v += 1) { const y = tubeTop + tubeH * (v / 50), big = v % 10 === 0, mid = v % 5 === 0; g.beginPath(); g.moveTo(bx - bw / 2, y); g.lineTo(bx - bw / 2 - (big ? 12 : mid ? 8 : 4), y); g.stroke(); if (mid) g.fillText(String(v), bx - bw / 2 - 15, y + 3); }
-    g.strokeStyle = 'rgba(255,255,255,.45)'; g.lineWidth = 2; g.strokeRect(bx - bw / 2, tubeTop, bw, tubeH); g.lineWidth = 1;
+    g.strokeStyle = TH.line(.45); g.lineWidth = 2; g.strokeRect(bx - bw / 2, tubeTop, bw, tubeH); g.lineWidth = 1;
     // stopcock (turns open while titrant flows) and jet
     const flowing = S.run || S.stream || S.queue > 0, scY = tubeBot + h * 0.03, tipY = tubeBot + h * 0.11;
-    g.fillStyle = '#c9b8e6'; g.fillRect(bx - bw * 0.2, tubeBot, bw * 0.4, h * 0.07);
+    g.fillStyle = TH.metal; g.fillRect(bx - bw * 0.2, tubeBot, bw * 0.4, h * 0.07);
     g.fillStyle = '#ffcb83'; g.save(); g.translate(bx, scY); g.rotate(flowing ? (S.run || S.stream ? Math.PI / 2 : Math.PI / 6) : 0); g.fillRect(-bw * 0.9, -3, bw * 1.8, 6); g.restore();   // handle in line with the jet = open
-    g.fillStyle = '#c9b8e6'; g.beginPath(); g.moveTo(bx - bw * 0.2, tubeBot + h * 0.07); g.lineTo(bx + bw * 0.2, tubeBot + h * 0.07); g.lineTo(bx + 2, tipY); g.lineTo(bx - 2, tipY); g.fill();
+    g.fillStyle = TH.metal; g.beginPath(); g.moveTo(bx - bw * 0.2, tubeBot + h * 0.07); g.lineTo(bx + bw * 0.2, tubeBot + h * 0.07); g.lineTo(bx + 2, tipY); g.lineTo(bx - 2, tipY); g.fill();
     // conical flask
     const fy = h * 0.92, fw = w * 0.22, fh = h * 0.3, fcx = bx, top = fy - fh, neckW = fw * 0.3, liqH = fh * 0.42;
     const swirl = S.t * 4, ly = fy - liqH;
@@ -142,24 +142,24 @@
       g.fillStyle = rg; g.beginPath(); g.ellipse(b.x + ox, oy, rad * 1.3, rad * 0.8, 0, 0, 6.283); g.fill();
     });
     // ripples on the surface
-    g.strokeStyle = 'rgba(255,255,255,.6)';
+    g.strokeStyle = TH.line(.6);
     S.ripples.forEach((r) => { g.globalAlpha = Math.max(0, r.a); g.beginPath(); g.ellipse(r.x, ly + 1, r.r, r.r * 0.22, 0, 0, 6.283); g.stroke(); });
     g.globalAlpha = 1; g.restore();
-    g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2; path(); g.stroke(); g.lineWidth = 1;
+    g.strokeStyle = TH.line(.55); g.lineWidth = 2; path(); g.stroke(); g.lineWidth = 1;
     // heater flame
     if (S.exp.needsHeat || P().needsHeat) {
-      g.fillStyle = '#3a2b57'; g.fillRect(fcx - fw * 0.7, fy + 2, fw * 1.4, 6);
+      g.fillStyle = TH.stand; g.fillRect(fcx - fw * 0.7, fy + 2, fw * 1.4, 6);
       if (S.opts.heat) for (let i = 0; i < 7; i++) { const fx2 = fcx - fw * 0.45 + (i / 6) * fw * 0.9, fl = 8 + Math.sin(S.t * 14 + i * 2) * 3; g.fillStyle = 'rgba(70,130,255,.55)'; g.beginPath(); g.ellipse(fx2, fy + 4, 3, fl, 0, 0, 6.283); g.fill(); }
     }
     // meter
     if ((S.opts.meter && cur().pH != null) || S.exp.mode === 'potentiometric' || S.exp.mode === 'conductometric') {
       const st = cur(), lab = S.exp.mode === 'conductometric' ? st.kappa.toFixed(2) + ' mS/cm' : S.exp.mode === 'potentiometric' ? (st.E).toFixed(3) + ' V' : 'pH ' + st.pH.toFixed(2);
-      g.fillStyle = '#0d0618'; g.strokeStyle = 'rgba(206,114,245,.7)'; const mw = Math.min(w * 0.3, 190), mh = 44, mx = w - mw - 12, my = 12;
+      g.fillStyle = '#0d0618'; g.strokeStyle = TH.light ? 'rgba(138,47,192,.7)' : 'rgba(206,114,245,.7)'; const mw = Math.min(w * 0.3, 190), mh = 44, mx = w - mw - 12, my = 12;
       g.beginPath(); if (g.roundRect) g.roundRect(mx, my, mw, mh, 10); else g.rect(mx, my, mw, mh); g.fill(); g.stroke();
       g.fillStyle = '#7cf0b4'; g.font = '700 ' + Math.max(15, w * 0.026) + 'px ui-monospace, Menlo, monospace'; g.textAlign = 'center'; g.fillText(lab, mx + mw / 2, my + 29);
-      g.strokeStyle = 'rgba(206,114,245,.7)'; g.beginPath(); g.moveTo(mx + 14, my + mh); g.lineTo(fcx + fw * 0.14, top + 8); g.lineTo(fcx + fw * 0.14, fy - 10); g.stroke();
+      g.strokeStyle = TH.light ? 'rgba(138,47,192,.7)' : 'rgba(206,114,245,.7)'; g.beginPath(); g.moveTo(mx + 14, my + mh); g.lineTo(fcx + fw * 0.14, top + 8); g.lineTo(fcx + fw * 0.14, fy - 10); g.stroke();
     }
-    g.fillStyle = 'rgba(235,225,250,.8)'; g.textAlign = 'left'; g.font = Math.max(10, w * 0.016) + 'px Hanken Grotesk, sans-serif';
+    g.fillStyle = TH.text(.8); g.textAlign = 'left'; g.font = Math.max(10, w * 0.016) + 'px Hanken Grotesk, sans-serif';
     const capTxt = 'Burette: ' + P().titrant + ' · Flask: ' + P().flask, cap = $('benchCap'); if (cap && cap.textContent !== capTxt) cap.textContent = capTxt;
     requestAnimationFrame(draw);
   }

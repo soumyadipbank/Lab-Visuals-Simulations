@@ -32,6 +32,9 @@
     '<a class="brand" href="index.html" aria-label="Lab Visuals home"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9565ff"/><stop offset=".6" stop-color="#ce72f5"/><stop offset="1" stop-color="#fea6d0"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#lg)"/><path d="M26 10h12v4h-3v14l12 20c2 4-1 8-5 8H22c-4 0-7-4-5-8l12-20V14h-3z" fill="#160923"/><path d="M23 42h22l4 7c1 2-.5 4-2.5 4h-25c-2 0-3.500-2-2.500-4z" fill="#ffcb83"/></svg><span>Lab Visuals</span></a>' +
     '<div class="top-right">' +
     (level ? '<a class="level-chip" href="index.html" title="Change level">' + LV[level].name + ' <span>change</span></a>' : '') +
+    '<button type="button" class="theme-btn" id="themeBtn" aria-label="Switch to light mode" title="Light / dark mode">' +
+    '<svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g></svg>' +
+    '<svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.5 8.5 0 0 1 9.4 4a8.5 8.5 0 1 0 10.6 10.6z" fill="currentColor"/></svg></button>' +
     '<button type="button" class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false">☰</button>' +
     '<nav class="nav" id="mainNav" aria-label="Main">' + navHTML + '</nav></div></header>';
 
@@ -52,6 +55,11 @@
     if (f) f.outerHTML = footer;
     if (!document.getElementById('progress')) document.body.insertAdjacentHTML('afterbegin', prog);
     if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) document.querySelectorAll('.foot .social').forEach((l) => l.removeAttribute('target'));   // phones: instagram.com / linkedin.com links then open the apps
+    const tb = document.getElementById('themeBtn');
+    if (tb && window.TH) {
+      const label = () => tb.setAttribute('aria-label', TH.light ? 'Switch to dark mode' : 'Switch to light mode');
+      label(); tb.addEventListener('click', () => { TH.toggle(); label(); });
+    }
     const btn = document.getElementById('menuBtn'), nav = document.getElementById('mainNav');
     if (btn && nav) {
       btn.addEventListener('click', () => { const o = nav.classList.toggle('open'); btn.setAttribute('aria-expanded', String(o)); });

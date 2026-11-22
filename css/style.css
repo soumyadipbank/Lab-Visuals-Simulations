@@ -24,6 +24,7 @@
   --radius: 20px;
   --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
   --sans: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --field: rgba(10, 3, 22, .55);
   color-scheme: dark;
 }
 * { box-sizing: border-box; }

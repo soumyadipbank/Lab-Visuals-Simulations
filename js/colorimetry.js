@@ -72,25 +72,26 @@
   function size() { const dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv.clientWidth || 760, h = Math.round(w * 0.45); if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.height = h + 'px'; } return { w, h, dpr }; }
   function frame() {
     const { w, h, dpr } = size(); g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#22123b'); bg.addColorStop(1, '#120a22'); g.fillStyle = bg; g.fillRect(0, 0, w, h);
+    TH.bg(g, w, h);
     const my = h * 0.5, rgb = wl2rgb(S.lam), sp = S.exp.sp, c = S.cur.c, A = L.absorbance(sp, c, S.lam, null), T = Math.pow(10, -A);
     // lamp and monochromator
-    g.fillStyle = '#ffe9a8'; g.beginPath(); g.arc(w * 0.08, my, 14, 0, 6.283); g.fill();
-    g.fillStyle = '#3a2b57'; g.fillRect(w * 0.18, my - 38, 56, 76); g.fillStyle = 'rgba(255,255,255,.7)'; g.font = '11px Hanken Grotesk, sans-serif'; g.textAlign = 'center'; g.fillText('prism', w * 0.18 + 28, my + 54);
+    g.fillStyle = '#ffe9a8'; g.beginPath(); g.arc(w * 0.08, my, 14, 0, 6.283); g.fill(); if (TH.light) { g.strokeStyle = 'rgba(180,120,0,.6)'; g.stroke(); }
+    g.fillStyle = TH.stand; g.fillRect(w * 0.18, my - 38, 56, 76); g.fillStyle = TH.text(.7); g.font = '11px Hanken Grotesk, sans-serif'; g.textAlign = 'center'; g.fillText('prism', w * 0.18 + 28, my + 54);
     // beams
     const grad1 = g.createLinearGradient(w * 0.08, 0, w * 0.18, 0); grad1.addColorStop(0, 'rgba(255,240,200,.8)'); grad1.addColorStop(1, 'rgba(255,240,200,.3)'); g.fillStyle = grad1; g.fillRect(w * 0.08, my - 3, w * 0.1, 6);
     const cx0 = w * 0.5, cw = 54;
     g.fillStyle = 'rgba(' + rgb.join(',') + ',.95)'; g.fillRect(w * 0.18 + 56, my - 3, cx0 - cw / 2 - w * 0.18 - 56, 6);
     // cuvette
     const sc = C.hex2rgb(L.SPECIES[sp].color), dil = Math.min(1, 1 - Math.pow(10, -(L.epsAt(sp, L.lambdaMax(sp)) * c) * 0.9)) * 0.95;
-    g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(cx0 - cw / 2, my - 52, cw, 104); g.fillStyle = c > 0 ? 'rgba(' + sc.join(',') + ',' + (0.12 + dil * 0.85).toFixed(2) + ')' : 'rgba(200,230,245,.25)'; g.fillRect(cx0 - cw / 2 + 3, my - 36, cw - 6, 86);
-    g.strokeStyle = 'rgba(255,255,255,.6)'; g.strokeRect(cx0 - cw / 2, my - 52, cw, 104);
+    g.fillStyle = TH.tint(.12); g.fillRect(cx0 - cw / 2, my - 52, cw, 104); g.fillStyle = c > 0 ? 'rgba(' + sc.join(',') + ',' + (0.12 + dil * 0.85).toFixed(2) + ')' : 'rgba(200,230,245,.25)'; g.fillRect(cx0 - cw / 2 + 3, my - 36, cw - 6, 86);
+    g.strokeStyle = TH.line(.6); g.strokeRect(cx0 - cw / 2, my - 52, cw, 104);
     // transmitted beam fades with absorbance
     g.fillStyle = 'rgba(' + rgb.join(',') + ',' + Math.max(0.03, T * 0.95).toFixed(3) + ')'; g.fillRect(cx0 + cw / 2, my - 3, w * 0.8 - cx0 - cw / 2, 6);
     // detector
     g.fillStyle = '#0d0618'; g.strokeStyle = 'rgba(206,114,245,.7)'; g.fillRect(w * 0.8, my - 40, w * 0.17, 80); g.strokeRect(w * 0.8, my - 40, w * 0.17, 80);
     g.fillStyle = '#7cf0b4'; g.font = '700 ' + Math.max(9, Math.min(w * 0.028, (w * 0.17 - 8) / 4.6)) + 'px ui-monospace, Menlo, monospace'; g.textAlign = 'center'; g.fillText(S.shownA.toFixed(3), w * 0.885, my + 8);   /* absorbance, fitted to the detector box */
-    g.fillStyle = 'rgba(235,225,250,.8)'; g.font = Math.max(10, w * 0.016) + 'px Hanken Grotesk, sans-serif'; g.fillText(S.lam + ' nm', w * 0.885, my - 22); g.fillText('A', w * 0.885, my + 26); g.fillText('light source', w * 0.08, my + 34); g.fillText('sample (1 cm)', cx0, my + 72); g.fillText('detector', w * 0.885, my + 56);
+    g.fillStyle = 'rgba(235,225,250,.8)'; g.font = Math.max(10, w * 0.016) + 'px Hanken Grotesk, sans-serif'; g.fillText(S.lam + ' nm', w * 0.885, my - 22); g.fillText('A', w * 0.885, my + 26);   /* inside the dark detector window */
+    g.fillStyle = TH.text(.8); g.fillText('light source', w * 0.08, my + 34); g.fillText('sample (1 cm)', cx0, my + 72); g.fillText('detector', w * 0.885, my + 56);
     requestAnimationFrame(frame);
   }
 

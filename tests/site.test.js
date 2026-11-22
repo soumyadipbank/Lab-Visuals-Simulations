@@ -16,6 +16,7 @@ for (const p of ['index.html', 'lab.html', 'school.html', 'bsc.html', 'titration
   ok(p + ' exists', fs.existsSync(path.join(root, p)));
   const t = src(p); const s = [...t.matchAll(/<script src="([^"]+)"/g)].map((x) => x[1]);
   s.forEach((x) => ok(p + ' script ' + x, fs.existsSync(path.join(root, x))));
+  ok(p + ' loads js/theme.js in <head> (light / dark mode before the first paint)', /<head>[\s\S]*<script src="js\/theme.js"><\/script>[\s\S]*<\/head>/.test(t));
 }
 // no university names anywhere on the site
 for (const p of fs.readdirSync(root).filter((x) => x.endsWith('.html')).concat(fs.readdirSync(path.join(root, 'js')).map((x) => 'js/' + x))) {
